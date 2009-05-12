@@ -1,0 +1,113 @@
+#! /usr/bin/python
+
+import getopt, sys, os
+
+
+# default pixel threshold
+pixel_threshold = 30
+# default region threshold
+region_threshold = 0.2
+# default frame threshold
+frame_threshold = 0.5
+# minimum shot length
+min_shot_length = 5
+# grid size n x n
+grid_size = 4
+# average factor
+average = 1
+# output file
+resultFile = 'shot.output.txt'
+
+CAPATH = None
+
+def usage():
+    print 'USAGE: shot [OPTIONS] <input directory>'
+    print 'OPTIONS' 
+    print '\t-a A'
+    print '\t\tSpecify the average (smoothing) factor. Default=%s'%average
+    print '\t-f F'
+    print '\t\tSpecify frame threshold to F. A frame is considered'
+    print '\t\tto have changed if F fraction of regions in the frame'
+    print '\t\thave changed. Default=%s'%frame_threshold
+    print '\t-g N'
+    print '\t\tSpecify the number of regions in a frame to N x N.'
+    print '\t\tDefault=%s'%grid_size
+    print '\t--help'
+    print '\t\tPrint this usage screen'
+    print '\t-m M'    
+    print '\t\tSpecify the mininum number of frames for a shot.'
+    print '\t\tAny shot whose number of frames is less than M is not'
+    print '\t\t considered a valid shot. Default=%s'%min_shot_length
+    print '\t-p P'
+    print '\t\tSpecify pixel threshold to P. Two pixels are considered'
+    print '\t\tto be different if the difference of intensity in one'
+    print '\t\tthe channels is greater than P. Default=%s'%pixel_threshold
+    print '\t-r R'
+    print '\t\tSpecify region threshold to R. A region is considered'
+    print '\t\tto have changed if R fraction of pixels in the region'
+    print '\t\thave changed. Default=%s'%region_threshold
+
+
+def process(inputPath):
+    javaPath = os.path.join(CAPATH,'bin')
+    
+    command = 'java -Xmx1000M -Djava.awt.headless=true'
+    command = command + ' -cp %s extractor.ShotDetector %s %s %s'%\
+              (javaPath,inputPath,pixel_threshold,region_threshold)
+    command = command + ' %s %s %s %s %s/%s'%\
+              (frame_threshold,grid_size,average,min_shot_length,inputPath,resultFile)
+    error = os.system(command)
+    if (error != 0):
+        print 'Error processing %s'%(file)
+        sys.exit(1)
+
+
+def main():
+
+    global pixel_threshold, region_threshold
+    global frame_threshold, min_shot_length
+    global grid_size, average
+    global CAPATH
+   
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], 'p:r:f:m:g:a:', 
+                                   ['help'])
+    except getopt.GetoptError:
+        print 'Error: Illegal arguments'
+        usage()
+        sys.exit(2)
+
+    for o, a in opts:
+        if o in ('--help'):
+            usage()
+            sys.exit()
+        elif o in ('-p'):
+            pixel_threshold = a
+        elif o in ('-r'):
+            region_threshold = a
+        elif o in ('-f'):
+            frame_threshold = a
+        elif o in ('-m'):
+            min_shot_length = a
+        elif o in ('-g'):
+            grid_size = a
+        elif o in ('-a'):
+            average = a
+        else:
+            assert False, "unhandled option"
+
+    if len(args) != 1:
+        print 'Invalid arguments. --help for more info'
+        sys.exit(1)
+
+    try:
+        CAPATH = os.environ['CAPATH']
+    except:
+        print 'ERROR: CAPATH enviroment variable not found'
+        sys.exit(1)
+
+    process(args[0])
+
+
+if __name__ == "__main__":
+    main()

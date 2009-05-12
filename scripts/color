@@ -1,0 +1,73 @@
+#! /usr/bin/python
+
+import getopt, sys, os
+
+# default quantization level
+q = 4
+
+CAPATH = None
+
+def usage():
+    print 'USAGE: color [OPTIONS] <input directory>'
+    print 'OPTIONS' 
+    print '\t-q Q'
+    print '\t\tSet quantization level to Q. Default=%s'%q
+    print '\t--help'
+    print '\t\tPrint this usage screen'
+
+
+def processImage(file):
+    javaPath = os.path.join(CAPATH,'bin')
+    command = 'java -Xmx1000M -Djava.awt.headless=true '+\
+              '-cp %s extractor.ColorInspector %s %s'%\
+              (javaPath,file,q)
+    error = os.system(command)
+    if (error != 0):
+        print 'Error processing %s'%(file)
+        sys.exit(1)
+
+
+def batch(dir):
+    l = os.listdir(dir)
+    for f in l:
+        f_with_dir = os.path.join(dir,f)
+        if os.access(f_with_dir,os.F_OK)\
+           and ((f.endswith('.png') or f.endswith('.jpg'))):
+            print 'Processing...%s'% f
+            processImage(f_with_dir)
+
+def main():
+    global q
+    global CAPATH
+
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], 'q:', ['help'])
+    except getopt.GetoptError:
+        print 'Error: Illegal arguments'
+        usage()
+        sys.exit(2)
+
+    for o, a in opts:
+        if o in ('--help'):
+            usage()
+            sys.exit()
+        elif o in ('-q'):
+            q = a
+        else:
+            assert False, "unhandled option"
+
+    if len(args) != 1:
+        print 'Invalid arguments. --help for more info'
+        sys.exit(1)
+
+    try:
+        CAPATH = os.environ['CAPATH']
+    except:
+        print 'ERROR: CAPATH enviroment variable not found'
+        sys.exit(1)
+
+    batch(args[0].rstrip('/'))
+            
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,407 @@
+#!/bin/bash
+# Argument = -i inmovie -o outfolder -m mode -v
+
+# NOTE: for some reason when I used -c in
+# /vilinx.08.command -i kotor-output.avi -o kotor-outputb -c -g color-time.dgraph -f 24
+# ...the graphs didn't generate, but when I dropped the -c
+# /vilinx.08.command -i kotor-output.avi -o kotor-outputb -g color-time.dgraph -f 24
+# ...they did
+# ....oh. It is because -c is crop, not cache, and crop was eating the -g as its argument.
+
+# NOTE: I'd like to do something with
+# sort -t"," -k2 -nu kotor-outputb/orig/graphs/stats.txt > stats.sort.txt
+# ... this statement sorts the text file on column 2 (mean) -- maybe create a number of sorts and autogenerate a series of calls to datagraph? right now I'm accepting a file path, which makes it hard to dynamically generate multiple output graph graphics in a namespace - I need to figure out how to safely strip the filepath, or else come up with some other clever solution like timestamp etc.
+
+
+# --- USAGE ---
+
+usage()
+{
+cat << EOF
+
+Vilinx $VVERSION
+usage: $0 options
+Vilinx is a bash script implementation of a video and image processing tool for software recordings. It assumes that ffmpeg and imagemagick are installed.
+
+OPTIONS:
+  -i file    input:    an input movie file
+  -o fold    output:   an output folder
+
+  -c dims	   crop:     crop geometry string for video export
+  -f num     frameout: frames per second extracted, e.g. 1
+  -F num     framein:  frames per second recompiled, e.g. 24
+  -g file    graph:    a datagraph file (requires stats)
+  -h         help
+  -m mode    mode:     orig | diff | hist | all
+               orig:   original output
+               diff:   differential output
+               hist:   histogram output
+  -s         stats:    generate statistics
+  -t         temp:     reuses temp cached frames rather than reexport
+  -v         verbose
+
+EXAMPLES:
+./vilinx -i source.flv -o test1
+     defaults
+./vilinx -i source.flv -o test2 -f 3 -F 30
+     output 3fps, compile 30fps videos (10x speed)
+./vilinx -i source.flv -o test3 -m diff
+     generate differential output
+./vilinx -t -o test2 -m hist
+     generate histogram output from project temp cache
+./vilinx -i source.flv -o test3 -s -g line.graph
+     generate stastics and graph using dgraph file
+./vilinx -i source.flv -o test3 -m diff -c 120x32+8+8 -s -g line.graph
+     crop video input, create differential images, and graph
+
+EOF
+}
+
+# future useage flags:
+#   -k num     keyframe:   frame copied to position 00000, e.g. 00185
+#   -g  string  graph:     control string to pass to datagraph or R
+#   -e  extnsn	extension: image output format, e.g. jpeg, png, tiff
+
+# --- VARIABLES ---
+
+CROP=
+GRAPH=
+INFILE=
+MODE="orig"
+PROJECT=
+PSET=
+FRAMEOUT="1"
+FRAMEIN="24"
+TEMP="temp"
+TEMPFLAG=
+VERBOSE=
+VVERSION="0.3"
+SFLAG=
+
+
+# --- FUNCTIONS ---
+
+fsetmake () {
+  if [ -z "$1" ] | [ -z "$2" ] # Is parameter #1 zero length?
+  then
+    echo "Error: Set path not specified"
+    exit
+  else
+    echo "--- Set: $1/$2 ---"
+    mkdir $1/$2
+    mkdir $1/$2/averages
+    mkdir $1/$2/data
+    mkdir $1/$2/frames
+    mkdir $1/$2/graphs
+    mkdir $1/$2/montages
+    ls $1/$2
+  fi
+  return 0
+}
+
+fgraph () {
+  if [ -n "$SFLAG" ]
+	then
+    fmsg "assembling graph stats"
+    ls $1/$2/frames/*.jpeg > files.tmp
+    paste -d ',' files.tmp $1/$2/frames/stats.txt > $1/$2/graphs/stats.txt
+  fi
+  fmsg "graphing stats"
+  # cat $1/$2/graphs/stats.txt
+  ~/Applications/Graphics/DataGraph/DataGraph.app/dgraph $1/$2/graphs/stats.txt -script $3 -output $1/$2/graphs/graph.png
+  convert $1/$2/graphs/graph.png -resize 640x $1/$2/graphs/graph_640x.png
+  convert $1/$2/graphs/graph.png -resize 320x $1/$2/graphs/graph_320x.png
+
+  # ls $DIRIN/*.jpeg > $DIROUT/files.tmp
+  # paste -d ',' $DIROUT/files.tmp $DIRIN/stats.txt differences/stats.txt > $DIROUT/stats.txt
+  # cat $DIROUT/stats.txt
+  # ~/Applications/Graphics/DataGraph/DataGraph.app/dgraph $PDIR/graphs/stats.txt -script $PDIR/graphs/graph.dgraph -output $PDIR/graphs/graph.png
+  # rm $PDIR/$DIROUT/*.tmp
+}
+
+ftitle () {
+  echo ""
+  echo "------------------------------------"
+  echo "---            "$1"            ---"
+  echo "------------------------------------"
+}
+fmsg () {
+  echo ""
+  echo "--- VILINX: "$1" ---"
+}
+
+
+# --- BEGIN EXECUTION ---
+
+while getopts "c:f:F:g:hi:m:o:stv" OPTION
+do
+  case $OPTION in
+    c)
+      if [ -z "$OPTARG" ] # zero length?
+      then
+        echo "Error: -c dimensions not specified"
+        echo "For help: "$0" -h"
+        exit
+      else
+        # rollover parameter substitution to default if necc
+        CROP=$OPTARG
+        echo "-F $CROP"
+      fi
+      ;;
+    f)
+      if [ -z "$OPTARG" ] # zero length?
+      then
+        echo "Error: -f rate not specified"
+        echo "For help: "$0" -h"
+        exit
+      else
+        # rollover parameter substitution to default if necc
+        FRAMEOUT=${OPTARG-$FRAMEOUT}
+        echo "-f $FRAMEOUT"
+      fi
+      ;;
+    F)
+      if [ -z "$OPTARG" ] # zero length?
+      then
+        echo "Error: -F rate not specified"
+        echo "For help: "$0" -h"
+        exit
+      else
+        # rollover parameter substitution to default if necc
+        FRAMEIN=${OPTARG-$FRAMEIN}
+        echo "-F $FRAMEIN"
+      fi
+      ;;
+    g)
+      if [ -z "$OPTARG" ] # zero length?
+      then
+        echo "Error: -g file not specified"
+        echo "For help: "$0" -h"
+        exit
+      else
+        GRAPH=$OPTARG
+        echo "-g $OPTARG"
+      fi
+      ;;    
+    h)
+      # echo "-h"
+      usage
+      exit 1
+      ;;
+    i)
+      if [ -z "$OPTARG" ] # zero length?
+      then
+        echo "Error: -i file not specified"
+        echo "For help: "$0" -h"
+        exit
+      else
+        INFILE=$OPTARG
+        echo "-i $OPTARG"
+      fi
+      ;;
+    m)
+      if [ -z "$OPTARG" ] # zero length?
+      then
+        echo "Error: -m mode not specified"
+        echo "For help: "$0" -h"
+        exit
+      else
+        # rollover parameter substitution to default if necc
+        MODE=${OPTARG-$MODE}
+        echo "-m $MODE"
+      fi
+      ;;
+    o)
+      if [ -z "$OPTARG" ] # zero length?
+      then
+        echo "Error: -o folder not specified"
+        echo "For help: "$0" -h"
+        exit
+      else
+        PROJECT=$OPTARG
+        echo "-o $OPTARG"
+      fi
+      ;;
+    s)
+      SFLAG="1"
+      echo "-n"
+      ;;
+    t)
+      TEMPFLAG="1"
+      INFILE=$TEMP
+      echo "-c"
+      ;;
+    v)
+      VERBOSE="1"
+      echo "-v"
+      ;;
+    ?)
+      echo "For help: "$0" -h"
+      exit
+      ;;
+   esac
+done
+
+if [ -z "$INFILE" ]
+  then
+    echo "Error: -i input file not specified"
+    echo "For help: "$0" -h"
+		exit
+fi
+if [ -z "$PROJECT" ]
+  then
+    echo "Error: -o output folder not specified"
+    echo "For help: "$0" -h"
+		exit
+fi
+
+
+echo ""
+ftitle "VILINX"
+echo " INFILE="$INFILE
+echo "PROJECT="$PROJECT
+
+# --- SETUP ---
+
+mkdir $PROJECT
+mkdir $PROJECT/$TEMP
+mkdir $PROJECT/$TEMP/frames
+
+if [ -z "$TEMPFLAG" ]
+	then
+  fmsg "ffmpeg converting video to frames temp"
+  ffmpeg -i $INFILE -r $FRAMEOUT -f image2 $PROJECT/$TEMP/frames/%05d.jpeg &
+  MYPID=$!;echo "...waiting on "$MYPID;wait $MYPID
+  fmsg "duplicating frame 00001 to 00000"
+  # ffmpeg outputs from 00001, imagemagick from 00000
+  cp $PROJECT/$TEMP/frames/00001.jpeg $PROJECT/$TEMP/frames/00000.jpeg &
+  MYPID=$!;echo "...waiting on "$MYPID;wait $MYPID
+  if [ -n "$CROP" ]
+	  then
+	  mogrify -crop $CROP $PROJECT/$TEMP/frames/*.jpeg &
+    MYPID=$!;echo "...waiting on "$MYPID;wait $MYPID
+  fi
+fi
+
+case $MODE in
+  orig)
+    ftitle $MODE
+  	fsetmake $PROJECT $MODE
+    fmsg "copying frames"
+    cp $PROJECT/$TEMP/frames/*.jpeg $PROJECT/$MODE/frames/ &
+    MYPID=$!;echo "...waiting on "$MYPID;wait $MYPID
+    fmsg "ffmpeg converting frames to video"
+    ffmpeg -r $FRAMEIN -i $PROJECT/$MODE/frames/%05d.jpeg $PROJECT/$MODE/frames/video.mp4 &
+    MYPID=$!;echo "...waiting on "$MYPID;wait $MYPID
+    if [ -n "$SFLAG" ]
+	    then
+      fmsg "imagemagick-convert generating frame statistics"
+      convert $PROJECT/$MODE/frames/*.jpeg -colorspace RGB -format "%[fx:100*mean],%[fx:100*minima],%[fx:100*maxima],%[fx:100*r],%[fx:100*g],%[fx:100*b]" info:- > $PROJECT/$MODE/frames/stats.txt
+    fi
+		fmsg "imagemagick-convert averaging frames"
+		echo $PROJECT/$MODE/frames/*.jpeg $PROJECT/$MODE/averages/00001.jpeg | xargs convert -average
+    MYPID=$!;echo "...waiting on "$MYPID;wait $MYPID
+    if [ -n "$SFLAG" ]
+	    then
+		  fmsg "imagemagick-convert generating frame statistics"
+		  convert $PROJECT/$MODE/averages/00001.jpeg -colorspace RGB -format "%[fx:100*mean],%[fx:100*minima],%[fx:100*maxima],%[fx:100*r],%[fx:100*g],%[fx:100*b]" info:- > $PROJECT/$MODE/averages/stats.txt
+		fi
+		fmsg "imagemagick-montage generating frame montages"
+		montage $PROJECT/$MODE/frames/*.jpeg -tile 5x6 -geometry 124x+2+2 -background black $PROJECT/$MODE/montages/%05d.jpeg &
+    MYPID=$!;echo "...waiting on "$MYPID;wait $MYPID
+    convert $PROJECT/$MODE/montages/*.jpeg -resize 640x -extent 640x $PROJECT/$MODE/montages/tmp-%05d.jpg &
+    MYPID=$!;echo "...waiting on "$MYPID;wait $MYPID
+		fmsg "ffmpeg converting frames to video"
+    ffmpeg -r 2 -i $PROJECT/$MODE/montages/tmp-%05d.jpg $PROJECT/$MODE/montages/video.mp4 &
+    MYPID=$!;echo "...waiting on "$MYPID;wait $MYPID
+    rm $PROJECT/$MODE/montages/tmp*
+    if [ -n "$GRAPH" ]
+	    then
+      fgraph $PROJECT $MODE $GRAPH
+    fi
+    ;;
+
+  diff)
+    ftitle $MODE
+  	fsetmake $PROJECT $MODE
+		fmsg "compiling frame comparison list"
+    ls $PROJECT/$TEMP/frames/*.jpeg | sed '$d' > col1.tmp
+		ls $PROJECT/$TEMP/frames/*.jpeg | awk 'NR > 1 {print ""$1}' > col2.tmp
+		# this is a terrible hack -- I need to figure out how to dynamically change the path for each name with grep/sed/awk
+    cp $PROJECT/$TEMP/frames/*.jpeg $PROJECT/$MODE/frames/; ls $PROJECT/$MODE/frames/*.jpeg > col3.tmp; rm $PROJECT/$MODE/frames/*.jpeg
+		paste col1.tmp col2.tmp col3.tmp > args.tmp
+		fmsg "imagemagick-compare generating difference images and stats"
+		cat args.tmp | xargs -n3 compare -metric MAE -fuzz 25% -compose Src -highlight-color White -lowlight-color Black 2>$PROJECT/$MODE/frames/stats.txt &
+    MYPID=$!;echo "...waiting on "$MYPID;wait $MYPID
+    # above I was using a transparent shadow with default red -- xargs -n3 compare -metric MAE -fuzz 25% -- but changed to an absolute mask -compose Src
+		rm *.tmp
+    fmsg "ffmpeg converting frames to video"
+    ffmpeg -r $FRAMEIN -i $PROJECT/$MODE/frames/%05d.jpeg $PROJECT/$MODE/frames/video.mp4 &
+    MYPID=$!;echo "...waiting on "$MYPID;wait $MYPID
+    if [ -n "$SFLAG" ]
+	    then
+		  fmsg "imagemagick-convert generating frame statistics"
+      convert $PROJECT/$MODE/frames/*.jpeg -colorspace RGB -format "%[fx:100*mean],%[fx:100*minima],%[fx:100*maxima],%[fx:100*r],%[fx:100*g],%[fx:100*b]" info:- > $PROJECT/$MODE/frames/stats.txt
+    fi
+		fmsg "imagemagick-convert averaging frames"
+		echo $PROJECT/$MODE/frames/*.jpeg $PROJECT/$MODE/averages/00001.jpeg | xargs convert -average
+    MYPID=$!;echo "...waiting on "$MYPID;wait $MYPID
+    if [ -n "$SFLAG" ]
+	    then
+      fmsg "imagemagick-convert generating frame statistics"
+		  convert $PROJECT/$MODE/averages/00001.jpeg -colorspace RGB -format "%[fx:100*mean],%[fx:100*minima],%[fx:100*maxima],%[fx:100*r],%[fx:100*g],%[fx:100*b]" info:- > $PROJECT/$MODE/averages/stats.txt
+		fi
+		fmsg "imagemagick-montage generating frame montages"
+		montage $PROJECT/$MODE/frames/*.jpeg -tile 5x6 -geometry 124x+2+2 -background black $PROJECT/$MODE/montages/%05d.jpeg &
+    MYPID=$!;echo "...waiting on "$MYPID;wait $MYPID
+    convert $PROJECT/$MODE/montages/*.jpeg -resize 640x -extent 640x $PROJECT/$MODE/montages/tmp-%05d.jpg &
+    MYPID=$!;echo "...waiting on "$MYPID;wait $MYPID
+		fmsg "ffmpeg converting frames to video"
+    ffmpeg -r 2 -i $PROJECT/$MODE/montages/tmp-%05d.jpg $PROJECT/$MODE/montages/video.mp4 &
+    MYPID=$!;echo "...waiting on "$MYPID;wait $MYPID
+    rm $PROJECT/$MODE/montages/tmp*
+    if [ -n "$GRAPH" ]
+	    then
+      fgraph $PROJECT $MODE $GRAPH
+    fi
+    ;;
+
+  hist)
+    ftitle $MODE
+  	fsetmake $PROJECT $MODE
+		fmsg "imagemagick-convert generating histogram images"
+		convert $PROJECT/$TEMP/frames/*.jpeg histogram:$PROJECT/$MODE/frames/%05d.jpeg &
+    MYPID=$!;echo "...waiting on "$MYPID;wait $MYPID
+    fmsg "ffmpeg converting frames to video"
+    ffmpeg -r $FRAMEIN -i $PROJECT/$MODE/frames/%05d.jpeg $PROJECT/$MODE/frames/video.mp4 &
+    MYPID=$!;echo "...waiting on "$MYPID;wait $MYPID
+		fmsg "imagemagick-convert averaging frames"
+		echo $PROJECT/$MODE/frames/*.jpeg $PROJECT/$MODE/averages/00001.jpeg | xargs convert -average &
+    MYPID=$!;echo "...waiting on "$MYPID;wait $MYPID
+    if [ -n "$SFLAG" ]
+	    then
+  		fmsg "imagemagick-convert generating frame statistics"
+		  convert $PROJECT/$MODE/averages/00001.jpeg -colorspace RGB -format "%[fx:100*mean],%[fx:100*minima],%[fx:100*maxima],%[fx:100*r],%[fx:100*g],%[fx:100*b]" info:- > $PROJECT/$MODE/averages/stats.txt
+		fi
+		fmsg "imagemagick-montage generating frame montages"
+		montage $PROJECT/$MODE/frames/*.jpeg -tile 5x6 -geometry 124x+2+2 -background black $PROJECT/$MODE/montages/%05d.jpeg &
+    MYPID=$!;echo "...waiting on "$MYPID;wait $MYPID
+    convert $PROJECT/$MODE/montages/*.jpeg -resize 640x -extent 640x $PROJECT/$MODE/montages/tmp-%05d.jpg &
+    MYPID=$!;echo "...waiting on "$MYPID;wait $MYPID
+		fmsg "ffmpeg converting frames to video"
+    ffmpeg -r 2 -i $PROJECT/$MODE/montages/tmp-%05d.jpg $PROJECT/$MODE/montages/video.mp4 &
+    MYPID=$!;echo "...waiting on "$MYPID;wait $MYPID
+    rm $PROJECT/$MODE/montages/tmp*
+    if [ -n "$GRAPH" ]
+	    then
+      fgraph $PROJECT $MODE $GRAPH
+    fi
+    ;;
+
+  all)
+    ftitle " "$MODE" "
+    echo "--- -m all    not yet implemented ---"
+    ;;
+esac
+
+ftitle "  DONE! "
