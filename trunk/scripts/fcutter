@@ -1,5 +1,4 @@
 #!/bin/bash
-# Argument = -i inmovie -o outfolder -m mode -v
 
 # --- USAGE ---
 
@@ -12,13 +11,16 @@ usage: $0 options
 fcutter is a bash script implementation of a video cutting utility that uses a timing file to produce a directory tree of clip framedumps. It assumes that ffmpeg and imagemagick are installed.
 
 OPTIONS:
-fcutter infile
+  -i file    input:     input text file in proper format
+  -o fold    output:    an output folder
 
-INFILE:
+  -f num     frameout:  frames per second extracted, default 10fps
 
-The infile is currently a tab-delimited text file with a header line and entries in the following format:
+FILE FORMAT:
 
-FILESOURCE-I	STARTTIME-SS	DURATION-T	OUTPUT(LAST)
+The infile is currently a tab-delimited text file with a header line (ignored) and entries in the following 4-column format, expected in the following order:
+
+FILESOURCE-i	STARTTIME-ss	DURATION-t	OUTPUT
 tvkeyboard.mp4	00:00:00	00:00:02	shots/1
 tvkeyboard.mp4	00:00:02	00:00:02	shots/2
 tvkeyboard.mp4	00:00:04	00:00:03	shots/3
@@ -26,11 +28,116 @@ tvkeyboard.mp4	00:00:00	00:00:01	modes/1sclip
 tvkeyboard.mp4	00:00:03	00:00:02	modes/2sclip
 tvkeyboard.mp4	00:00:02	00:00:04	modes/4sclip
 
-EXAMPLE:
-./fcutter timings.txt
+FILESOURCE corresponds to the ffmpeg -i command.
+FILESOURCE corresponds to the ffmpeg -ss command.
+FILESOURCE corresponds to the ffmpeg -t command.
+
+OUTPUT gives the local path and prefix for the output frames. Thus shots/1 and shots/2 will be saved in one directory as follows:
+
+shots/1-00000001.jpeg
+shots/1-00000002.jpeg
+shots/1-00000003.jpeg
+shots/2-00000001.jpeg
+shots/2-00000002.jpeg
+shots/2-00000003.jpeg
+
+To create each clip in a unique directory, end the output text with a / as follows:
+
+tvkeyboard.mp4	00:00:00	00:00:02	shots/1/
+tvkeyboard.mp4	00:00:00	00:00:02	shots/2/
+
+Resulting in:
+
+shots/1/-00000001.jpeg
+shots/2/-00000001.jpeg
+
+EXAMPLES:
+./fcutter -i timings.txt -o mytest
+./fcutter -i timings.txt -f 1 -o mytest2
 
 EOF
 }
 
-awk '{if (NR>1) print $4}' $1 | xargs -t mkdir -p
-awk '{if (NR>1) print "-i ", $1, " -ss ", $2, " -t ", $3, " -r 10 -f image2 ", $4"/%05d.jpeg"}' timings.txt | xargs -t -L 1 ffmpeg
+# --- VARIABLES ---
+INFILE=
+FRAMEOUT="10"
+PROJECT=
+VVERSION="0.3"
+
+# --- BEGIN EXECUTION ---
+
+while getopts "f:hi:o:" OPTION
+do
+  case $OPTION in
+    f)
+      if [ -z "$OPTARG" ] # zero length?
+      then
+        echo "Error: -f rate not specified"
+        echo "For help: "$0" -h"
+        exit
+      else
+        # rollover parameter substitution to default if necc
+        FRAMEOUT=${OPTARG-$FRAMEOUT}
+        echo "-f $FRAMEOUT"
+      fi
+      ;;  
+    h)
+      # echo "-h"
+      usage
+      exit 1
+      ;;
+    i)
+      if [ -z "$OPTARG" ] # zero length?
+      then
+        echo "Error: -i file not specified"
+        echo "For help: "$0" -h"
+        exit
+      else
+        INFILE=$OPTARG
+        echo "-i $OPTARG"
+      fi
+      ;;
+    o)
+      if [ -z "$OPTARG" ] # zero length?
+      then
+        echo "Error: -o folder not specified"
+        echo "For help: "$0" -h"
+        exit
+      else
+        PROJECT=$OPTARG
+        echo "-o $OPTARG"
+      fi
+      ;;
+    ?)
+      echo "For help: "$0" -h"
+      exit
+      ;;
+   esac
+done
+
+if [ -z "$INFILE" ]
+  then
+    echo "Error: -i input file not specified"
+    echo "For help: "$0" -h"
+		exit
+fi
+if [ -z "$PROJECT" ]
+  then
+    echo "Error: -o output folder not specified"
+    echo "For help: "$0" -h"
+		exit
+fi
+
+echo "fcutter "$VVERSION
+echo "   INFILE="$INFILE
+
+# --- SETUP ---
+
+echo "   ...creating output directories..."
+awk -v "project=$PROJECT" '{if (NR>1) print project"/"$4}' $INFILE | xargs -t mkdir -p
+
+echo "   ...dumping frames..."
+
+awk -v "project=$PROJECT" -v "frameout=$FRAMEOUT" '{if (NR>1) print "-ss ", $2, " -i ", $1, " -t ", $3, " -r ", frameout, " -f image2 ", project"/"$4"-%08d.jpeg"}' $INFILE | xargs -t -L 1 ffmpeg
+
+echo "   ...done!"
