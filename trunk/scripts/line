@@ -1,0 +1,197 @@
+#! /usr/bin/python
+
+import getopt, sys, os
+
+
+# default gaussian kernel width
+kWidth = 15
+# default gaussian kernel sigma
+sigma = 3
+# minimum line length
+minLineLength = 10
+# high threshold
+highThreshold = 15
+# low threshold
+lowThreshold = 5
+# histogram
+histogram = 0
+# output directory
+outputDir = '.'
+# result file
+resultFile = 'result.txt'
+
+CAPATH = None
+
+imageFileSuffix = '.line.png'
+detailFileSuffix = '.detail.txt'
+summaryFileSuffix = '.summary.txt'
+
+
+def usage():
+    print 'USAGE: line [OPTIONS] <input directory>'
+    print 'OPTIONS' 
+    print '\t-d,--dir output-directory'
+    print '\t\tSpecify a directory for output files. Default="%s"'%outputDir
+    print '\t-g,--gsize W'
+    print '\t\tSpecify size of the Gaussian filter to W x W. Default=%s'%kWidth
+    print '\t-h,--high H'
+    print '\t\tSpecify high threshold for line tracing to H. Default=%s'%highThreshold
+    print '\t--help'
+    print '\t\tPrint this usage screen'
+    print '\t--histogram'
+    print '\t\tAlso output histograms using Matlab. This requires "matlab" on the system path'
+    print '\t-l,--low L'
+    print '\t\tSpecify low threshold for line tracing to L. Default=%s'%lowThreshold
+    print '\t-m,--minlength M'
+    print '\t\tSpecify the minimum line length that program will process to M. Default=%s'%minLineLength
+    print '\t-o summary-file-name'
+    print '\t\tSpecify a file name for the summary file. Default="%s"'%resultFile
+    print '\t-p,--preset <low | high>'
+    print '\t\tUse the default set of parameters. Now only "low" and "high" are available.'
+    print '\t-s,--sigma S'    
+    print '\t\tSpecify sigma used by Gaussian filter to S. Default=%s'%sigma
+    print 'EXAMPLES'
+    print '\t./line -d ex1 --preset high .'
+    print '\t\tProcess the current directory using "high" preset and output to directory ex1'
+
+
+def processImage(file):
+
+    javaPath = os.path.join(CAPATH,'bin')
+    matlabPath = os.path.join(CAPATH,'matlab')
+
+    filenameOnly = file.split('/')[-1]
+    imageFile = outputDir + '/' + filenameOnly + imageFileSuffix
+    detailFile = outputDir + '/' + filenameOnly + detailFileSuffix
+    summaryFile = outputDir + '/' + filenameOnly + summaryFileSuffix
+    
+    command = 'java -Xmx1000M -Djava.awt.headless=true '+\
+              '-cp %s extractor.LineFeature %s %s %s %s'%\
+              (javaPath,file,imageFile,summaryFile,detailFile)
+    command = command + ' %s %s %s %s %s'%(lowThreshold, highThreshold, kWidth, sigma, minLineLength)
+    error = os.system(command)
+    if (error != 0):
+        print 'Error processing %s'%(file)
+        sys.exit(1)
+    
+    if (histogram == 1):
+        command = 'matlab -nodisplay -nosplash -r "path(path,\'%s\'); makePlots(\'%s\'); exit;" > /dev/null'%\
+                  (matlabPath, detailFile)
+        error = os.system(command)
+        if (error != 0):
+            print 'Error processing %s'%(file)
+            sys.exit(1)
+
+
+def batch(dir):
+    if (not os.access(dir, os.F_OK)):
+        print 'Invalid directory %s'%dir
+        sys.exit(1)
+    if (not os.access(outputDir, os.F_OK)):
+        try:
+            os.makedirs(outputDir)
+        except error:
+            print 'Error: os.makedirs'
+            sys.exit(1)
+
+    fo = open(outputDir + '/' + resultFile,'w')
+    # Print header
+    fo.write('filename,avg_length,')
+    fo.write('avg_turns,avg_straightness,')
+    fo.write('avg_angle\n')
+    fo.write('string,float,')
+    fo.write('float,float,')
+    fo.write('float\n')
+    l = os.listdir(dir)
+    l.sort()
+    for f in l:
+        f_with_dir = dir + '/' + f
+        if os.access(f_with_dir,os.F_OK) and ((f.endswith('.png') or f.endswith('.jpg'))):
+            print 'Processing...%s'% f
+            processImage(f_with_dir)
+            summaryFile = outputDir + '/' + f + summaryFileSuffix
+            fo.write(f)
+            fi = open(summaryFile,'r')
+            count = 0
+            for line in fi:
+                if count > 5:
+                    info = line.split('\t')[1]
+                    fo.write(',' + info.strip())
+                count += 1
+            fo.write('\n')
+            fi.close()
+    fo.close()
+
+
+def main():
+
+    global kWidth, sigma, minLineLength
+    global highThreshold, lowThreshold
+    global histogram, outputDir, resultFile
+    global CAPATH
+
+    preset = None
+   
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], 'p:g:s:l:h:m:d:o:', 
+           ['help','preset=','gsize=','sigma=','low=','high=',\
+            'dir=','minlength=','histogram'])
+    except getopt.GetoptError:
+        print 'Error: Illegal arguments'
+        usage()
+        sys.exit(2)
+
+    for o, a in opts:
+        if o in ('--help'):
+            usage()
+            sys.exit()
+        elif o in ('-p','--preset'):
+            preset = a
+        elif o in ('-g','--gsize'):
+            kWidth = a
+        elif o in ('-s','--sigma'):
+            sigma = a
+        elif o in ('-l','--low'):
+            low = a
+        elif o in ('-h','--high'):
+            high = a
+        elif o in ('-d','--dir'):
+            outputDir = a.rstrip('/')
+        elif o in ('-m','--minlength'):
+            minLineLength = a
+        elif o in ('--histogram'):
+            histogram = 1
+        elif o in ('-o'):
+            resultFile = a
+        else:
+            assert False, "unhandled option"
+
+    if (preset == 'low'):
+        kWidth = 3
+        sigma = 1
+        lowThreshold = 10
+        highThreshold = 30
+        minLineLenght = 5
+
+    if (preset == 'high'):
+        kWidth = 15
+        sigma = 3
+        lowThreshold = 5
+        highThreshold = 15
+        minLineLenght = 10
+
+    if len(args) != 1:
+        print 'Invalid arguments. --help for more info'
+        sys.exit(1)
+
+    try:
+        CAPATH = os.environ['CAPATH']
+    except:
+        print 'ERROR: CAPATH enviroment variable not found'
+        sys.exit(1)
+
+    batch(args[0].rstrip('/'))
+            
+
+if __name__ == "__main__":
+    main()

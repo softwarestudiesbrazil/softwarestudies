@@ -1,0 +1,36 @@
+#!/bin/bash
+# Argument = -i inmovie -o outfolder -m mode -v
+
+# --- USAGE ---
+
+usage()
+{
+cat << EOF
+
+fcutter $VVERSION
+usage: $0 options
+fcutter is a bash script implementation of a video cutting utility that uses a timing file to produce a directory tree of clip framedumps. It assumes that ffmpeg and imagemagick are installed.
+
+OPTIONS:
+fcutter infile
+
+INFILE:
+
+The infile is currently a tab-delimited text file with a header line and entries in the following format:
+
+FILESOURCE-I	STARTTIME-SS	DURATION-T	OUTPUT(LAST)
+tvkeyboard.mp4	00:00:00	00:00:02	shots/1
+tvkeyboard.mp4	00:00:02	00:00:02	shots/2
+tvkeyboard.mp4	00:00:04	00:00:03	shots/3
+tvkeyboard.mp4	00:00:00	00:00:01	modes/1sclip
+tvkeyboard.mp4	00:00:03	00:00:02	modes/2sclip
+tvkeyboard.mp4	00:00:02	00:00:04	modes/4sclip
+
+EXAMPLE:
+./fcutter timings.txt
+
+EOF
+}
+
+awk '{if (NR>1) print $4}' $1 | xargs -t mkdir -p
+awk '{if (NR>1) print "-i ", $1, " -ss ", $2, " -t ", $3, " -r 10 -f image2 ", $4"/%05d.jpeg"}' timings.txt | xargs -t -L 1 ffmpeg
