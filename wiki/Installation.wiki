@@ -2,13 +2,13 @@
 
 = Required software =
 
-* Java SDK / Ant 
-* Python
-* Matlab
+ * Java SDK / Ant 
+ * Python
+ * Matlab
 
 = Quick install guide =
 
-# Download / check out code
-# Run ant
-# Set $CAPATH global variable
-# Optional: Add scripts to $PATH
+ # Download / check out code
+ # Run ant
+ # Set $CAPATH global variable
+ # Optional: Add scripts to $PATH
