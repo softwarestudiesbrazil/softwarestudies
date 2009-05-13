@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 import getopt, sys, os, shutil, string
 
@@ -35,7 +35,7 @@ CAPATH = None
 
 
 def usage():
-    print 'USAGE: %s [OPTIONS] <project directory>'%sys.argv[0]
+    print 'USAGE: %s [OPTIONS] <project directory>'%('cascript')
     print 'OPTIONS' 
     print '\t--help\tShow this usage screen' 
     print '\t--url\tDownload and create project directory from URL'
@@ -159,16 +159,16 @@ def combineResults(target, sourceFiles):
 		f.append(new_f)
 
 	# for each line
-	for line in f[0].readlines():
-		fout.write(line.rstrip('\n'))
-		for j in range(1,len(sourceFiles)):
-			temp = f[j].readline().rstrip('\n')
-	                temp = temp.split(',')
-			temp = string.join(temp[1:],',')
-			fout.write(',' + temp)
-	 	fout.write('\n')
+	if (f != []):
+		for line in f[0].readlines():
+			fout.write(line.rstrip('\n'))
+			for j in range(1,len(sourceFiles)):
+				temp = f[j].readline().rstrip('\n')
+	        	        temp = temp.split(',')
+				temp = string.join(temp[1:],',')
+				fout.write(',' + temp)
+		 	fout.write('\n')
 	
-
 	# close files
 	for i in range(0,len(sourceFiles)):
 		f[i].close()
@@ -205,7 +205,7 @@ def processColor(projectDir, args):
     error = os.system(command)
     if error != 0:
         print 'Error: color'
-        #sys.exit(1)
+        return False
 
     # move output
     l = os.listdir(sourceDir)
@@ -215,7 +215,7 @@ def processColor(projectDir, args):
             dst = os.path.join(targetDir,f)
             shutil.move(src,dst)
         
-
+    return True
 
 def processLine(projectDir, args):
 
@@ -244,7 +244,9 @@ def processLine(projectDir, args):
     error = os.system(command)
     if error != 0:
         print 'Error: line'
-        #sys.exit(1)
+        return False
+
+    return True
 
 
 def processShot(projectDir, args):
@@ -273,7 +275,7 @@ def processShot(projectDir, args):
     error = os.system(command)
     if error != 0:
         print 'Error: shot'
-        #sys.exit(1)
+        return False
 
     # move the output file
     shotFileSrc = os.path.join(sourceDir,'shot.output.txt')
@@ -290,6 +292,7 @@ def processShot(projectDir, args):
             img = os.path.join(sourceDir,tokens[0])
             shutil.copy2(img,keyframeDir)            
     f.close()
+    return True
 
 
 
@@ -312,22 +315,28 @@ def processColorTexture(projectDir):
 
     # run matlab
     if not verbose:
-        command = 'matlab -nodisplay -nosplash '+\
+        command = 'matlab -nodisplay -nojvm '+\
             '-r "path(path,\'%s\'); '%(matlabPath) +\
-            'new_batch(\'%s\'); '%(sourceDir)+\
+            'batch(\'%s\'); '%(sourceDir)+\
             'exit;" > /dev/null'
     else:
-        command = 'matlab -nodisplay -nosplash '+\
+        command = 'matlab -nodisplay -nojvm '+\
             '-r "path(path,\'%s\'); '%(matlabPath) +\
-            'new_batch(\'%s\'); '%(sourceDir)+\
+            'batch(\'%s\'); '%(sourceDir)+\
             'exit;"'
         print command
 
-    os.system(command)
+    error = os.system(command)
+    if error != 0:
+	print 'Error: colorTexture'
+	return False
     
     # move stats.txt to
     statsFile = os.path.join(sourceDir,'stats.txt')
     shutil.move(statsFile,targetDir)
+    
+    return True
+  
 
 
 ###########################################
@@ -435,7 +444,7 @@ def main():
     except ImportError:
 	print 'WARNING: config.py not found'	
     except:
-        print 'Error: importing'
+        print 'Error: importing config.py'
 
     # video case
     if (videoFile != None) or videoMode:
@@ -443,24 +452,38 @@ def main():
             extractFrames(projectDir,videoFile,default_ffmpeg_args)
         else:
             convertToJpg(projectDir)
-        processShot(projectDir,default_shot_args)
-        processLine(projectDir,default_line_args)
-        processColor(projectDir,default_color_args)
-        processColorTexture(projectDir)
-        combineResults(projectDir+'/result.txt',\
-                        [projectDir+'/shots/shot.output.txt',\
-		         projectDir+'/lines/result.txt',\
-                         projectDir+'/stats/stats.txt'])
+        shotFlag = processShot(projectDir,default_shot_args)
+        lineFlag = processLine(projectDir,default_line_args)
+        colorFlag = processColor(projectDir,default_color_args)
+        matlabFlag = processColorTexture(projectDir)
+	
+	# check for finished results 	
+	files = []
+        if shotFlag:
+	     	files.append(projectDir+'/shots/shot.output.txt')
+	if lineFlag:
+	     	files.append(projectDir+'/lines/result.txt')
+	if matlabFlag:
+	     	files.append(projectDir+'/stats/stats.txt')
+
+        combineResults(projectDir+'/result.txt',files)
+
     # images case
     else:
         convertToJpg(projectDir)
         sampleFromImages(projectDir)
-        processLine(projectDir,default_line_args)
-        processColorTexture(projectDir)
-        processColor(projectDir,default_color_args)
-        combineResults(projectDir+'/result.txt',\
-                        [projectDir+'/lines/result.txt',\
-                         projectDir+'/stats/stats.txt'])
+        lineFlag = processLine(projectDir,default_line_args)
+        matlabFlag = processColorTexture(projectDir)
+        colorFlag = processColor(projectDir,default_color_args)
+
+	# check for finished results 	
+	files = []
+	if lineFlag:
+	     	files.append(projectDir+'/lines/result.txt')
+	if matlabFlag:
+	     	files.append(projectDir+'/stats/stats.txt')
+
+        combineResults(projectDir+'/result.txt',files)
 
 
 if __name__ == "__main__":

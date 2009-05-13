@@ -1,4 +1,4 @@
-#! /usr/bin/python
+#! /usr/bin/env python
 
 import getopt, sys, os
 
@@ -57,7 +57,7 @@ def usage():
 
 def processImage(file):
 
-    javaPath = os.path.join(CAPATH,'bin')
+    javaPath = os.path.join(CAPATH,'dist','softwarestudies.jar')
     matlabPath = os.path.join(CAPATH,'matlab')
 
     filenameOnly = file.split('/')[-1]
