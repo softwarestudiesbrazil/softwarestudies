@@ -9,6 +9,9 @@
 
 === Using CAscript ===
 
+CAscript is the master script for running many feature extraction tools on a set of images or a movie. 
+
+CAscript is called by using comamnd *`cascript`*.
 
 {{{
 USAGE: cascript [OPTIONS] <project directory>
@@ -19,8 +22,28 @@ OPTIONS
 	   --sampling	Set sampling rate when we sample frames as previews
 	-v           	Verbose mode.
 }}}
+  
+*`<project directory>`* is assumed to have a subdirectory called *`source`* which contains the original data. The original data can be either a movie file or a set of images. In addition, *`cascript`* can instead download a movie file directly from the internet and run analysis on it.
+
+==== Notes about options ====
+ * `--video`: This is useful when your source file is not a movie but a sequence of images. In order to tell *`cascript`* to include video analysid i.e. shot-detection, `--video` is required.
+ * `-v`: *`cascript`* is primarily developed to run in batch mode. So, by default, there is very little information being printed on screen. If `-v` is used, then *`cascript`* will print more information on screen.
 
 
+==== Examples ====
+
+ # Movie from existing file
+  * Create a project directory called *`test`*.
+  * Create a subdirectory under *`test`* called *`source`*
+  * Copy the movie file into *`source`*
+  * Run *`cascript test`*
+ # Movie from `http://www.test.com/test.avi`
+  * Run *`cascript --url http://www.test.com/test.avi test`*. In this case, the script will automatically create project directory called *`test`*.
+ # Images
+  * Create a project directory called *`test`*.
+  * Create a subdirectory under *`test`* called *`source`*
+  * Copy the images file into *`source`*
+  * Run *`cascript test`*
 
 
 === Default parameters for CAscript ===
@@ -36,3 +59,4 @@ default_color_args = '-q 2'
 supportedMovieType = ['mpeg','mpg','avi','mov','m4v','mp4']
 supportedImageType = ['jpg','jpeg','png','tif','tiff','bmp']
 }}}
+
