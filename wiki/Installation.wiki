@@ -1,4 +1,4 @@
-#summary Install Guide
+#summary Installation guide
 
 = Required software =
 
@@ -16,6 +16,4 @@
  # _Optional_ Add scripts directory to *`$PATH`*. Although this is not needed, it is highly recommended.
   * *MaxOSX*: Add *`export PATH="$CAPATH/scripts:$PATH"`* right after where you define *`$CAPATH`*
  # Run *test-cascript* from command line. If you don't see any *`[FAILED]`*, then you are good to go.
-
-
 
