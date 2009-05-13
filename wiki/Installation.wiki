@@ -2,13 +2,15 @@
 
 = Required software =
 
- * Java SDK / Ant 
- * Python
- * Matlab
+ * Java
+ * Python 
+ * Matlab 
+ * ffmpeg
+ * ImageMagick
 
 = Quick install guide =
 
  # Download / check out code
- # Run ant
+ # Compile 
  # Set $CAPATH global variable
  # Optional: Add scripts to $PATH
