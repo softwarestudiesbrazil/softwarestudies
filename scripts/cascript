@@ -8,7 +8,6 @@ import getopt, sys, os, shutil, string
 
 # require: wget, convert, ffmpeg, matlab
 
-
 samplingRate = 10
 
 default_ffmpeg_args = '-t 300 -sameq'
@@ -37,9 +36,11 @@ CAPATH = None
 def usage():
     print 'USAGE: %s [OPTIONS] <project directory>'%('cascript')
     print 'OPTIONS' 
-    print '\t--help\tShow this usage screen' 
-    print '\t--url\tDownload and create project directory from URL'
-
+    print '\t-h,--help    \tShow this usage screen.' 
+    print '\t   --url     \tDownload and create project directory from URL.'
+    print '\t   --video   \tForce video mode.'
+    print '\t   --sampling\tSet sampling rate when we sample frames as previews'
+    print '\t-v           \tVerbose mode.'
 
 # download specfic file to projectDir/source
 def downloadFromUrl(projectDir,url):
