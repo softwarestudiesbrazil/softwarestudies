@@ -4,7 +4,7 @@ import sys, os
 
 
 def capath():
-	print 'CAPATH enviroment variable...',
+	print '\nCAPATH enviroment variable...',
 	CAPATH = None
 	try:
 		CAPATH = os.environ['CAPATH']
@@ -17,15 +17,24 @@ def capath():
 			print '[Failed]'
 
 def java():
-	print 'Java Runtime.................',
+	print '\nJava Runtime.................',
 	error = os.system('java -version')
 	if error != 0:
 		print '[Failed]'
 	else:
 		print '[Passed]'
 
+def wget():
+	print '\nwget.........................',
+	error = os.system('wget --version')
+	if error != 0:
+		print '[Failed]'
+	else:
+		print '[Passed]'
+
+
 def ffmpeg():
-	print 'ffmpeg.......................',
+	print '\nffmpeg.......................',
 	error = os.system('ffmpeg -version')
 	if error != 0:
 		print '[Failed]'
@@ -33,7 +42,7 @@ def ffmpeg():
 		print '[Passed]'
 
 def convert():
-	print 'ImageMagick [convert]........',
+	print '\nImageMagick [convert]........',
 	error = os.system('convert -version')
 	if error != 0:
 		print '[Failed]'
@@ -41,7 +50,7 @@ def convert():
 		print '[Passed]'
 
 def matlab():
-	print 'Matlab.......................',
+	print '\nMatlab.......................',
 	sys.stdout.flush()
 	error = os.system('matlab -nodisplay -nojvm -r "exit" > /dev/null')
 	if error != 0:
@@ -54,6 +63,7 @@ def main():
 	print 'Running tests for required software...'
 	capath()
 	java()
+	wget()
 	ffmpeg()
 	convert()
 	matlab()
