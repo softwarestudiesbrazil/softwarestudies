@@ -1,11 +1,9 @@
 #summary Documentation
 
+= Documentation =
 
-<wiki:toc max_depth="2" />
-
-== Installation ==
-
-[Installation]
+ * [Installation]
+ * [Documentation#CAscript CAscript]
 
 == CAscript ==
 
