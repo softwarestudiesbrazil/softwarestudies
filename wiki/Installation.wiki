@@ -2,7 +2,7 @@
 
 = Required software =
 
- * Java
+ * Java (version > 1.5)
  * Python 
  * Matlab 
  * ffmpeg
@@ -10,9 +10,9 @@
 
 = Quick install guide =
 
- # Download _softwarestudies.zip_ from Download page.
- # Set $CAPATH environment variable.
-  * *MacOSX*: Add `export CAPATH="<path to softwarestudies directory>"` to the end of the your *~/.profile* where `<path to softwarestudies directory>` is where you extract the files. For example, on Giza, we use `export CAPATH="/Users/culturevis/Documents/Programming/softwarestudies"`  
- # [Optional] Add scripts directory to $PATH.
-  * *MaxOSX*: Add `export PATH="$CAPATH/scripts:$PATH"` right after where you define $CAPATH
- # Run *test-cascript* from command line. If you don't see any *[FAILED]*, then you are good to go.
+ # Download the latest release from Download page.
+ # Set *`$CAPATH`* environment variable.
+  * *MacOSX*: Add *`export CAPATH="<path to softwarestudies directory>"`* to the end of the your *~/.profile*.For example, on Giza, we use *`export CAPATH="/Users/culturevis/Documents/Programming/softwarestudies"`*  
+ # _Optional_ Add scripts directory to *`$PATH`*. Although this is not needed, it is highly recommended.
+  * *MaxOSX*: Add *`export PATH="$CAPATH/scripts:$PATH"`* right after where you define *`$CAPATH`*
+ # Run *test-cascript* from command line. If you don't see any *`[FAILED]`*, then you are good to go.
