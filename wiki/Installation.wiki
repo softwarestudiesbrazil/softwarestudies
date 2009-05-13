@@ -10,7 +10,9 @@
 
 = Quick install guide =
 
- # Download / check out code
- # Compile 
- # Set $CAPATH global variable
- # Optional: Add scripts to $PATH
+ # Download _softwarestudies.zip_ from Download page.
+ # Set $CAPATH environment variable.
+  * *MacOSX*: Add `export CAPATH="<path to softwarestudies directory>"` to the end of the your *~/.profile* where `<path to softwarestudies directory>` is where you extract the files. For example, on Giza, we use `export CAPATH="/Users/culturevis/Documents/Programming/softwarestudies"`  
+ # [Optional] Add scripts directory to $PATH.
+  * *MaxOSX*: Add `export PATH="$CAPATH/scripts:$PATH"` right after where you define $CAPATH
+ # Run *test-cascript* from command line. If you don't see any *[FAILED]*, then you are good to go.
