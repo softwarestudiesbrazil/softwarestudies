@@ -1,10 +1,31 @@
 #summary Documentation
 
 
- * [Installation]
+<wiki:toc max_depth="2" />
+
+== Installation ==
+
+[Installation]
+
+== CAscript ==
+
+=== Using CAscript ===
 
 
-== Default parameters for CAscript ==
+{{{
+USAGE: cascript [OPTIONS] <project directory>
+OPTIONS
+	-h,--help    	Show this usage screen.
+	   --url     	Download and create project directory from URL.
+	   --video   	Force video mode.
+	   --sampling	Set sampling rate when we sample frames as previews
+	-v           	Verbose mode.
+}}}
+
+
+
+
+=== Default parameters for CAscript ===
 
 {{{
 samplingRate = 10
