@@ -1,3 +1,17 @@
 #summary Documentation
 
+
  * [Installation]
+
+
+== Default parameters for CAscript ==
+
+samplingRate = 10
+
+default_ffmpeg_args = '-t 300 -sameq'
+default_line_args = '--preset high'
+default_shot_args = ''
+default_color_args = '-q 2'
+
+supportedMovieType = ['mpeg','mpg','avi','mov','m4v','mp4']
+supportedImageType = ['jpg','jpeg','png','tif','tiff','bmp']
