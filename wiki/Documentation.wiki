@@ -60,3 +60,37 @@ supportedMovieType = ['mpeg','mpg','avi','mov','m4v','mp4']
 supportedImageType = ['jpg','jpeg','png','tif','tiff','bmp']
 }}}
 
+
+== CAbatch ==
+
+=== Using CAscript ===
+
+=== Using CAbatch ===
+
+CAbatch is a batch wrapper that takes a list of movie file URLs and runs CAscript on each movie file in a separate subdirectory.
+
+CAbatch is called by using command *`cabatch`*.
+
+{{{
+USAGE: cabatch <configuration file>
+}}}
+  
+*`<configuration file>`* is a tab-delimited text file with two entries per line. The first entry is a full URL, the second entry is a text string to be used as the subdirectory name where the downloaded file will be processed by cascript.
+
+==== Example Configuration File ====
+
+{{{
+http://my.url.com/movie1.mp4	1_Intro
+http://my.url.com/movie2.mp4	2_Main
+http://my.url.com/movie3.mp4	3_Conclusion
+}}}
+
+==== Examples ====
+
+ # Movie list from websites
+  * Create a batch project directory called *`batch_test`*.
+  * Create a configuration file under * `batch_test`* called *`cabatch.cfg`*
+  * Add two URLs and directory titles to *`cabatch.cfg`* as per the example configuration file above
+  * Run *`cabatch cabatch.cfg`*
+ # Movie list from drive
+  * To be supported
