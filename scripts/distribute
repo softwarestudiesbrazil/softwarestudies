@@ -1,0 +1,91 @@
+#!/bin/bash
+
+# --- USAGE ---
+
+usage()
+{
+cat << EOF
+
+distribute $VVERSION
+usage: $0 options
+distribute is a bash script that checks out the latest HEAD revision of the software studies scripts from svn and creates a distribution package suitable for posting to the code.google.com download page: it compiles the java jar, cleans the extranious version control files out, and zips everything. The script assumes that svn is installed.
+
+OPTIONS:
+  -r label    revision:     a label such as "r27" that is applied to the checkout and file
+
+EXAMPLES:
+./distribute -r 27
+EOF
+}
+
+# --- VARIABLES ---
+RNUMBER=
+VVERSION=0.1
+
+# --- BEGIN EXECUTION ---
+
+while getopts "r:h" OPTION
+do
+  case $OPTION in  
+    h)
+      # echo "-h"
+      usage
+      exit 1
+      ;;
+    r)
+      if [ -z "$OPTARG" ] # zero length?
+      then
+        echo "Error: -r HEAD revision not labeled"
+        echo "For help: "$0" -h"
+        exit
+      else
+        RNUMBER=$OPTARG
+        echo "-r $OPTARG"
+      fi
+      ;;
+    ?)
+      echo "For help: "$0" -h"
+      exit
+      ;;
+   esac
+done
+
+if [ -z "$RNUMBER" ]
+  then
+    echo "Error: -r HEAD revision label not specified"
+    echo "For help: "$0" -h"
+		exit
+fi
+
+echo "distribute "$VVERSION
+echo "   RNUMBER="$RNUMBER
+
+# --- SETUP ---
+
+echo "   ...checking out from svn..."
+
+svn checkout http://softwarestudies.googlecode.com/svn/trunk/ softwarestudies_$RNUMBER
+
+cd softwarestudies_$RNUMBER/
+
+echo "   ...compiling jar..."
+
+ant jar
+
+cd ..
+
+echo "   ...stripping .svn tracking..."
+
+find softwarestudies_$RNUMBER -iname ".svn" -exec rm -rf '{}' ';'
+
+echo "   ...compressing zip..."
+
+zip -r softwarestudies_$RNUMBER.zip softwarestudies_$RNUMBER/*
+
+echo "   ...cleaning up checkout..."
+
+rm -rf softwarestudies_$RNUMBER
+
+echo "   ...done!"
+
+
