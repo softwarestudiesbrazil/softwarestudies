@@ -53,6 +53,8 @@ def downloadFromUrl(projectDir,url):
 
     # set target location
     target = os.path.join(projectDir, sourceSuffix)
+    createDir(target)
+
     target = os.path.join(target,filename)
 
     # begin download by calling wget
