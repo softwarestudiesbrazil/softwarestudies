@@ -9,7 +9,7 @@
 
     <property name="dir.dist" value="dist"/>
     <property name="dir.bin" value="bin"/>
-    <property name="dir.src" value="bin"/>
+    <property name="dir.src" value="src"/>
 
     <path id="MediaAnalysis.classpath">
         <pathelement location="bin"/>
@@ -25,7 +25,6 @@
    
     <target name="clean">
         <delete dir="${dir.bin}"/>
-	<delete dir="${dir.dist}"/>
     </target>
  
     <target depends="clean" name="cleanall"/>
