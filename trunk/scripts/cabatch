@@ -13,7 +13,7 @@ def process(cfgFile):
      for s in f:
           s = s.strip('\n')
           l = s.split('\t')
-          cmd = 'cascript --url ' + l[0]  + ' -v ' + l[1]
+          cmd = 'cascript --url ' + l[0]  + ' --redump -v ' + l[1]
           error = os.system(cmd)
           if error != 0:
                print 'error: cascript'
