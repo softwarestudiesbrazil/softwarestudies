@@ -4,6 +4,7 @@
 
  * [Installation]
  * [Documentation#CAscript CAscript]
+ * [Documentation#CAbatch CAbatch]
 
 == CAscript ==
 
@@ -62,8 +63,6 @@ supportedImageType = ['jpg','jpeg','png','tif','tiff','bmp']
 
 
 == CAbatch ==
-
-=== Using CAscript ===
 
 === Using CAbatch ===
 
