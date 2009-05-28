@@ -456,7 +456,7 @@ def main():
         else:
             convertToJpg(projectDir)
         shotFlag = processShot(projectDir,default_shot_args)
-        lineFlag = processLine(projectDir,default_line_args)
+        #lineFlag = processLine(projectDir,default_line_args)
         colorFlag = processColor(projectDir,default_color_args)
         matlabFlag = processColorTexture(projectDir)
 	
@@ -464,8 +464,8 @@ def main():
 	files = []
         if shotFlag:
 	     	files.append(projectDir+'/shots/shot.output.txt')
-	if lineFlag:
-	     	files.append(projectDir+'/lines/result.txt')
+	#if lineFlag:
+	#     	files.append(projectDir+'/lines/result.txt')
 	if matlabFlag:
 	     	files.append(projectDir+'/stats/stats.txt')
 
