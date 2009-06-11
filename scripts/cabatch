@@ -17,7 +17,7 @@ def process(cfgFile):
           error = os.system(cmd)
           if error != 0:
                print 'error: cascript'
-	  shutil.rmtree(os.path.join(l[1],'images'))
+          shutil.rmtree(os.path.join(l[1],'images'))
      f.close()
 
 
