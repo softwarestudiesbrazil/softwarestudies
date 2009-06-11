@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import getopt, sys, os, shutil, string
+import getopt, sys, os, shutil, string, time
 
 # CA script
 # author: Sunsern Cheamanunkul
@@ -10,7 +10,7 @@ import getopt, sys, os, shutil, string
 
 samplingRate = 10
 
-default_ffmpeg_args = '-t 300 -sameq'
+default_ffmpeg_args = '-r 15 -t 300 -sameq'
 default_line_args = '--preset high'
 #default_shot_args = '-f 0.4 -r 0.25 -g 3'
 default_shot_args = ''
@@ -24,6 +24,8 @@ shotSuffix = 'shots'
 colorSuffix = 'colors'
 statsSuffix = 'stats'
 keyframeSuffix = 'keyframes'
+
+procTimeFilename = 'procTime.log'
 
 supportedMovieType = ['mpeg','mpg','avi','mov','m4v','mp4']
 supportedImageType = ['jpg','jpeg','png','tif','tiff','bmp']
@@ -285,12 +287,13 @@ def processShot(projectDir, args):
     shotFileDst = os.path.join(targetDir,'shot.output.txt')
     shutil.move(shotFileSrc,shotFileDst)
 
-    # create key frame dir
+    # create keyframe dir
     keyframeDir = os.path.join(targetDir,keyframeSuffix)
     createDir(keyframeDir)
     f = open(shotFileDst,'r')
     for line in f.readlines():
-        tokens = line.split('\t')
+        tokens = line.rstrip('\n')
+        tokens = tokens.split(',')
         if (len(tokens) == 3  and tokens[1] == '1'):
             img = os.path.join(sourceDir,tokens[0])
             shutil.copy2(img,keyframeDir)            
@@ -416,7 +419,7 @@ def main():
     except:
         print 'ERROR: CAPATH enviroment variable not found'
         sys.exit(1)
-    
+            
     # if url is specified, create project dir 
     # and download the file
     if url != None:
@@ -449,17 +452,43 @@ def main():
     except:
         print 'Error: importing config.py'
 
+
     # video case
     if (videoFile != None) or videoMode:
+
+        procTimeLog = open(os.path.join(projectDir,procTimeFilename),'w')
+        procTimeLog.write('preprocessing(ms)\t')
+        procTimeLog.write('shot(ms)\t')
+        procTimeLog.write('color(ms)\t')
+        procTimeLog.write('matlab(ms)\n')
+
+        t1 = time.time()
         if (videoFile != None):
             extractFrames(projectDir,videoFile,default_ffmpeg_args)
         else:
             convertToJpg(projectDir)
+        t2 = time.time()
+        procTimeLog.write('%0.3f\t'%((t2-t1)*1000.0))
+
+        t1 = time.time()
         shotFlag = processShot(projectDir,default_shot_args)
+        t2 = time.time()
+        procTimeLog.write('%0.3f\t'%((t2-t1)*1000.0))
+        
         #lineFlag = processLine(projectDir,default_line_args)
+        
+        t1 = time.time()
         colorFlag = processColor(projectDir,default_color_args)
+        t2 = time.time()
+        procTimeLog.write('%0.3f\t'%((t2-t1)*1000.0))
+
+        t1 = time.time()
         matlabFlag = processColorTexture(projectDir)
+        t2 = time.time()
+        procTimeLog.write('%0.3f\n'%((t2-t1)*1000.0))
 	
+        procTimeLog.close()
+
 	# check for finished results 	
 	files = []
         if shotFlag:
@@ -473,11 +502,35 @@ def main():
 
     # images case
     else:
+
+        procTimeLog = open(os.path.join(projectDir,procTimeFilename),'w')
+        procTimeLog.write('preprocessing(ms)\t')
+        procTimeLog.write('line(ms)\t')
+        procTimeLog.write('color(ms)\t')
+        procTimeLog.write('matlab(ms)\n')
+        
+        t1 = time.time()
         convertToJpg(projectDir)
         sampleFromImages(projectDir)
+        t2 = time.time()
+        procTimeLog.write('%0.3f\t'%((t2-t1)*1000.0))
+
+        t1 = time.time()
         lineFlag = processLine(projectDir,default_line_args)
-        matlabFlag = processColorTexture(projectDir)
+        t2 = time.time()
+        procTimeLog.write('%0.3f\t'%((t2-t1)*1000.0))
+
+        t1 = time.time()
         colorFlag = processColor(projectDir,default_color_args)
+        t2 = time.time()
+        procTimeLog.write('%0.3f\t'%((t2-t1)*1000.0))
+
+        t1 = time.time()
+        matlabFlag = processColorTexture(projectDir)
+        t2 = time.time()
+        procTimeLog.write('%0.3f\t'%((t2-t1)*1000.0))
+ 
+        procTimeLog.close()
 
 	# check for finished results 	
 	files = []
