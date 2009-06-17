@@ -1,7 +1,7 @@
 
 n = 16;
 k = 2;
-directory = '/home/scheaman/Desktop/color/';
+directory = '/home/scheaman/workspace/softwarestudies/datasets/rothko/';
 
 files = dir([directory,'*.jpg']); 
 nimages = length(files);
