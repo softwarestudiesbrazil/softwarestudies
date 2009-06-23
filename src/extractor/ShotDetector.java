@@ -253,7 +253,7 @@ public class ShotDetector {
 					    }
 					}
 					
-					System.out.println("Processing frame " + (i+1));
+					System.out.println("[shot]Processing frame " + (i+1));
 					
 					rgbLastFrame = rgbThisFrame;
 					rgbThisFrame = new int[bimg.getWidth() * bimg.getHeight() * 3];
