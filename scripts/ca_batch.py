@@ -15,8 +15,11 @@ def process(cfgFile):
           s = s.strip('\n')
           l = s.split('\t')
 
-          ca_project.main(['--prep_arg','--url ' + l[0] + ' --redump',\
-                           '--analyze_arg','--mode video',l[1]])
+          if (l[0].startswith('http')):
+               ca_project.main(['--prep_arg','--url ' + l[0] + ' --redump',\
+                                     '--analyze_arg','--mode video',l[1]])
+          else:
+               ca_project.main([],l[1])
 
           shutil.rmtree(os.path.join(l[1],'images'))
      f.close()
