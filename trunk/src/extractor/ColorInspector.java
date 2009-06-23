@@ -187,8 +187,8 @@ public void outputHSV(File outputFile, double[] frequency, int numBlock) {
 		double[] temp;
 		temp = ci.processRGB(numBlock);
 		ci.outputRGB(new File(rgbOutput), temp, numBlock);
-		temp = ci.processHSV(numBlock);
-		ci.outputHSV(new File(hsvOutput), temp, numBlock);
+		//temp = ci.processHSV(numBlock);
+		//ci.outputHSV(new File(hsvOutput), temp, numBlock);
 		
 	}
 	

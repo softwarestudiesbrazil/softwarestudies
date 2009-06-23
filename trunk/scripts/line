@@ -107,7 +107,7 @@ def batch(dir):
     for f in l:
         f_with_dir = dir + '/' + f
         if os.access(f_with_dir,os.F_OK) and ((f.endswith('.png') or f.endswith('.jpg'))):
-            print 'Processing...%s'% f
+            print '[line]Processing...%s'% f
             processImage(f_with_dir)
             summaryFile = outputDir + '/' + f + summaryFileSuffix
             fo.write(f)

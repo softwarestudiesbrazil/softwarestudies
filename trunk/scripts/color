@@ -33,7 +33,7 @@ def batch(dir):
         f_with_dir = os.path.join(dir,f)
         if os.access(f_with_dir,os.F_OK)\
            and ((f.endswith('.png') or f.endswith('.jpg'))):
-            print 'Processing...%s'% f
+            print '[color]Processing...%s'% f
             processImage(f_with_dir)
 
 def main():
