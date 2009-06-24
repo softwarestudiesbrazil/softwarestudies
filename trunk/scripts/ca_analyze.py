@@ -285,12 +285,13 @@ def main(arguments):
         for var in dir(config):
             if not var.startswith('_'):
                 globals()[var] = eval('config.' + var)
+	sys.path.remove(projectDir)
+	sys.modules.pop('config')
     except ImportError:
 	print 'WARNING: config.py not found'	
     except:
         print 'Error: importing config.py'
-
-
+    
     shotFlag = False
     lineFlag = False
     colorFlag = False
