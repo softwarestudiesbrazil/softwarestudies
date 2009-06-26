@@ -4,27 +4,43 @@
 
  * [Installation]
  * [Documentation#CAscript CAscript]
- * [Documentation#CAbatch CAbatch]
 
 == CAscript ==
 
+=== Overview ===
+
+CAscript is the master script for running many feature extraction tools on a set of images or a movie. CAscript is consist of the following modules:
+
+  * `ca_prep.py` - This script prepares the project directory
+  * `ca_analyze.py` - This script runs a collection of analysis scripts.
+  * `ca_project.py` - A wrapper script for processing a project directory
+  * `ca_batch.py` - A wrapper script for processing a set of project directory
+
 === Using CAscript ===
 
-CAscript is the master script for running many feature extraction tools on a set of images or a movie. 
+To use CAscript, you can use either *`ca_project.py`* or *`ca_batch.py`*. Usually, *`ca_project.py`* is for a single project directory processing and *`ca_batch.py`* is for multiple project directory processing.
 
-CAscript is called by using comamnd *`cascript`*.
+==== Using ca_project.py ====
+
+*`ca_project.py`* is basically a wrapper script that calls *`ca_prep.py`* and *`ca_analyze.py`* sequentially. Here's the usage of *`ca_project.py`*
 
 {{{
-USAGE: cascript [OPTIONS] <project directory>
+USAGE: ca_project [OPTIONS] <project directory>
 OPTIONS
-	-h,--help    	Show this usage screen.
-	   --url     	Download and create project directory from URL.
-	   --video   	Force video mode.
-	   --sampling	Set sampling rate when we sample frames as previews
-	-v           	Verbose mode.
+	-h,--help          	Show this usage screen.
+	--prep_arg ARGS    	ca_prep arguments
+	--analyze_arg ARGS 	ca_analyze arguments.
 }}}
+
   
-*`<project directory>`* is assumed to have a subdirectory called *`source`* which contains the original data. The original data can be either a movie file or a set of images. In addition, *`cascript`* can instead download a movie file directly from the internet and run analysis on it.
+*`<project directory>`* is assumed to have a subdirectory called *`source`* which contains the original data. The original data can be either a movie file or a set of images.
+
+*`prep_arg`* is used to specify the argument to pass on to *`ca_prep.py`*. The most common argument is to have *`ca_prep.py`* downloads a movie file from the internet, *`--url <URL>`*. In this case, we use *`--prep_arg "--url <URL>"`*.
+
+*`analyze_arg`* is used to specify the argument to pass on to *`ca_analyze.py`*. The most common argument is to specify mode of operation i.e. video or images. For example, if we want to do image analysis, we use *`--analyze_arg "--mode images"`*.
+
+Furthermore, you can use a configuration file instead of these command line arguments. More detail in *`config.py`* section.
+
 
 ==== Notes about options ====
  * `--video`: This is useful when your source file is not a movie but a sequence of images. In order to tell *`cascript`* to include video analysid i.e. shot-detection, `--video` is required.
