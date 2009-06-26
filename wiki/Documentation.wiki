@@ -5,6 +5,9 @@
  * [Installation]
  * [Documentation#CAscript CAscript]
 
+
+----
+
 == CAscript ==
 
 === Overview ===
@@ -16,11 +19,14 @@ CAscript is the master script for running many feature extraction tools on a set
   * `ca_project.py` - A wrapper script for processing a project directory
   * `ca_batch.py` - A wrapper script for processing a set of project directory
 
+
 === Using CAscript ===
 
-To use CAscript, you can use either *`ca_project.py`* or *`ca_batch.py`*. Usually, *`ca_project.py`* is for a single project directory processing and *`ca_batch.py`* is for multiple project directory processing.
+To use CAscript, you can use either *`ca_project.py`* or *`ca_batch.py`*. 
 
-==== Using ca_project.py ====
+Usually, *`ca_project.py`* is for a single project directory processing and *`ca_batch.py`* is for multiple project directory processing.
+
+==== Using *`ca_project.py`* ====
 
 *`ca_project.py`* is basically a wrapper script that calls *`ca_prep.py`* and *`ca_analyze.py`* sequentially. Here's the usage of *`ca_project.py`*
 
@@ -32,22 +38,25 @@ OPTIONS
 	--analyze_arg ARGS 	ca_analyze arguments.
 }}}
 
-  
-*`<project directory>`* is assumed to have a subdirectory called *`source`* which contains the original data. The original data can be either a movie file or a set of images.
 
-*`prep_arg`* is used to specify the argument to pass on to *`ca_prep.py`*. The most common argument is to have *`ca_prep.py`* downloads a movie file from the internet, *`--url <URL>`*. In this case, we use *`--prep_arg "--url <URL>"`*.
+ * *`<project directory>`* is assumed to have a subdirectory called *`source`* which contains the original data. The original data can be either a movie file or a set of images.
 
-*`analyze_arg`* is used to specify the argument to pass on to *`ca_analyze.py`*. The most common argument is to specify mode of operation i.e. video or images. For example, if we want to do image analysis, we use *`--analyze_arg "--mode images"`*.
+ * *`prep_arg`* is used to specify the argument to pass on to *`ca_prep.py`*. The most common argument is to have *`ca_prep.py`* downloads a movie file from the internet, *`--url <URL>`*. In this case, we use *`--prep_arg "--url <URL>"`*.
 
-Furthermore, you can use a configuration file instead of these command line arguments. More detail in *`config.py`* section.
+ * *`analyze_arg`* is used to specify the argument to pass on to *`ca_analyze.py`*. The most common argument is to specify mode of operation i.e. video or images. For example, if we want to do image analysis, we use *`--analyze_arg "--mode images"`*.
 
-
-==== Notes about options ====
- * `--video`: This is useful when your source file is not a movie but a sequence of images. In order to tell *`cascript`* to include video analysid i.e. shot-detection, `--video` is required.
- * `-v`: *`cascript`* is primarily developed to run in batch mode. So, by default, there is very little information being printed on screen. If `-v` is used, then *`cascript`* will print more information on screen.
+Furthermore, you can use a configuration file instead of these command line arguments. 
 
 
-==== Examples ====
+===== *`config.py`* =====
+
+You can have a configuration file that specifies special parameters for different analysis modules, switches off some analysis modules. 
+
+To do so, you simply create a file called *`config.py`* in the root of the project directory.
+
+
+
+===== Examples =====
 
  # Movie from existing file
   * Create a project directory called *`test`*.
@@ -63,24 +72,10 @@ Furthermore, you can use a configuration file instead of these command line argu
   * Run *`cascript test`*
 
 
-=== Default parameters for CAscript ===
-
-{{{
-samplingRate = 10
-
-default_ffmpeg_args = '-t 300 -sameq'
-default_line_args = '--preset high'
-default_shot_args = ''
-default_color_args = '-q 2'
-
-supportedMovieType = ['mpeg','mpg','avi','mov','m4v','mp4']
-supportedImageType = ['jpg','jpeg','png','tif','tiff','bmp']
-}}}
 
 
-== CAbatch ==
 
-=== Using CAbatch ===
+==== Using *`ca_batch.py`* ====
 
 CAbatch is a batch wrapper that takes a list of movie file URLs and runs CAscript on each movie file in a separate subdirectory.
 
