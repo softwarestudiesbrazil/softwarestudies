@@ -11,12 +11,13 @@ CAscript is the master script for running many feature extraction tools on a set
 
 
 === Installation ===
-To install CAscript, please read the instructions in [Installation].
+
+To install CAscript, please read the instructions in [Installation]. Before running CAscript, run *`test-cascript`* and make sure that there are no errors.
 
 
 === Using CAscript ===
 
-To use CAscript, you can use either *`ca_project.py`* or *`ca_batch.py`*. 
+To use CAscript, you call *`ca_project.py`* or *`ca_batch.py`*.
 
 Usually, *`ca_project.py`* is for processing a single project directory and *`ca_batch.py`* is for processing multiple project directories
 
@@ -43,15 +44,18 @@ OPTIONS
 Furthermore, you can use a configuration file instead of these command line arguments. 
 
 
-===== Project configuration file: *`config.py`* =====
+==== Project configuration file: *`config.py`* ====
 
 You can have a configuration file that specifies special parameters for different analysis modules, switches off some analysis modules. 
 
 To do so, you simply create a file called *`config.py`* in the root of the project directory.
 
 
+http://fpga1.ucsd.edu/~scheaman/cascript_config.png
 
-===== Usage Examples =====
+
+
+==== Examples ====
 
  # Movie from existing file
   * Create a project directory called *`test`*.
@@ -96,3 +100,5 @@ http://my.url.com/movie3.mp4	3_Conclusion
   * Run *`cabatch cabatch.cfg`*
  # Movie list from drive
   * To be supported
+
+
