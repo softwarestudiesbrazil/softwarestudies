@@ -1,16 +1,6 @@
 #summary Documentation
 
-= Documentation =
-
- * [Installation]
- * [Documentation#CAscript CAscript]
-
-
-----
-
 == CAscript ==
-
-=== Overview ===
 
 CAscript is the master script for running many feature extraction tools on a set of images or a movie. CAscript is consist of the following modules:
 
@@ -20,13 +10,18 @@ CAscript is the master script for running many feature extraction tools on a set
   * `ca_batch.py` - A wrapper script for processing a set of project directory
 
 
+=== Installation ===
+To install CAscript, please read the instructions in [Installation].
+
+
 === Using CAscript ===
 
 To use CAscript, you can use either *`ca_project.py`* or *`ca_batch.py`*. 
 
-Usually, *`ca_project.py`* is for a single project directory processing and *`ca_batch.py`* is for multiple project directory processing.
+Usually, *`ca_project.py`* is for processing a single project directory and *`ca_batch.py`* is for processing multiple project directories
 
-==== Using *`ca_project.py`* ====
+
+==== Single project processing: *`ca_project.py`* ====
 
 *`ca_project.py`* is basically a wrapper script that calls *`ca_prep.py`* and *`ca_analyze.py`* sequentially. Here's the usage of *`ca_project.py`*
 
@@ -48,7 +43,7 @@ OPTIONS
 Furthermore, you can use a configuration file instead of these command line arguments. 
 
 
-===== *`config.py`* =====
+===== Project configuration file: *`config.py`* =====
 
 You can have a configuration file that specifies special parameters for different analysis modules, switches off some analysis modules. 
 
@@ -56,7 +51,7 @@ To do so, you simply create a file called *`config.py`* in the root of the proje
 
 
 
-===== Examples =====
+===== Usage Examples =====
 
  # Movie from existing file
   * Create a project directory called *`test`*.
@@ -72,10 +67,7 @@ To do so, you simply create a file called *`config.py`* in the root of the proje
   * Run *`cascript test`*
 
 
-
-
-
-==== Using *`ca_batch.py`* ====
+==== Multiple projects processing: *`ca_batch.py`* ====
 
 CAbatch is a batch wrapper that takes a list of movie file URLs and runs CAscript on each movie file in a separate subdirectory.
 
