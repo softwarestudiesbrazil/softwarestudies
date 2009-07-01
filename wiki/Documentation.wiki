@@ -27,7 +27,7 @@ Usually, *`ca_project.py`* is for processing a single project directory and *`ca
 *`ca_project.py`* is basically a wrapper script that calls *`ca_prep.py`* and *`ca_analyze.py`* sequentially. Here's the usage of *`ca_project.py`*
 
 {{{
-USAGE: ca_project [OPTIONS] <project directory>
+USAGE: ca_project.py [OPTIONS] <project directory>
 OPTIONS
 	-h,--help          	Show this usage screen.
 	--prep_arg ARGS    	ca_prep arguments
@@ -46,25 +46,37 @@ Furthermore, you can use a configuration file instead of these command line argu
 
 === Multiple projects processing: *`ca_batch.py`* ===
 
-CAbatch is a batch wrapper that takes a list of movie file URLs and runs CAscript on each movie file in a separate subdirectory.
-
-CAbatch is called by using command *`cabatch`*.
+*`ca_batch.py`* is a batch wrapper that takes a list of movie file URLs and runs *`ca_project.py`* on each movie file in a separate subdirectory.
 
 {{{
-USAGE: cabatch <configuration file>
+USAGE: ca_batch.py <cabatch.cfg>
 }}}
   
-*`<configuration file>`* is a tab-delimited text file with two entries per line. The first entry is a full URL, the second entry is a text string to be used as the subdirectory name where the downloaded file will be processed by cascript.
+ * *`<cabatch.cfg>`* is a configuration file described in [Documentation#Configuration_files Configuration_files].
 
 
-=== Project configuration file: *`config.py`* ===
+=== Configuration files ===
+
+Configuration files in CAscript are basically python scripts that get included into the main scripts. There are two configuration files in CAscript. 
+
+ # *`cabatch.cfg`*: Configuration file for *`ca_batch.py`*
+ # *`config.py`*: Configuration file for *`ca_project.py`*
+
+
+http://fpga1.ucsd.edu/~scheaman/cascript_config.png
+
+=== ca_batch configuration file: *`cabatch.cfg`* ===
+
+*`<cabatch.cfg>`* is a tab-delimited text file with two entries per line. The first entry is a full URL or '-' for local directory, the second entry is a text string to be used as the subdirectory name where the downloaded file will be processed by *`ca_project.py`*.
+
+
+=== ca_project configuration file: *`config.py`* ===
 
 You can have a configuration file that specifies special parameters for different analysis modules, switches off some analysis modules. 
 
 To do so, you simply create a file called *`config.py`* in the root of the project directory.
 
 
-http://fpga1.ucsd.edu/~scheaman/cascript_config.png
 
 
 ==== Example Configuration File ====
