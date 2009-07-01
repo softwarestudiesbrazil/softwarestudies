@@ -57,10 +57,10 @@ USAGE: ca_batch.py <cabatch.cfg>
 
 === Configuration files ===
 
-Configuration files in CAscript are basically python scripts that get included into the main scripts. There are two configuration files in CAscript. 
+There are two configuration files in CAscript. 
 
- # *`cabatch.cfg`*: Configuration file for *`ca_batch.py`*
- # *`config.py`*: Configuration file for *`ca_project.py`*
+ # *`cabatch.cfg`* - Configuration file for *`ca_batch.py`*
+ # *`config.py`* - Configuration file for *`ca_project.py`*
 
 
 http://fpga1.ucsd.edu/~scheaman/cascript_config.png
@@ -70,47 +70,63 @@ http://fpga1.ucsd.edu/~scheaman/cascript_config.png
 *`<cabatch.cfg>`* is a tab-delimited text file with two entries per line. The first entry is a full URL or '-' for local directory, the second entry is a text string to be used as the subdirectory name where the downloaded file will be processed by *`ca_project.py`*.
 
 
-=== ca_project configuration file: *`config.py`* ===
-
-You can have a configuration file that specifies special parameters for different analysis modules, switches off some analysis modules. 
-
-To do so, you simply create a file called *`config.py`* in the root of the project directory.
-
-
-
-
-==== Example Configuration File ====
+==== Example *`cabatch.cfg`* ====
 
 {{{
 http://my.url.com/movie1.mp4	1_Intro
 http://my.url.com/movie2.mp4	2_Main
 http://my.url.com/movie3.mp4	3_Conclusion
+-	~/Users/4_Appendix
 }}}
 
-== Examples ==
 
- # Movie from existing file
+=== ca_project configuration file: *`config.py`* ===
+
+You can have a configuration file that specifies special parameters for different analysis modules, switches off some analysis modules.
+
+To do so, you simply create a file called *`config.py`* in the root of the project directory. 
+
+Basically, *`config.py`* is a python script and will get included by *`ca_prep.py`* and *`ca_analyze.py`*.
+
+==== Example *`config.py`* ====
+
+ #
+{{{
+mode = 'images'
+line_enable = True
+color_enable = True
+matlab_enable = True
+line_args = '--preset high'
+}}}
+
+ # 
+{{{
+mode = 'video'
+line_enable = False
+color_enable = False
+shot_enable = True
+matlab_enable = True
+shot_args = '-g 2 -m 5 -p 30 -r 0.2'
+ffmpeg_args = '-r 25 -sameq -ss 60 -t 10'
+}}}
+
+
+== CAscript Examples ==
+
+ # Single movie from existing file
   * Create a project directory called *`test`*.
   * Create a subdirectory under *`test`* called *`source`*
   * Copy the movie file into *`source`*
-  * Run *`cascript test`*
- # Movie from `http://www.test.com/test.avi`
-  * Run *`cascript --url http://www.test.com/test.avi test`*. In this case, the script will automatically create project directory called *`test`*.
- # Images
+  * Run *`ca_project.py test`*
+ # Single movie from `http://www.test.com/test.avi`
+  * Run *`ca_project.py --prep_arg "--url http://www.test.com/test.avi" test`*. In this case, the script will automatically create project directory called *`test`*.
+ # Images in a single directory
   * Create a project directory called *`test`*.
   * Create a subdirectory under *`test`* called *`source`*
   * Copy the images file into *`source`*
-  * Run *`cascript test`*
-
-
-
-
-== Examples ==
-
- # Movie list from websites
+  * Run *`ca_project.py test`*
+ # Movie list
   * Create a batch project directory called *`batch_test`*.
   * Create a configuration file under * `batch_test`* called *`cabatch.cfg`*
-  * Add two URLs and directory titles to *`cabatch.cfg`* as per the example configuration file above
-  * Run *`cabatch cabatch.cfg`*
- # Movie list from drive
-  * To be supported
+  * Add URLs/path and directory titles to *`cabatch.cfg`* as per the example configuration file above
+  * Run *`ca_batch.py cabatch.cfg`*
