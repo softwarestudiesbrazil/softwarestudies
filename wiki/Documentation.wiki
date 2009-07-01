@@ -1,6 +1,6 @@
 #summary Documentation
 
-== CAscript ==
+= CAscript =
 
 CAscript is the master script for running many feature extraction tools on a set of images or a movie. CAscript is consist of the following modules:
 
@@ -10,19 +10,19 @@ CAscript is the master script for running many feature extraction tools on a set
   * `ca_batch.py` - A wrapper script for processing a set of project directory
 
 
-=== Installation ===
+== Installation ==
 
 To install CAscript, please read the instructions in [Installation]. Before running CAscript, run *`test-cascript`* and make sure that there are no errors.
 
 
-=== Using CAscript ===
+== Using CAscript ==
 
-To use CAscript, you call *`ca_project.py`* or *`ca_batch.py`*.
+To use CAscript, you either run *`ca_project.py`* or *`ca_batch.py`*.
 
 Usually, *`ca_project.py`* is for processing a single project directory and *`ca_batch.py`* is for processing multiple project directories
 
 
-==== Single project processing: *`ca_project.py`* ====
+=== Single project processing: *`ca_project.py`* ===
 
 *`ca_project.py`* is basically a wrapper script that calls *`ca_prep.py`* and *`ca_analyze.py`* sequentially. Here's the usage of *`ca_project.py`*
 
@@ -44,7 +44,20 @@ OPTIONS
 Furthermore, you can use a configuration file instead of these command line arguments. 
 
 
-==== Project configuration file: *`config.py`* ====
+=== Multiple projects processing: *`ca_batch.py`* ===
+
+CAbatch is a batch wrapper that takes a list of movie file URLs and runs CAscript on each movie file in a separate subdirectory.
+
+CAbatch is called by using command *`cabatch`*.
+
+{{{
+USAGE: cabatch <configuration file>
+}}}
+  
+*`<configuration file>`* is a tab-delimited text file with two entries per line. The first entry is a full URL, the second entry is a text string to be used as the subdirectory name where the downloaded file will be processed by cascript.
+
+
+=== Project configuration file: *`config.py`* ===
 
 You can have a configuration file that specifies special parameters for different analysis modules, switches off some analysis modules. 
 
@@ -54,8 +67,15 @@ To do so, you simply create a file called *`config.py`* in the root of the proje
 http://fpga1.ucsd.edu/~scheaman/cascript_config.png
 
 
+==== Example Configuration File ====
 
-==== Examples ====
+{{{
+http://my.url.com/movie1.mp4	1_Intro
+http://my.url.com/movie2.mp4	2_Main
+http://my.url.com/movie3.mp4	3_Conclusion
+}}}
+
+== Examples ==
 
  # Movie from existing file
   * Create a project directory called *`test`*.
@@ -71,27 +91,9 @@ http://fpga1.ucsd.edu/~scheaman/cascript_config.png
   * Run *`cascript test`*
 
 
-==== Multiple projects processing: *`ca_batch.py`* ====
 
-CAbatch is a batch wrapper that takes a list of movie file URLs and runs CAscript on each movie file in a separate subdirectory.
 
-CAbatch is called by using command *`cabatch`*.
-
-{{{
-USAGE: cabatch <configuration file>
-}}}
-  
-*`<configuration file>`* is a tab-delimited text file with two entries per line. The first entry is a full URL, the second entry is a text string to be used as the subdirectory name where the downloaded file will be processed by cascript.
-
-==== Example Configuration File ====
-
-{{{
-http://my.url.com/movie1.mp4	1_Intro
-http://my.url.com/movie2.mp4	2_Main
-http://my.url.com/movie3.mp4	3_Conclusion
-}}}
-
-==== Examples ====
+== Examples ==
 
  # Movie list from websites
   * Create a batch project directory called *`batch_test`*.
@@ -100,5 +102,3 @@ http://my.url.com/movie3.mp4	3_Conclusion
   * Run *`cabatch cabatch.cfg`*
  # Movie list from drive
   * To be supported
-
-
