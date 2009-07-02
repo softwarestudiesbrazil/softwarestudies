@@ -270,6 +270,27 @@ public class ShotDetector {
 				}
 			}			
 			
+			
+			if (buffer.size() > 0) {
+			    if (buffer.size() < MIN_SHOT_LENGTH) {
+				bw.write(buffer.get(0) + SEPARATOR +"0"+ SEPARATOR + shotNo +"\n");
+				for (int j=1;j<buffer.size();j++) {
+				    bw.write(buffer.get(j) + SEPARATOR + "0" + SEPARATOR + shotNo +"\n");
+				}
+				bw.flush();
+				buffer.clear();
+			    }
+			    else {
+				shotNo++;
+				bw.write(buffer.get(0) + SEPARATOR + "1" + SEPARATOR + shotNo + "\n");
+				for (int j=1;j<buffer.size();j++) {
+				    bw.write(buffer.get(j) + SEPARATOR + "0" + SEPARATOR + shotNo + "\n");
+				}
+				bw.flush();
+				buffer.clear();
+			    }
+			}
+
 			bw.write("\n");
 			bw.close();
 
