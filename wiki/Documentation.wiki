@@ -4,10 +4,10 @@
 
 CAscript is the master script for running many feature extraction tools on a set of images or a movie. CAscript is consist of the following modules:
 
-  * `ca_prep.py` - This script prepares the project directory
+  * `ca_prep.py` - This script prepares the project directory.
   * `ca_analyze.py` - This script runs a collection of analysis scripts.
-  * `ca_project.py` - A wrapper script for processing a project directory
-  * `ca_batch.py` - A wrapper script for processing a set of project directory
+  * `ca_project.py` - A wrapper script for processing a project directory.
+  * `ca_batch.py` - A wrapper script for processing a set of project directories.
 
 
 == Installation ==
