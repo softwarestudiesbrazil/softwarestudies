@@ -3,6 +3,10 @@
 import sys,os,getopt,shutil
 import ca_project
 
+def usage():
+     print 'USAGE: ca_batch.py <cabatch.cfg>'
+
+
 def process(cfgFile):
 
      # check for cfgFile
@@ -26,8 +30,6 @@ def process(cfgFile):
      f.close()
 
 
-def usage():
-     print 'test'
 
 
 def main():
