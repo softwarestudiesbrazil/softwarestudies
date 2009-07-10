@@ -36,7 +36,7 @@ OPTIONS
 }}}
 
 
- * *`<project directory>`* is assumed to have a subdirectory called *`source`* which contains the original data. The original data can be either a movie file or a set of images.
+ * *`<project directory>`* is assumed to have a subdirectory called *`source`* which contains the original data. The original data can be either a single video file or a set of images.
 
  * *`prep_arg`* is used to specify the argument to pass on to *`ca_prep.py`*. The most common argument is to have *`ca_prep.py`* downloads a movie file from the internet, *`--url <URL>`*. In this case, we use *`--prep_arg "--url <URL>"`*.
 
