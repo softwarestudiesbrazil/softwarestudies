@@ -2,7 +2,7 @@
 
 = Introduction =
 
-{{{
+<pre>
 `-t duration'
     Restrict the transcoded/captured video sequence to the duration specified in seconds. hh:mm:ss[.xxx] syntax is also supported. 
 `-ss position'
@@ -16,7 +16,7 @@
 `-sameq'
     Use same video quality as source (implies VBR). 
 
-}}}
+</pre>
 
 Add your content here.
 
