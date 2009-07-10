@@ -9,6 +9,7 @@ CAscript is the master script for running many feature extraction tools on a set
   * `ca_project.py` - A wrapper script for processing a project directory.
   * `ca_batch.py` - A wrapper script for processing a set of project directories.
 
+http://fpga1.ucsd.edu/~scheaman/cascript_config.png
 
 == Installation ==
 
@@ -59,16 +60,16 @@ USAGE: ca_batch.py <cabatch.cfg>
 
 There are two configuration files in CAscript. 
 
- # *`cabatch.cfg`* - Configuration file for *`ca_batch.py`*
- # *`config.py`* - Configuration file for *`ca_project.py`*
+ # *`cabatch.cfg`* - Configuration file for *`ca_batch.py`*.
+ # *`config.py`* - Configuration file for *`ca_project.py`*. This file must be named
 
-
-http://fpga1.ucsd.edu/~scheaman/cascript_config.png
 
 === ca_batch configuration file: *`cabatch.cfg`* ===
 
 *`<cabatch.cfg>`* is a tab-delimited text file with two entries per line. The first entry is a full URL or '-' for local directory, the second entry is a text string to be used as the subdirectory name where the downloaded file will be processed by *`ca_project.py`*.
 
+==== Note ====
+ * ca_batch configuration file can be named anything. It does not have to be *`cabatch.cfg`*.
 
 ==== Example *`cabatch.cfg`* ====
 
@@ -87,6 +88,9 @@ You can have a configuration file that specifies special parameters for differen
 To do so, you simply create a file called *`config.py`* in the root of the project directory. 
 
 Basically, *`config.py`* is a python script and will get included by *`ca_prep.py`* and *`ca_analyze.py`*.
+
+==== Note ====
+ * Unlike ca_batch configuration file, project configuration file must be named *`config.py`*.
 
 ==== Example *`config.py`* ====
 
