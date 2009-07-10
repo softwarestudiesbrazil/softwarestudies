@@ -2,18 +2,32 @@
 
 = Required software =
 
- * Java (version > 1.5)
- * Python 
- * Matlab 
- * ffmpeg
- * ImageMagick
+ * OS X (in theory adaptable to Unix/Linux)
+ * ImageMagick (MacPorts available)
+ * Java (version > 1.5) (OS X 10.5 installed)
+ * ffmpeg (MacPorts available)
+ * Matlab
+ * Python (OS X 10.5 installed)
+ * wget (MacPorts available)
 
 = Quick install guide =
 
- # Download the latest release from Download page.
- # Set *`$CAPATH`* environment variable.
-  * *MacOSX*: Add *`export CAPATH="<path to softwarestudies directory>"`* to the end of the your *~/.profile*.For example, on Giza, we use *`export CAPATH="/Users/culturevis/Documents/Programming/softwarestudies"`*  
- # _Optional_ Add scripts directory to *`$PATH`*. Although this is not needed, it is highly recommended.
-  * *MaxOSX*: Add *`export PATH="$CAPATH/scripts:$PATH"`* right after where you define *`$CAPATH`*
- # Run *test-cascript* from command line. If you don't see any *`[FAILED]`*, then you are good to go.
+ # Download the latest release from [Download page]http://code.google.com/p/softwarestudies/downloads/list.
+ # If you are on OS X, most dependencies are available through MacPorts
+  * Install [MacPorts]http://www.macports.org/, following [installation instructions]http://www.macports.org/install.php to run sudo port -v selfupdate
+  * Install imagemagick, ffmpeg, and wget
+    `*sudo port install imagemagick*`
+    `*sudo port install ffmpeg*`
+    `*sudo port install wget*`
 
+ # Set environment variables so that dependencies are available to the scripts
+  * *MacOSX*: There are several ways of doing this. For a single account that will be executing scripts through the Terminal or SSH shells, add *`export CAPATH="<path to softwarestudies directory>"`* to the end of the your *~/.profile*. For example, on Giza, we use
+     *`export CAPATH="/Users/culturevis/Documents/Programming/softwarestudies"`*
+     *`export PATH="$CAPATH/scripts:$PATH"`*
+  For multiple accounts on the same server, add a text file to /etc/paths.d/ called "softwarestudies" that contains the globally accessible path line where you installed the scripts. For example, on Aptana we use:
+     *`/Applications/Programming/softwarestudies`*
+     *`/Applications/Programming/softwarestudies/scripts`*
+     *`/Applications/MATLAB_R2009aSV.app/bin`*
+  After saving, relaunch the Terminal / shell and type "which cascript" or "which matlab" to test.  If you used installed imagemagick, ffmpeg, and wget through MacPorts, then they will already be in your path. If not, you can either copy those binaries into a normal path directory (e.g. usr/bin/) or else add path lines for them as above.
+ 
+ # Run *test-cascript* from command line. If you don't see any *`[FAILED]`*, then you are good to go.
