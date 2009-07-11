@@ -134,3 +134,9 @@ ffmpeg_args = '-r 25 -sameq -ss 60 -t 10'
   * Create a configuration file under * `batch_test`* called *`cabatch.cfg`*
   * Add URLs/path and directory titles to *`cabatch.cfg`* as per the example configuration file above
   * Run *`ca_batch.py cabatch.cfg`*
+
+
+
+Some outdated documentation needs to be ported from:
+
+http://seed.ucsd.edu/mediawiki/index.php/FeatureExtraction
