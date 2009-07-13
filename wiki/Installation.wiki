@@ -1,4 +1,5 @@
 #summary Installation guide
+#labels Featured
 
 = Required software =
 
