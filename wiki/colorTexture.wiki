@@ -1,4 +1,4 @@
-#summary Description of colorTexture
+#summary Color and texture information feature extractor
 
 = List of features =
 
