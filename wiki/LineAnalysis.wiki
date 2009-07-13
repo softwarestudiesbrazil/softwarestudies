@@ -2,7 +2,7 @@
 
 = Usage =
 
-{{{
+<pre>
  NAME
     line - extract information about line characteristics from images
  
@@ -41,4 +41,4 @@
         Use the default set of parameters. Now only "low" and "high" are available.
    -s,--sigma S
         Specify sigma used by Gaussian filter to S. Default=3
-}}}
+</pre>
