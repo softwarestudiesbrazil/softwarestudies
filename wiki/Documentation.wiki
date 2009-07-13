@@ -1,4 +1,5 @@
 #summary Documentation
+#labels Featured
 
 = CAscript =
 
@@ -136,7 +137,10 @@ ffmpeg_args = '-r 25 -sameq -ss 60 -t 10'
   * Run *`ca_batch.py cabatch.cfg`*
 
 
+== List of Analysis Tools ==
 
-Some outdated documentation needs to be ported from:
-
-http://seed.ucsd.edu/mediawiki/index.php/FeatureExtraction
+  * [ColorTexture] - Color and texture feature extractor (Matlab)
+  * [LineAnalysis] - Line analysis program (Java)
+  * [ShotDetector] - Shot detector program (Java)
+  * [UniformColorQ] - Uniform color quantization program (Java)
+  * [AdaptiveColorQ] - Adaptive color quantization program (Matlab)
