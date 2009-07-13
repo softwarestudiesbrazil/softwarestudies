@@ -1,4 +1,4 @@
-#summary Line analysis program
+#summary Line analysis program (Java)
 
 = Usage =
 
