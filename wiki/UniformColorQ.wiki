@@ -1,4 +1,4 @@
-#summary Uniform color quantization program
+#summary Uniform color quantization program (java)
 
 = Usage =
 
