@@ -1,1 +1,3 @@
-#summary Adaptive Color Quantization program
+#summary Adaptive color quantization program (Matlab)
+
+= Usage =
