@@ -1,0 +1,15 @@
+#summary Uniform color quantization program
+
+= Usage =
+
+{{{
+ NAME
+    color - Color Inspector
+ 
+ SYNOPSIS
+    color [OPTIONS] input-path
+ 
+ OPTIONS
+ 	-q Q
+ 		Set quantization level to Q. Default=4.
+}}}
