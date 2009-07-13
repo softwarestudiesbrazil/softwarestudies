@@ -2,5 +2,13 @@
 
 = Usage =
 
-
-coming soon
+{{
+USAGE: adaptiveColorQ [OPTIONS] <input directory>
+OPTIONS
+	-n N
+		Set number of colors to reduce to N. Default=16
+	-k K
+		Set number of colors to report to K. Default=2
+	--help
+		Print this usage screen
+}}
