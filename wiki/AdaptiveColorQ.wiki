@@ -2,7 +2,7 @@
 
 = Usage =
 
-{{
+{{{
 USAGE: adaptiveColorQ [OPTIONS] <input directory>
 OPTIONS
 	-n N
@@ -11,4 +11,4 @@ OPTIONS
 		Set number of colors to report to K. Default=2
 	--help
 		Print this usage screen
-}}
+}}}
