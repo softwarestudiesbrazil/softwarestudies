@@ -2,7 +2,7 @@
 
 = Overview =
 
-colorTexture is a matlab script that extracts basic color and texture features from images. 
+*`colorTexture`* is a matlab script that extracts basic color and texture features from images. 
 
 = List of features =
 
@@ -40,14 +40,13 @@ where p contains the histogram counts.
 {{{
  sum_{i,j} (p(i,j)/(1 + |i-j|))
 }}}
-  * Mean of brightness
-  * Standard deviation of brightness
+  * Mean of brightness - Mean of brightness of the grayscale image.
+  * Standard deviation of brightness - Standard deviation of brightness of the grayscale image.
   * Amount of Sobel edge - The amount of edges detected by Sobel edge detector. Range = 0..1.
 
-*Note* 
+*Notes* 
   * All texture features are extracted from grayscale. If input is not a grayscale, it will be converted to grayscale.
   * The gray-level co-occurrence matrices are computed using `offsets = [0 D; -D D; -D 0; -D -D]` where `D` is a parameter.
   * For more information
     * [http://www.mathworks.com/access/helpdesk/help/toolbox/images/graycomatrix.html]
     * [http://www.mathworks.com/access/helpdesk/help/toolbox/images/graycoprops.html]
-  
