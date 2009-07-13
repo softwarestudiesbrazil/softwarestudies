@@ -93,26 +93,55 @@ Basically, *`config.py`* is a python script and will get included by *`ca_prep.p
 ==== Note ====
  * Unlike ca_batch configuration file, project configuration file must be named *`config.py`*.
 
+==== List of configurable variables ====
+
+{{{
+mode = ['video', 'images']
+
+line_enable = [True, False]
+shot_enable = [True, False]
+uniformColorQ_enable = [True, False] 
+adaptiveColorQ_enable = [True, False]
+colorTexture_enable = [True, False]
+
+line_args = ''
+shot_args = ''
+uniformColorQ_args = '-q 2'
+adaptiveColorQ_args = '-n 16 -k 2'
+colorTexture_args = '-d 1'
+}}}
+
+
 ==== Example *`config.py`* ====
 
  #
 {{{
 mode = 'images'
+
 line_enable = True
-color_enable = True
-matlab_enable = True
-line_args = '--preset high'
+shot_enable = False
+uniformColorQ_enable = False
+adaptiveColorQ_enable = True
+colorTexture_enable = True
+
+uniformColorQ_args = '-q 2'
+adaptiveColorQ_args = '-n 16 -k 2'
+colorTexture_args = '-d 1'
 }}}
 
  # 
 {{{
 mode = 'video'
+
 line_enable = False
-color_enable = False
 shot_enable = True
-matlab_enable = True
+uniformColorQ_enable = False
+adaptiveColorQ_enable = False
+colorTexture_enable = True
+
 shot_args = '-g 2 -m 5 -p 30 -r 0.2'
 ffmpeg_args = '-r 25 -sameq -ss 60 -t 10'
+colorTexture_args = '-d 1'
 }}}
 
 
