@@ -1,4 +1,4 @@
-#summary Shot detector program
+#summary Shot detector program (Java)
 
 = Usage =
 
