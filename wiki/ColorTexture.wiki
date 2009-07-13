@@ -1,0 +1,28 @@
+#summary Color and texture information feature extractor
+
+= List of features =
+
+== Color features ==
+
+  * Mean of R,G,B,H,S,V
+  * Median of R,G,B,H,S,V
+  * Standard deviation of of R,G,B,H,S,V
+  * Skewness of of R,G,B,H,S,V
+  * Kurtosis of R,G,B,H,S,V
+
+== Texture features ==
+
+All texture features are extracted from grayscale.
+
+  * Entropy - A statistical measure of randomness that can be used to characterize the texture of the input image. Entropy is defined as
+{{{
+ -sum(p.*log2(p))
+}}}
+where p contains the histogram counts.
+  * Contrast - A measure of the intensity contrast between a pixel and its neighbor over the whole image. Range = 0..(size(GLCM,1)-1)^2. Contrast is 0 for a constant image.
+  * Correlation - A measure of how correlated a pixel is to its neighbor over the whole image. Range = -1..1. Correlation is 1 or -1 for a perfectly positively or negatively correlated image. Correlation is NaN for a constant image.
+  * Energy - The sum of squared elements in the GLCM. Range = 0..1. Energy is 1 for a constant image.
+  * Homogeneity - A value that measures the closeness of the distribution of elements in the GLCM to the GLCM diagonal. Range = 0..1. Homogeneity is 1 for a diagonal GLCM.
+  * Mean of brightness
+  * Standard deviation of brightness
+  * Amount of Sobel edge - The amount of edges detected by Sobel edge detector. Range = 0..1.
