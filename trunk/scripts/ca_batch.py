@@ -26,7 +26,7 @@ def process(cfgFile):
           else:
                ca_project.main([l[1]])
 
-          shutil.rmtree(os.path.join(l[1],'images'))
+          #shutil.rmtree(os.path.join(l[1],'images'))
      f.close()
 
 
