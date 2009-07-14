@@ -13,12 +13,15 @@ samplingRate = 10
 
 line_enable = True
 shot_enable = True
-color_enable = True
-matlab_enable = True
+uniformColorQ_enable = True
+adaptiveColorQ_enable = True
+colorTexture_enable = True
 
 line_args = '--preset high'
 shot_args = ''
-color_args = '-q 2'
+uniformColorQ_args = '-q 2'
+adaptiveColorQ_args = '-n 16 -k 2'
+colorTexture_args = '-d 1'
 
 imagesSuffix = 'images'
 lineSuffix = 'lines'
@@ -53,12 +56,9 @@ def createDir(dir):
 
 def process(targetDir, command):
     
-    # remove targetDir if already exist
-    if os.path.isdir(targetDir):
-        shutil.rmtree(targetDir)
-
-    # create new targetDir
-    createDir(targetDir)
+    # targetDir does not exist, create a new one
+    if not os.path.isdir(targetDir):
+        createDir(targetDir)
     
     # execute command (PUT WRAPPER HERE)
     print command
@@ -70,20 +70,20 @@ def process(targetDir, command):
 #########################################
 
     
-def processColor(projectDir, args):
+def processUniformColorQ(projectDir, args):
 
-    print 'Processing color...'
+    print 'Processing UniformColorQ...'
     
     scriptsDir = os.path.join(CAPATH,'scripts')
     sourceDir = os.path.join(projectDir,imagesSuffix)
     targetDir = os.path.join(projectDir,colorSuffix)
     
-    command = '%s/color %s %s '%(scriptsDir,args,sourceDir)
+    command = '%s/uniformColorQ %s %s '%(scriptsDir,args,sourceDir)
     
     error = process(targetDir, command)
 
     if error != 0:
-        print 'Error: color'
+        print 'Error: uniformColorQ'
         return False
 
     # move output
@@ -152,21 +152,41 @@ def processShot(projectDir, args):
     return True
 
 
+def processAdaptiveColorQ(projectDir, args):
 
-def processColorTexture(projectDir):
+    print 'Processing AdaptiveColorQ...'
+    
+    scriptsDir = os.path.join(CAPATH,'scripts')
+    sourceDir = os.path.join(projectDir,imagesSuffix)
+    sourceDir = os.path.abspath(sourceDir).rstrip('/') + '/'
+    targetDir = os.path.join(projectDir,colorSuffix)
+    
+    command = '%s/adaptiveColorQ %s %s '%(scriptsDir,args,sourceDir)
+    
+    error = process(targetDir, command)
+
+    if error != 0:
+        print 'Error: AdaptiveColorQ'
+        return False
+
+    # move output
+    fileSrc = os.path.join(sourceDir,'adaptiveColorQ_result.txt')
+    shutil.move(fileSrc,targetDir)
+
+    return True
+
+
+def processColorTexture(projectDir, args):
 
     print 'Processing colorTexture...'
 
-    matlabPath = os.path.join(CAPATH,'matlab')
-    matlabPath = os.path.join(matlabPath,'colorTexture')
+
+    scriptsDir = os.path.join(CAPATH,'scripts')
     sourceDir = os.path.join(projectDir,imagesSuffix)
     sourceDir = os.path.abspath(sourceDir).rstrip('/') + '/'
     targetDir = os.path.join(projectDir,statsSuffix)
 
-    command = 'matlab -nodisplay -nojvm '+\
-        '-r "path(path,\'%s\'); '%(matlabPath) +\
-        'batch(\'%s\'); '%(sourceDir)+\
-        'exit;"'
+    command = '%s/colorTexture %s %s '%(scriptsDir,args,sourceDir)
 
     error = process(targetDir,command)
 
@@ -294,16 +314,18 @@ def main(arguments):
     
     shotFlag = False
     lineFlag = False
-    colorFlag = False
-    matlabFlag = False
+    uniformColorQFlag = False
+    adaptiveColorQFlag = False
+    colorTextureFlag = False
 
     # video case
     if (mode == 'video'):
 
         procTimeLog = open(os.path.join(projectDir,procTimeFilename),'w')
-        procTimeLog.write('shot(ms)\t')
-        procTimeLog.write('color(ms)\t')
-        procTimeLog.write('matlab(ms)\n')
+        procTimeLog.write('Shot(ms)\t')
+        procTimeLog.write('UniformColorQ(ms)\t')
+        procTimeLog.write('AdaptiveColorQ(ms)\t')
+        procTimeLog.write('ColorTexture(ms)\n')
 
         t1 = time.time()
         if shot_enable:
@@ -312,14 +334,20 @@ def main(arguments):
         procTimeLog.write('%0.3f\t'%((t2-t1)*1000.0))
         
         t1 = time.time()
-        if color_enable:
-            colorFlag = processColor(projectDir,color_args)
+        if uniformColorQ_enable:
+            uniformColorQFlag = processUniformColorQ(projectDir,uniformColorQ_args)
         t2 = time.time()
         procTimeLog.write('%0.3f\t'%((t2-t1)*1000.0))
 
         t1 = time.time()
-        if matlab_enable:
-            matlabFlag = processColorTexture(projectDir)
+        if adaptiveColorQ_enable:
+            adaptiveColorQFlag = processAdaptiveColorQ(projectDir,adaptiveColorQ_args)
+        t2 = time.time()
+        procTimeLog.write('%0.3f\t'%((t2-t1)*1000.0))
+
+        t1 = time.time()
+        if colorTexture_enable:
+            colorTextureFlag = processColorTexture(projectDir,colorTexture_args)
         t2 = time.time()
         procTimeLog.write('%0.3f\n'%((t2-t1)*1000.0))
 	
@@ -329,7 +357,9 @@ def main(arguments):
 	files = []
         if shotFlag:
 	     	files.append(projectDir+'/shots/shot.output.txt')
-	if matlabFlag:
+        if adaptiveColorQFlag:
+	     	files.append(projectDir+'/colors/adaptiveColorQ_result.txt')
+	if colorTextureFlag:
 	     	files.append(projectDir+'/stats/stats.txt')
 
         combineResults(projectDir+'/result.txt',files)
@@ -340,9 +370,10 @@ def main(arguments):
         sampleFromImages(projectDir)
 
         procTimeLog = open(os.path.join(projectDir,procTimeFilename),'w')
-        procTimeLog.write('line(ms)\t')
-        procTimeLog.write('color(ms)\t')
-        procTimeLog.write('matlab(ms)\n')
+        procTimeLog.write('Line(ms)\t')
+        procTimeLog.write('UniformColorQ(ms)\t')
+        procTimeLog.write('AdaptiveColorQ(ms)\t')
+        procTimeLog.write('ColorTexture(ms)\n')
         
         t1 = time.time()
         if line_enable:
@@ -351,14 +382,20 @@ def main(arguments):
         procTimeLog.write('%0.3f\t'%((t2-t1)*1000.0))
 
         t1 = time.time()
-        if color_enable:
-            colorFlag = processColor(projectDir,color_args)
+        if uniformColorQ_enable:
+            uniformColorQFlag = processUniformColorQ(projectDir,uniformColorQ_args)
         t2 = time.time()
         procTimeLog.write('%0.3f\t'%((t2-t1)*1000.0))
 
         t1 = time.time()
-        if matlab_enable:
-            matlabFlag = processColorTexture(projectDir)
+        if adaptiveColorQ_enable:
+            adaptiveColorQFlag = processAdaptiveColorQ(projectDir,adaptiveColorQ_args)
+        t2 = time.time()
+        procTimeLog.write('%0.3f\t'%((t2-t1)*1000.0))
+
+        t1 = time.time()
+        if colorTexture_enable:
+            colorTextureFlag = processColorTexture(projectDir,colorTexture_args)
         t2 = time.time()
         procTimeLog.write('%0.3f\t'%((t2-t1)*1000.0))
  
@@ -368,7 +405,9 @@ def main(arguments):
 	files = []
 	if lineFlag:
 	     	files.append(projectDir+'/lines/result.txt')
-	if matlabFlag:
+        if adaptiveColorQFlag:
+	     	files.append(projectDir+'/colors/adaptiveColorQ_result.txt')
+	if colorTextureFlag:
 	     	files.append(projectDir+'/stats/stats.txt')
 
         combineResults(projectDir+'/result.txt',files)

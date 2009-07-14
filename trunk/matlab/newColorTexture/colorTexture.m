@@ -1,12 +1,8 @@
-function colorTexture(inputPath)
-
-% basicTexture parameter
-D = 1;
+function colorTexture(inputPath,D)
 
 currfolder = inputPath;
-myfiles=dir([currfolder,'*.jpg']); 
+myfiles=dir([currfolder,'*.jpg']);
 nimages = length(myfiles);
-disp(['[matlab-colorTexture]Processing ' currfolder ' with ' num2str(nimages) ' images...']);
 
 resultf = fopen([currfolder 'stats.txt'],'w');
 printHeader(resultf);
@@ -15,9 +11,9 @@ for i=1:nimages
     Image = imread([currfolder,myfiles(i).name]);
     
     % 5 features for each channel = 5*3 = 15
-    color_feat_rgb = basicRGB(Image); 
+    color_feat_rgb = basicRGB(Image);
     % 5 features for each channel = 5*3 = 15
-    color_feat_hsv = basicHSV(Image); 
+    color_feat_hsv = basicHSV(Image);
     % 7 features
     texture_feat = basicTexture(Image,D);
     
@@ -26,7 +22,5 @@ for i=1:nimages
     printResult(resultf, myfiles(i).name, vfeat);
 end
 fclose(resultf);
-
-disp('[matlab-colorTexture]Done');
 
 end

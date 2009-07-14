@@ -8,7 +8,7 @@ q = 4
 CAPATH = None
 
 def usage():
-    print 'USAGE: color [OPTIONS] <input directory>'
+    print 'USAGE: uniformColorQ [OPTIONS] <input directory>'
     print 'OPTIONS' 
     print '\t-q Q'
     print '\t\tSet quantization level to Q. Default=%s'%q
@@ -33,7 +33,7 @@ def batch(dir):
         f_with_dir = os.path.join(dir,f)
         if os.access(f_with_dir,os.F_OK)\
            and ((f.endswith('.png') or f.endswith('.jpg'))):
-            print '[color]Processing...%s'% f
+            print '[uniformColorQ]Processing...%s'% f
             processImage(f_with_dir)
 
 def main():
