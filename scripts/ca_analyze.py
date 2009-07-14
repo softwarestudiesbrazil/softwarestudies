@@ -231,13 +231,14 @@ def combineResults(target, sourceFiles):
 	# for each line
 	if (f != []):
 		for line in f[0].readlines():
-			fout.write(line.rstrip('\n'))
-			for j in range(1,len(sourceFiles)):
+                        if len(line) > 1:
+                            fout.write(line.rstrip('\n'))
+                            for j in range(1,len(sourceFiles)):
 				temp = f[j].readline().rstrip('\n')
 	        	        temp = temp.split(',')
 				temp = string.join(temp[1:],',')
 				fout.write(',' + temp)
-		 	fout.write('\n')
+                            fout.write('\n')
 	
 	# close files
 	for i in range(0,len(sourceFiles)):
@@ -322,10 +323,17 @@ def main(arguments):
     if (mode == 'video'):
 
         procTimeLog = open(os.path.join(projectDir,procTimeFilename),'w')
-        procTimeLog.write('Shot(ms)\t')
-        procTimeLog.write('UniformColorQ(ms)\t')
-        procTimeLog.write('AdaptiveColorQ(ms)\t')
-        procTimeLog.write('ColorTexture(ms)\n')
+
+        if shot_enable:
+            procTimeLog.write('Shot(ms)\t')
+        if uniformColorQ_enable:
+            procTimeLog.write('UniformColorQ(ms)\t')
+        if adaptiveColorQ_enable:
+            procTimeLog.write('AdaptiveColorQ(ms)\t')
+        if colorTexture_enable:
+            procTimeLog.write('ColorTexture(ms)\t')
+            
+        procTimeLog.write('\n')
 
         t1 = time.time()
         if shot_enable:
@@ -370,10 +378,17 @@ def main(arguments):
         sampleFromImages(projectDir)
 
         procTimeLog = open(os.path.join(projectDir,procTimeFilename),'w')
-        procTimeLog.write('Line(ms)\t')
-        procTimeLog.write('UniformColorQ(ms)\t')
-        procTimeLog.write('AdaptiveColorQ(ms)\t')
-        procTimeLog.write('ColorTexture(ms)\n')
+
+        if line_enable:
+            procTimeLog.write('Line(ms)\t')
+        if uniformColorQ_enable:
+            procTimeLog.write('UniformColorQ(ms)\t')
+        if adaptiveColorQ_enable:
+            procTimeLog.write('AdaptiveColorQ(ms)\t')
+        if colorTexture_enable:
+            procTimeLog.write('ColorTexture(ms)\t')
+
+        procTimeLog.write('\n')
         
         t1 = time.time()
         if line_enable:
