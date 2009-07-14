@@ -1,0 +1,69 @@
+#! /usr/bin/env python
+
+import getopt, sys, os
+
+# default parameters
+d = 1
+
+CAPATH = None
+
+
+def usage():
+    print 'USAGE: colorTexture [OPTIONS] <input directory>'
+    print 'OPTIONS' 
+    print '\t-d D'
+    print '\t\tPixel distance for offsets when calculating GLCMs. Default=%s'%d
+    print '\t--help'
+    print '\t\tPrint this usage screen'
+
+
+def process(dir):
+
+    matlabPath = os.path.join(CAPATH,'matlab')
+    matlabPath = os.path.join(matlabPath,'newColorTexture')
+    sourceDir = os.path.abspath(dir).rstrip('/') + '/'
+    command = 'matlab -nodisplay -nojvm '+\
+        '-r "path(path,\'%s\'); '%(matlabPath) +\
+        'colorTexture(\'%s\',%s); '%(sourceDir,d)+\
+        'exit;"'
+    print command
+    error = os.system(command)
+    if error != 0:
+        print 'Error: colorTexture'
+        sys.exit(-1)
+
+def main():
+
+    global CAPATH
+    global d
+
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], 'd:', ['help'])
+    except getopt.GetoptError:
+        print 'Error: Illegal arguments'
+        usage()
+        sys.exit(2)
+
+    for o, a in opts:
+        if o in ('--help'):
+            usage()
+            sys.exit()
+        elif o in ('-d'):
+            d = a
+        else:
+            assert False, "unhandled option"
+
+    if len(args) != 1:
+        print 'Invalid arguments. --help for more info'
+        sys.exit(1)
+
+    try:
+        CAPATH = os.environ['CAPATH']
+    except:
+        print 'ERROR: CAPATH enviroment variable not found'
+        sys.exit(1)
+
+    process(args[0].rstrip('/'))
+            
+if __name__ == "__main__":
+    main()
