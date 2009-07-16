@@ -96,8 +96,8 @@ def batch(dir):
 
     fo = open(outputDir + '/' + resultFile,'w')
     # Print header
-    fo.write('filename,avg_length,')
-    fo.write('avg_turns,avg_straightness,')
+    fo.write('filename,avg_length_over_size,')
+    fo.write('avg_turns_over_size,avg_straightness,')
     fo.write('avg_angle\n')
     fo.write('string,float,')
     fo.write('float,float,')
@@ -114,7 +114,7 @@ def batch(dir):
             fi = open(summaryFile,'r')
             count = 0
             for line in fi:
-                if count > 5:
+                if count > 6:
                     info = line.split('\t')[1]
                     fo.write(',' + info.strip())
                 count += 1

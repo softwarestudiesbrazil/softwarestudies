@@ -359,15 +359,16 @@ public class LineFeature {
 						total++;
 					}
 				}
-				
+				double imgSize = this.width * this.height;
 				bw.write("gaussianWidth=\t" + gaussianWidth + "\n");
 				bw.write("sigma=\t" + sigma + "\n");
 				bw.write("lowThreshold=\t" + lowThreshold + "\n");
 				bw.write("highThreshold=\t" + highThreshold + "\n");
 				bw.write("lenghtThreshold=\t" + lengthThreshold + "\n");
-				bw.write("total_number_of_lines=\t" + total + "\n");
-				bw.write("average_length=\t" + ((double)totalLength/total) + "\n");
-				bw.write("average_number_of_turns=\t" + ((double)totalTurns/total) + "\n");
+				bw.write("image_size=\t" + imgSize + "\n");
+				bw.write("total_number_of_lines_over_image_size=\t" + ((double)total/imgSize) + "\n");
+				bw.write("average_length_over_image_size=\t" + (((double)totalLength/total)/imgSize) + "\n");
+				bw.write("average_number_of_turns_over_image_size=\t" + (((double)totalTurns/total)/imgSize) + "\n");
 				bw.write("average_straightness=\t" + totalStraightness/total + "\n");
 				bw.write("average_line_angle=\t" + totalAngle/total + "\n");
 				bw.close();
