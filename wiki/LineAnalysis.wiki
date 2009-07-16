@@ -1,6 +1,6 @@
 #summary Line analysis program (Java)
 
-= Usage =
+=Usage=
 
 {{{
  NAME
@@ -42,3 +42,18 @@
    -s,--sigma S
         Specify sigma used by Gaussian filter to S. Default=3
 }}}
+
+=Algorithm=
+
+First, we apply a Gaussian blur filter to the image to remove noise. Then, a Sobel edge detection is applied to the image in each color channel. Taking maximum of gradients of each channel, we obtain a combined gradient image. After that, we apply Maximum Suppression to the gradient image. We, then, trace along each line to collect information and statistics. 
+
+=Output explanation=
+
+*`line`* outputs, for each input image, three output files.
+  # edge image
+  # detail about each line in the image
+  # summary statistics about lines in the image which are:
+    * average line length over image size. Range=0..1
+    * average number of turns in the image over image size. Range=0..1
+    * average straightness of lines. Range=0..1 (1 = most straight)
+    * average orientation of lines. Range=0..360 (degree)
