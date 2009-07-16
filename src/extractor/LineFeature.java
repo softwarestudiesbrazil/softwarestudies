@@ -355,7 +355,7 @@ public class LineFeature {
 						totalTurns += turnCount[i];
 						totalLength += lineLength[i];
 						totalStraightness += (lineAbsLength[i]/lineLength[i]);
-						totalAngle += lineAngle[i];
+						totalAngle += (lineAngle[i]*180.0/Math.PI);
 						total++;
 					}
 				}
