@@ -144,6 +144,18 @@ ffmpeg_args = '-r 25 -sameq -ss 60 -t 10'
 colorTexture_args = '-d 1'
 }}}
 
+# Output as frames ONLY
+{{{
+mode = 'video'
+
+line_enable = False
+shot_enable = False
+uniformColorQ_enable = False
+adaptiveColorQ_enable = False
+colorTexture_enable = False
+
+ffmpeg_args = '-r 25 -sameq -ss 60 -t 10'
+}}}
 
 == CAscript Examples ==
 
