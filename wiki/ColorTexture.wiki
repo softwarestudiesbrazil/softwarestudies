@@ -1,5 +1,18 @@
 #summary Color and texture feature extractor (Matlab)
 
+= Usage =
+{{{
+USAGE: colorTexture [OPTIONS] <input directory>
+OPTIONS
+	-d D
+		Pixel distance for offsets when calculating GLCMs. Default=1
+	--help
+		Print this usage screen
+}}}
+
+*Notes*
+  * The gray-level co-occurrence matrices are computed using `offsets = [0 D; -D D; -D 0; -D -D]` where `D` is a parameter. For more info, visit [http://www.mathworks.com/access/helpdesk/help/toolbox/images/graycomatrix.html]
+
 = Overview =
 
 *`colorTexture`* is a matlab script that extracts basic color and texture features from images. 
@@ -46,7 +59,6 @@ where p contains the histogram counts.
 
 *Notes* 
   * All texture features are extracted from grayscale. If input is not a grayscale, it will be converted to grayscale.
-  * The gray-level co-occurrence matrices are computed using `offsets = [0 D; -D D; -D 0; -D -D]` where `D` is a parameter.
   * For more information
     * [http://www.mathworks.com/access/helpdesk/help/toolbox/images/graycomatrix.html]
     * [http://www.mathworks.com/access/helpdesk/help/toolbox/images/graycoprops.html]
