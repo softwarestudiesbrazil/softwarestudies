@@ -29,6 +29,7 @@
 
   * *MacOSX*: There are several ways of doing this. For a single account that will be executing scripts through the Terminal or SSH shells, add *`export CAPATH="<path to softwarestudies directory>"`* to the end of the your *~/.profile*. For example, on Giza, we use
      `export CAPATH="/Users/culturevis/Documents/Programming/softwarestudies"`
+
      `export PATH="$CAPATH/scripts:$PATH"`
   For multiple accounts on the same server, add a text file to /etc/paths.d/ called "softwarestudies" that contains the globally accessible path line where you installed the scripts. For example, on Astana we use:
 {{{
