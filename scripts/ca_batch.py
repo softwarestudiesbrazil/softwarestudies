@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 
-import sys,os,getopt,shutil
+import sys,os,getopt,shutil,string
 import ca_project
 
 def usage():
@@ -11,20 +11,39 @@ def process(cfgFile):
 
      # check for cfgFile
      if not os.path.exists(cfgFile):
-          print cfgFile + ' does not exist'
+          print 'Error: ' + cfgFile + ' does not exist!'
           sys.exit(1)
 
      f = open(cfgFile,'r')
-     print '== Starting ca_batch =='
+
+     # check file format
      for s in f:
           s = s.strip('\n')
           l = s.split('\t')
-          print '>> Processing ' + l[1]
-          if (l[0].startswith('http')):
-               ca_project.main(['--prep_arg','--url ' + l[0] + ' --redump',\
-                                     '--analyze_arg','--mode video',l[1]])
+          if len(l) != 2:
+               print 'Error: wrong format in ' + cfgFile + '.'
+               print 'Please make sure you use tab to separate the columns and'
+               print 'there are only 2 columns per line.'
+               sys.exit(1)
+
+     f.close()
+
+     f = open(cfgFile,'r')
+
+     print '== Starting ca_batch =='
+
+     for s in f:
+          print s
+          s = s.strip('\n')
+          l = s.split('\t')
+          l0 = l[0].strip(' ')
+          l1 = l[1].strip(' ')
+          print '>> Processing ' + l1
+          if (l0.lower().startswith(('http','ftp'))):
+               ca_project.main(['--prep_arg','--url ' + l0 + ' --redump',\
+                                '--analyze_arg','--mode video',l1])
           else:
-               ca_project.main([l[1]])
+               ca_project.main([l1])
 
           #shutil.rmtree(os.path.join(l[1],'images'))
      f.close()
