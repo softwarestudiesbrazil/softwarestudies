@@ -11,6 +11,10 @@ public class ImageUtil {
 	public static final int BORDER_COPY = 1;
 	public static final int BORDER_PARTIAL = 2;
 	
+	public static double rgb2gray(int r, int g ,int b) {
+	  return 0.2989 * r + 0.5870 * g + 0.1140 * b; 
+	}
+	
 	
 	public static double[] rgb2hsv(int r, int g, int b) {
 		
