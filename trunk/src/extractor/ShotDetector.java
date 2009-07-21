@@ -90,7 +90,7 @@ public class ShotDetector {
       }
     }
 
-    return  sumDiff/flag.length;
+    return  Math.abs(sumDiff/flag.length);
   }
 
   private void detectRegionChange(int w, int h, boolean[] pixelChange, boolean[] regionChange) {
@@ -191,7 +191,7 @@ public class ShotDetector {
       // initialization
 
       bw = new BufferedWriter(new FileWriter(output));
-      bw.write("filename" + SEPARATOR +"Cut" + SEPARATOR + "Shot_number" + SEPARATOR + "Avg_Frame_Diff\n");
+      bw.write("filename" + SEPARATOR +"Cut" + SEPARATOR + "Shot_number" + SEPARATOR + "Abs_Avg_Frame_Diff\n");
       bw.write("string" + SEPARATOR + "int" + SEPARATOR + "int" + SEPARATOR + "float\n");
 
 
