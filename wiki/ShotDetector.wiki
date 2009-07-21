@@ -35,3 +35,9 @@
  		have changed. Default=0.2. 0 < R < 1.
 
 }}}
+
+= Output =
+
+  * *Cut* - 1 for shot boundary, 0 otherwise.
+  * *Shot_number* - the shot number starting from 1.
+  * *Abs_Avg_Frame_Diff* - Absolute value of average frame difference. Range = 0..255
