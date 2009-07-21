@@ -1,0 +1,9 @@
+#summary shotAnalyzer (Matlab)
+
+= Usage =
+
+In Matlab,
+
+{{{
+[s,h] = shotAnalyzer('/Users/Desktop/script_demo/movie_demo/result.txt','output.txt')
+}}}
