@@ -14,5 +14,6 @@
     Set frame size. The format is `wxh' (ffserver default = 160x128, ffmpeg default = same as source). 
 `-sameq'
     Use same video quality as source (implies VBR). 
-
+`-qscale q'
+    Use fixed video quantizer scale (VBR). *To output highest quality, use `-qscale 1`*
 </pre>
