@@ -1,0 +1,16 @@
+#summary Analysis Tools in Matlab
+
+= PCA =
+
+`performPCA` perform PCA on a result.txt
+
+
+
+= ShotAnalyzer =
+
+`shotAnalyzer` computes per-shot averages from a result.txt
+
+
+= Summarizer =
+
+`summarizer` computes averages of each column from a result.txt
