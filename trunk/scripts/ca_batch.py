@@ -14,7 +14,7 @@ def process(cfgFile):
           print 'Error: ' + cfgFile + ' does not exist!'
           sys.exit(1)
 
-     f = open(cfgFile,'r')
+     f = open(cfgFile,'rU')
 
      # check file format
      for s in f:
@@ -28,12 +28,11 @@ def process(cfgFile):
 
      f.close()
 
-     f = open(cfgFile,'r')
+     f = open(cfgFile,'rU')
 
      print '== Starting ca_batch =='
 
      for s in f:
-          print s
           s = s.strip('\n')
           l = s.split('\t')
           l0 = l[0].strip(' ')
