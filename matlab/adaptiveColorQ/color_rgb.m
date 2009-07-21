@@ -2,10 +2,13 @@
 function T = color_rgb(imgFile,n,k,outputImg)
 
 % get top k color from n indexed color
-% T(1) = R
-% T(2) = G
-% T(3) = B
-% T(4) = percentage
+% T(:,1) = R
+% T(:,2) = G
+% T(:,3) = B
+% T(:,4) = H
+% T(:,5) = S
+% T(:,6) = V
+% T(:,7) = percentage
 
 if nargin < 2
     n = 16;
@@ -43,11 +46,15 @@ if (ndims(img) == 3 && size(img,3) == 3)
     s = sum(count(:,2));
     if size(map,1) < k
         l = size(map,1);
-        T = [map(count(1:l,1),:)*255 count(1:l,2)*100/s];
-        filler = [NaN(k-l,3) zeros(k-l,1)];
+        rgb = map(count(1:l,1),:);
+        hsv = rgb2hsv(rgb);
+        T = [rgb*255 hsv count(1:l,2)*100/s];
+        filler = [NaN(k-l,6) zeros(k-l,1)];
         T = [T;filler];
     else
-        T = [map(count(1:k,1),:)*255 count(1:k,2)*100/s];
+        rgb = map(count(1:k,1),:);
+        hsv = rgb2hsv(rgb);
+        T = [rgb*255 hsv count(1:k,2)*100/s];
     end
     
 else

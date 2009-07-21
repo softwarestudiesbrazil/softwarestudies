@@ -21,15 +21,18 @@ if nimages > 0
     % column label
     fprintf(resultf,'filename');
     for j=1:k
-        fprintf(resultf,...
-            ',Color%d_R,Color%d_G,Color%d_B,Color%d_Percentage',j,j,j,j);
+        fprintf(resultf,',Color%d_R,Color%d_G,Color%d_B',j,j,j);
+        fprintf(resultf,',Color%d_H,Color%d_S,Color%d_V',j,j,j);
+        fprintf(resultf,',Color%d_Percentage',j);
     end
     fprintf(resultf,'\n');
     
     % data type
     fprintf(resultf,'string');
     for j=1:k
-        fprintf(resultf,',float,float,float,float');
+        fprintf(resultf,',float,float,float');
+        fprintf(resultf,',float,float,float');
+        fprintf(resultf,',float');
     end
     fprintf(resultf,'\n');
     
@@ -39,7 +42,9 @@ if nimages > 0
         T = color_rgb(full_filename,n,k,outputImg);
         fprintf(resultf,'%s',files(i).name);
         for j=1:k
-            fprintf(resultf,',%.1f,%.1f,%.1f,%.4f',T(j,:));
+            fprintf(resultf,',%.2f,%.2f,%.2f',T(j,1:3));
+            fprintf(resultf,',%.4f,%.4f,%.4f',T(j,4:6));
+            fprintf(resultf,',%.2f',T(j,7));
         end
         fprintf(resultf,'\n');
     end
