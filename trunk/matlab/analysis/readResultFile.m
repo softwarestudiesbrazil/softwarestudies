@@ -5,6 +5,7 @@ function [ data, headers filenames ] = readResultFile( resultfile )
 rawdata = textread(resultfile,'%s');
 % read header
 headers = textscan(rawdata{1},'%s','delimiter',',');
+headers = headers{:};
 % extract data without headers
 N = length(rawdata)-2;
 data = zeros(N,1);
