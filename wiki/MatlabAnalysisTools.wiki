@@ -1,4 +1,4 @@
-#summary Analysis tools in Matlab
+#summary Analysis tools in Matlab (PCA, shotAnalyzer, summarizer)
 
 
 = PCA =
