@@ -33,14 +33,24 @@
       export PATH="$CAPATH/scripts:$PATH"
 }}}
 
-  For multiple accounts on the same server, add a text file to /etc/paths.d/ called "softwarestudies" that contains the globally accessible path line where you installed the scripts. For example, on Astana we use:
+  To configure multiple accounts on the same server, first add a line to /etc/launchd.conf:
+{{{
+      setenv CAPATH /Applications/Programming/softwarestudies
+}}}
+
+  ...then add a text file to /etc/paths.d/ called "softwarestudies" that contains the globally accessible path line where you installed the scripts
+{{{
+     /Applications/Programming/softwarestudies
+     /Applications/Programming/softwarestudies/scripts
+}}}
+
+   You may also want to include lines for other installed dependencies. For example, on Astana we use:
 {{{
      /opt/local/bin/
      /opt/local/sbin/
-     /Applications/Programming/softwarestudies
-     /Applications/Programming/softwarestudies/scripts
      /Applications/MATLAB_R2009aSV.app/bin
 }}}
+
   Note that currently you will still need CAPATH defined in individual user profiles.
 
   After saving, relaunch the Terminal / shell and type "which cascript" or "which matlab" to test.  If you used installed imagemagick, ffmpeg, and wget through MacPorts, then they will already be in your path. If not, you can either copy those binaries into a normal path directory (e.g. usr/bin/) or else add path lines for them as above.
