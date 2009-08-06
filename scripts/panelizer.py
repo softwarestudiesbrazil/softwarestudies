@@ -1,274 +1,206 @@
-import time
-import threading
-import pygame
+
 import sys
 import os
 from PIL import Image
 from PIL import ImageDraw
 import math
+from panelops import *
+
+from optparse import OptionParser
 
 
-def cutOffEdges(image):
-    print "Cropping Edges...",
-    imageCopy = image.copy()
+parser = OptionParser()
+parser.add_option("-d", dest="imageDir",
+                  help="Image Directory. Default is the current directory", default=os.path.curdir, metavar="DIR")
+parser.add_option("-w", dest="threshdir",
+		  help="Threshold direction. 1 for values above the threshold are background, -1 for below. Default 1", default=1)
+parser.add_option("-t", dest="threshold",
+		  help="Background threshold. Defalut 220", default = 220)
+parser.add_option("-p", dest="maxPanels",
+		  help="Maximum number of panels per image. Default = 5 (even for FA)", default=6)
+parser.add_option("-o", dest="outDir",
+                  help="Output Directory. Default is ./Panels", default = "Panels", metavar="OUTDIR")
 
-    #size
+(options, args) = parser.parse_args()
 
-    xSize = image.size[0]
-    ySize = image.size[1]
+global ops 
+ops = options
 
-    #find left most frame edge
 
-    image = image.convert("L")
+imageDir = ops.imageDir
 
-    #make into matrix
+imageFolder = "Images"
+#outputFolder = "Panels" #please don't change this without look through the whole file
 
-    pix = image.load()
+#
+#if not os.path.exists(outputFolder) and os.path.isdir(outputFolder):
+	#os.path.mkdir(outputFolder)
 
-    whiteThresh = 100
-	
+############## Functions #######################
+
+def makeImagePath(imageName):
+    return os.path.join(imageFolder, imageName)
+
+############ Image Analysis Functions ########
+def findBrightness(picture):
+    print "Calculating Brightness:", os.path.basename(picture),
+    image = Image.open(picture)
+    print "Converting...",
+    image = image.convert("L") #converts to luminence
+    pixels = list(image.getdata())
+    print "Averaging...",
+    brightness = sum(pixels) / len(pixels)
+    print "Done"
+    return brightness
+
+def findSize(picture):
+    print "Counting Pixels:", picture
+    image = Image.open(picture)
+    size = image.size[0] * image.size[1]
+    return size
+
+def findXSize(picture):
+    image = Image.open(picture)
+    size = image.size[0]
+    return size
+
+def findYSize(picture):
+    image = Image.open(picture)
+    size = image.size[1]
+    return size
+  	
+def findEntropy(picture):
+    True
+
+def findAvgHue(picture):
+    print "Getting Avg Hue:", os.path.basename(picture),
+    image = Image.open(picture)
+
+    image = image.convert("RGB")
     
-    #find upper edge
-    upperEdge = 0
-    thisRowAllWhite = True
-    
-    for y in range(0, ySize):
-        if not thisRowAllWhite:
-	    upperEdge = y
-            break
-	for x in range(0, xSize):
-	    if not (pix[x,y] > whiteThresh):
-                thisRowAllWhite = False
+    image = image.split()
 
-    #find left edge
-    leftEdge = 0
-    thisColumnAllWhite = True
-    
-    for x in range(0, xSize):
-        if not thisColumnAllWhite:
-	    leftEdge = x
-            break
-	for y in range(0, ySize):
-	    if not (pix[x,y] > whiteThresh):
-                thisColumnAllWhite = False
+    R = list(image[0].getdata())
+    G = list(image[1].getdata())
+    B = list(image[2].getdata())
 
-    #find bottom edge
-    bottomEdge = ySize
-    thisRowAllWhite = True
-    
-    ry = range(0, ySize-1)
-    ry.reverse()
+    avgRed = sum(R) / len(R)
+    avgGreen = sum(G) / len(G)
+    avgBlue = sum(B) / len(B)
 
-    for y in ry:
-        if not thisRowAllWhite:
-	    bottomEdge = y
-            break
-	for x in range(0, xSize):
-	    if not (pix[x,y] > whiteThresh):
-                thisRowAllWhite = False
+    print "R:", avgRed, "G:", avgGreen ,"B:" ,avgBlue, "H:",
 
-    #find right edge
-    rightEdge = xSize
-    thisColumnAllWhite = True
+    xR = avgRed * math.cos(math.radians(60))
+    yR = avgRed * math.sin(math.radians(60))
 
-    rx = range(0, xSize-1)
-    rx.reverse()
+    xG = -avgGreen
+    yG = 0
 
-    for x in rx:
-        if not thisColumnAllWhite:
-	    rightEdge = x
-            break
-	for y in range(0, ySize):
-	    if not (pix[x,y] > whiteThresh):
-                thisColumnAllWhite = False
- 
+    xB = avgBlue * math.cos(math.radians(60))
+    yB = -avgBlue * math.sin(math.radians(60))
 
-    print "L:", leftEdge, "U:", upperEdge, "R:", rightEdge, "B:", bottomEdge
+    xH = xR + xG + xB
+    yH = yR + yG + yB
 
-    image = imageCopy
+    hue = math.degrees(math.atan(yH/xH))
 
-    image = image.crop((leftEdge, upperEdge, rightEdge, bottomEdge))
- 
-    return image
+    if hue < 0:
+        hue += 360
+
+    if xH < 0 and yH < 0:
+	hue += 180
+
+    if xH < 0 and yH > 0:
+	hue -= 180
+
+    print hue
+    return hue
 
 
-def getNextPanel (image, imageName, panelNum):
-    print "Finding Panel", panelNum
-    imageCopy = image.copy()
+################ Getting Images ###################
+pictureFileNames = os.listdir(imageDir)
 
-    #size
+for picture in pictureFileNames:
+    if not (picture.endswith(".jpg") or (picture.endswith(".JPG"))):
+        print "Cannot Load:", picture
+        pictureFileNames.remove(picture)
+        continue
+    else:
+        print "Loading:", picture
 
-    xSize = image.size[0]
-    ySize = image.size[1]
+picturePathNames = []
+for fileName in pictureFileNames:
+    picturePathNames.append(os.path.join(imageDir, fileName))
 
-    image = image.convert("L")
+################# Magic Happens Here ################
+imageStrs = []
 
-    #make into matrix
+#write to output file
+fo = open(os.path.join(ops.outDir, 'PanelData.txt'), "w")
+fo.write('Source, PanelNum, Left, Upper, Right, Lower\n')
+fo.write('string, int, int, int, int, int\n')
+fo.close()
 
-    pix = image.load()
-
-    maxNumPanels = 4
-    minPanelWidth = 300
-    minPanelHeight = 400
-    whiteThresh = 220
-    fudgeFactor = 20
+for path in picturePathNames:
+    print "Panelizing:", os.path.basename(path)
+    im = Image.open(path)
+    #print "Cutting White Space"
+    #im = cutOffEdges(im)
+    panelNum = 1
+    for panelNum in range(1,ops.maxPanels+1):
+        print "Getting Panel", panelNum
+        im = getNextPanel(im, os.path.basename(path), ops.outDir, panelNum, ops.threshdir, ops.threshold)
+    print "Done"
 
 
 
-    upperEdge = 0 #assumes the upper edge is at 0
-    leftEdge = 0 #ditto left
+############## Processing Images ###################
+doBrightness = True
+doSize = False
+doXSize = False
+doYSize = False
+doEntropy = True
+doAvgHue = True
 
-    #code to find the upper left corner so that you don't have to crop it first
+if doBrightness:
+    pictureBrightness = []
+    for picture in picturePathNames:
+	pictureBrightness.append ( findBrightness(picture) )
+    print "Brightness:", str(pictureBrightness)
 
-    #find upper edge
-    upperEdge = 0
-    notWhiteCount = 0
-    #print "Finding upper edge..."    
-    for y in range(0, ySize-1):
-        #print "Trying row", y
-	for x in range(0, xSize-1):
-	    if(x >= xSize) and (y >= ySize):
-	        #print "Ran out of image at", (x,y)
-		return imageCopy
-	    if pix[x,y] < whiteThresh:
-                notWhiteCount +=1
-	#print "notWhiteCount:", notWhiteCount 
-	if notWhiteCount > minPanelWidth - fudgeFactor:
-	    upperEdge = y
-	    break
+if doSize:
+    pictureSize = []
+    for picture in picturePathNames:
+        pictureSize.append ( findSize(picture))
+    print "Size:", str(pictureSize)
 
-    #find left edge
-    leftEdge = 0
-    notWhiteCount = 0
-    #print "Finding left edge..."
-    for x in range(0, xSize-1):
-	#print "Trying column", x
-	for y in range(upperEdge, upperEdge+minPanelHeight):
-           if(x >= xSize) or (y >= ySize):
-	       #print "Ran out of image at", (x,y)
-	       return imageCopy
-	   if pix[x,y] < whiteThresh:
-               notWhiteCount += 1
-	#print "notWhiteCount:", notWhiteCount 
-	if notWhiteCount > minPanelHeight - fudgeFactor:
-	    leftEdge = x
-            break
+if doXSize:
+    pictureXSize = []
+    for picture in picturePathNames:
+        pictureXSize.append ( findXSize(picture))
+    print "XSize:", str(pictureXSize)
 
-    print "upperEdge:", upperEdge
-    print "leftEdge:", leftEdge
+if doYSize:
+    pictureYSize = []
+    for picture in picturePathNames:
+        pictureYSize.append ( findYSize(picture))
+    print "YSize:", str(pictureYSize)
 
-    x = leftEdge
-    
-    ####### GUTTERS #############
-    #go down left edge until there is a white line
-    for y in range(upperEdge+(fudgeFactor), ySize - 1):
-        #could this be the start of a gutter?
-	if pix[x,y] > whiteThresh: #found a white pixel
-	    couldBeAGutter = True #assumes that its true
-	    #print "Possible horz. gutter at", y
+if doEntropy:
+    pictureEntropy = []
+    for picture in picturePathNames:
+        pictureEntropy.append ( findEntropy(picture))
 
-            #checks assumtion
-            for x in range(leftEdge,leftEdge+minPanelWidth): #see if the whiteness goes in enough that it could be a gutter
-		if x >= xSize-1 or y >= ySize-1:
-			break
-                if(x >= xSize - fudgeFactor) and (y >= ySize - fudgeFactor):
-		    #print "Ran out of image at", (x,y)
-		    return imageCopy
-		if pix[x,y] < whiteThresh: #found a not white one
-		    #print "Possible horz. gutter at", y, "fails"
-                    couldBeAGutter = False
-	            break #this will break out of the x loop here but it shouldn't matter
+if doAvgHue:
+    pictureAvgHue = []
+    for picture in picturePathNames:
+        pictureAvgHue.append ( findAvgHue(picture))
+    print "Hue:", str(pictureAvgHue)
 
 
-            #if assumtion holds
-	    if couldBeAGutter or (y >= ySize - fudgeFactor): #found one on the left edge or at bottom of image
-		if  (y >= ySize - fudgeFactor):
-	            print "Full height panel"
-		#print "Got horz. gutter at", y #well sort of... ;)
-		yGutterLoc = y #save this y so we can resue the variable
-		y = upperEdge
-
-		#go along top until there is a white line down
-		for x in range(leftEdge, xSize-1):
-
-		    #could this be the start of another gutter?
-		    if (pix[x,y] > whiteThresh) or (x >= xSize - fudgeFactor): #found a white pixel along top or at end of picture
-			couldBeAGutter = True
-                        #print "Possible vert. gutter at",(x,y)
-			#checks if it really could be
-			for y in range(upperEdge,upperEdge+minPanelHeight):#see if the whiteness goes down
-			    if pix[x,y] < whiteThresh: #it doesnt
-				#print "Possible vert. gutter at", (x,y), "fails"
-				couldBeAGutter = False
-				break
-			    #else:
-			        #print "Checks out", pix[x,y], "at", (x,y)
-
-			#yep
-			if couldBeAGutter or (x >= xSize - fudgeFactor): #found another or at right
-			    if (x >= xSize - fudgeFactor):
-                                print "Full width panel"
-			    #OK so we've found another possible gutter
-			    #we should check if they meet but I wont ;)
-			    print "Got panel", panelNum
-			    image = imageCopy
-			    print "Cropping", (leftEdge,upperEdge),(x,yGutterLoc)
-			    if (x - leftEdge) <= fudgeFactor or (yGutterLoc - upperEdge) <= fudgeFactor:
-				#this isn't a panel it's must be some kind of artifact
-				print "Found artifact at", (leftEdge,upperEdge),(x,yGutterLoc)
-			        draw = ImageDraw.Draw(image)
-			        draw.rectangle([leftEdge-fudgeFactor,upperEdge-fudgeFactor,x,yGutterLoc], fill=("white"))
-			        draw = None
-				return image
-			    
-                            panel = imageCopy.crop((leftEdge,upperEdge,x,yGutterLoc))#adds this panel to the list
-			    #save panel
-			    print "Saving...",
-
-			    newFileName = imageName.rstrip(".jpg")
-			    pageNum = newFileName[newFileName.index('-')+1:]
-			    print "Page #", pageNum
-			    issue = newFileName[:newFileName.index('-')]
-			    newFileName = issue + "-p" + str(pageNum) + "-f" + str(panelNum) + ".jpg"
-
-			    print newFileName
-
-			    panel.save(os.path.join("Panels",newFileName), "JPEG")
-			    draw = ImageDraw.Draw(image)
-			    draw.rectangle([leftEdge-fudgeFactor,upperEdge-fudgeFactor,x,yGutterLoc], fill=("white"))
-			    draw = None
-			    return image
-
-    #I guess we didn't find anything
-    return image #image is now greyscale btw. return imageCopy if you want... hope you don't actually end up here
+#picture = []
+#for picture in pictures:
+#    picture.append = find(picture)
 
 
-def checkAllWhite (image, imageName):
-    print "Checking All White..." 
-    imageCopy = image.copy()
 
-    #size
-
-    xSize = image.size[0]
-    ySize = image.size[1]
-
-    image = image.convert("L")
-
-    #make into matrix
-
-    pix = image.load()
-
-    maxNumPanels = 4
-    minPanelWidth = 300
-    minPanelHeight = 400
-    whiteThresh = 220
-
-    for y in range(0,ySize):
-	for x in range(0,xSize):
-            if pix[x,y] < whiteThresh:
-		    print "This one did not check out. You might want to have to look at it..."
-		    print "Extra info:", (x,y), "Value:", pix[x,y]
-		    return -1
-
-    print "All white"
-    return 0
