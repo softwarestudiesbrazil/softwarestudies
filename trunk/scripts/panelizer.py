@@ -1,4 +1,3 @@
-
 import sys
 import os
 from PIL import Image
@@ -136,6 +135,8 @@ for fileName in pictureFileNames:
 imageStrs = []
 
 #write to output file
+if not os.path.isdir(ops.outDir):
+    os.mkdir(ops.outDir)
 fo = open(os.path.join(ops.outDir, 'PanelData.txt'), "w")
 fo.write('Source, PanelNum, Left, Upper, Right, Lower\n')
 fo.write('string, int, int, int, int, int\n')
