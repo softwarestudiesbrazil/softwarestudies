@@ -257,7 +257,7 @@ def getNextPanel (image, imageName, outDir, panelNum, threshdir, thresh):
 
 			    print newFileName
                             path = outDir
-			    panel.save(os.path.join(path,newFileName), "JPEG")
+			    panel.convert('RGB').save(os.path.join(path,newFileName), "JPEG")
 			    draw = ImageDraw.Draw(image)
 			    print "Fill Color =", max([0,255*d])
 			    draw.rectangle([leftEdge-fudgeFactor,upperEdge-fudgeFactor,x,yGutterLoc], fill=bgc)
