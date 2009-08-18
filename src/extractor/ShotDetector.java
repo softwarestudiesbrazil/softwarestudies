@@ -157,8 +157,7 @@ public class ShotDetector {
     int[] rgbThisFrame = null;
     boolean[] pixelChange = null;
     boolean[] regionChange = new boolean[REGION_NO];
-    int shotNo = 0;
-    boolean firstFrame = true;
+    int shotNo = 1;
     ArrayList<BufferElement> buffer = new ArrayList<BufferElement>();
 
     FilenameFilter filter = new FilenameFilter() {
@@ -206,8 +205,10 @@ public class ShotDetector {
       rgbLastFrame = getRGBFromPackedRgb(packedRgb);
       rgbThisFrame = new int[bimg.getWidth() * bimg.getHeight() * 3]; 
 
-      buffer.add(new BufferElement(children[0],0));
-
+      bw.write(children[0] + SEPARATOR + "1" + SEPARATOR + shotNo +
+               SEPARATOR + "0\n");
+      bw.flush();
+      
       // for each image 
       for (int i=1; i<children.length; i++) {
 
@@ -230,9 +231,12 @@ public class ShotDetector {
           int cut = 0;
 
           if (change) {
-            // NOTE: the buffer is never empty
-            // case 1: buffer is non-empty but frames in buffers are not enough
-            if (buffer.size() < MIN_SHOT_LENGTH*AVERAGE_OVER_FRAMES && !firstFrame) {
+            // case 1: buffer is empty
+            if (buffer.size() == 0) {
+              buffer.add(new BufferElement(children[i],avgDiff));
+            }
+            // case 2: buffer is non-empty but frames in buffers are not enough
+            else if (buffer.size() < MIN_SHOT_LENGTH*AVERAGE_OVER_FRAMES) {
               // dump out frames in the buffer, mark as non-change
               BufferElement elem = buffer.get(0);
               bw.write(elem.filename + SEPARATOR +"0"+ SEPARATOR + shotNo + 
@@ -248,8 +252,33 @@ public class ShotDetector {
               // add new frame to buffer
               buffer.add(new BufferElement(children[i],avgDiff));
             }
-            // case 2: buffer is non-empty and we have enough framed in the buffer
+            // case 3: buffer is non-empty and we have enough framed in the buffer
             else {
+              // dump the buffer and mark as change
+              shotNo++;
+              BufferElement elem = buffer.get(0);
+              bw.write(elem.filename + SEPARATOR + "1" + SEPARATOR + shotNo +
+                       SEPARATOR + elem.avgDiff + "\n");
+              for (int j=1;j<buffer.size();j++) {
+                elem = buffer.get(j);
+                bw.write(elem.filename + SEPARATOR + "0" + SEPARATOR + shotNo +
+                         SEPARATOR + elem.avgDiff + "\n");
+              }
+              bw.flush();
+              // clear buffer
+              buffer.clear();
+              // add new frame to buffer
+              buffer.add(new BufferElement(children[i],avgDiff)); 
+            }
+          }        
+          // no change detected
+          else {
+            if (buffer.size() == 0) {
+              bw.write(children[i] + SEPARATOR + "0"+ SEPARATOR + shotNo +
+                       SEPARATOR + avgDiff + "\n");
+              bw.flush();
+            }
+            else if (buffer.size() >= MIN_SHOT_LENGTH*AVERAGE_OVER_FRAMES) {
               // dump the buffer and mark as change
               shotNo++;
               BufferElement elem = buffer.get(0);
@@ -263,16 +292,12 @@ public class ShotDetector {
               bw.write(children[i] + SEPARATOR + "0"+ SEPARATOR + shotNo +
                        SEPARATOR + avgDiff + "\n");
               bw.flush();
-              if (firstFrame) firstFrame = false;
               // clear buffer
               buffer.clear();
-              // add new frame to buffer
-              buffer.add(new BufferElement(children[i],avgDiff)); 
             }
-          }        
-          // no change detected
-          else {
-            buffer.add(new BufferElement(children[i],avgDiff));
+            else {
+              buffer.add(new BufferElement(children[i],avgDiff));
+            }
           }
 
           System.out.println("[shot]Processing frame " + (i+1));
@@ -281,10 +306,33 @@ public class ShotDetector {
           rgbThisFrame = new int[bimg.getWidth() * bimg.getHeight() * 3];
         }
         else {
-          buffer.add(new BufferElement(children[i],avgDiff));
+          if (buffer.size() == 0) {
+            bw.write(children[i] + SEPARATOR + "0"+ SEPARATOR + shotNo +
+                     SEPARATOR + avgDiff + "\n");
+            bw.flush();
+          }
+          else if (buffer.size() >= MIN_SHOT_LENGTH*AVERAGE_OVER_FRAMES) {
+            // dump the buffer and mark as change
+            shotNo++;
+            BufferElement elem = buffer.get(0);
+            bw.write(elem.filename + SEPARATOR + "1" + SEPARATOR + shotNo +
+                     SEPARATOR + elem.avgDiff + "\n");
+            for (int j=1;j<buffer.size();j++) {
+              elem = buffer.get(j);
+              bw.write(elem.filename + SEPARATOR + "0" + SEPARATOR + shotNo +
+                       SEPARATOR + elem.avgDiff + "\n");
+            }
+            bw.write(children[i] + SEPARATOR + "0"+ SEPARATOR + shotNo +
+                     SEPARATOR + avgDiff + "\n");
+            bw.flush();
+            // clear buffer
+            buffer.clear();
+          }
+          else {
+            buffer.add(new BufferElement(children[i],avgDiff));
+          }
         }
       }
-
 
       // dump out the frames
       if (buffer.size() > 0) {
