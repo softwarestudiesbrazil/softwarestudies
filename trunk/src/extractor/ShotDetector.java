@@ -233,11 +233,13 @@ public class ShotDetector {
           if (change) {
             // case 1: buffer is empty
             if (buffer.size() == 0) {
+              // add new frame to the head of the buffer
               buffer.add(new BufferElement(children[i],avgDiff));
             }
             // case 2: buffer is non-empty but frames in buffers are not enough
             else if (buffer.size() < MIN_SHOT_LENGTH*AVERAGE_OVER_FRAMES) {
-              // dump out frames in the buffer, mark as non-change
+              // dump out frames in the buffer, mark as non-change,
+              // add new frame to the head of the buffer
               BufferElement elem = buffer.get(0);
               bw.write(elem.filename + SEPARATOR +"0"+ SEPARATOR + shotNo + 
                        SEPARATOR + elem.avgDiff + "\n");
@@ -254,7 +256,8 @@ public class ShotDetector {
             }
             // case 3: buffer is non-empty and we have enough framed in the buffer
             else {
-              // dump the buffer and mark as change
+              // dump the buffer, mark as change
+              // add new frame to the head of the buffer
               shotNo++;
               BufferElement elem = buffer.get(0);
               bw.write(elem.filename + SEPARATOR + "1" + SEPARATOR + shotNo +
@@ -273,11 +276,13 @@ public class ShotDetector {
           }        
           // no change detected
           else {
+            // case 1: buffer is empty
             if (buffer.size() == 0) {
               bw.write(children[i] + SEPARATOR + "0"+ SEPARATOR + shotNo +
                        SEPARATOR + avgDiff + "\n");
               bw.flush();
             }
+            // case 2: buffer is large enough
             else if (buffer.size() >= MIN_SHOT_LENGTH*AVERAGE_OVER_FRAMES) {
               // dump the buffer and mark as change
               shotNo++;
@@ -295,6 +300,7 @@ public class ShotDetector {
               // clear buffer
               buffer.clear();
             }
+            // case 2: buffer is not large enough
             else {
               buffer.add(new BufferElement(children[i],avgDiff));
             }
