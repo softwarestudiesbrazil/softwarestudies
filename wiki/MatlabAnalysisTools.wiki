@@ -23,6 +23,8 @@ In MATLAB -- for a given results.txt file, e.g. at (Users/username/Desktop/scrip
 performPCA(data,filesnames,'/Users/username/Desktop/script_demo/movie_demo',100)
 }}}
 
+where path is the project directory (assumes /images) and
+100 = size as units of the axis, whatever they may be
 
 = ShotAnalyzer =
 
