@@ -24,11 +24,10 @@
 
 var              GUI_mode =    1;     // (1) GUI menus, (0) use default variables
 
-var       batch_mode_flag =    1;     // display while drawing (0) or at end (1)
-var       graph_save_flag =    0;     // save rather than displaying (1)
 var           images_flag =    1;     // draw images on top of dots (1) or no images (0)
+var    images_frames_flag =    1;     // draw image frames
 var           points_flag =    1;     // draw dots; if set to 0, and image_flag set to 1, only images are drawn
-var     images_blend_flag =    1;     // (1) Blend mode copying of images
+var     images_blend_flag =    0;     // (1) Blend mode copying of images
 var          x_fixed_flag =    0;     // fixed range for X
 var          y_fixed_flag =    0;     // fixed range for Y. Note: y_fixed_flag = 1 automatically if more than one data series
 var    points_values_flag =    1;     // draw values next to dot
@@ -39,6 +38,13 @@ var         x_labels_flag =    1;     // draw labels for X axis
 var         y_labels_flag =    1;     // draw labels for Y axis
 var           legend_flag =    1;     // draw legend for multiple series
 
+var   render_mode = "Fast";
+var   render_mode_list = newArray(
+   "Fast"
+  ,"Progressive"
+  ,"Save"
+  );
+
 var   points_style_choice = "Circle Filled";  // draw based on Series, based on Value, or in a fixed Fill color
 var     points_style_list = newArray(
    "Circle"
@@ -48,15 +54,23 @@ var     points_style_list = newArray(
   ,"None"
   );
 
-var     points_fill_color = newArray(255,255,255); // color for image background
-var     labels_fill_color = newArray(255,255,255); // color for image background
-var      lines_fill_color = newArray(255,255,255); // color for image background
+var   points_color_choice = "Fill";
+var   labels_color_choice = "Fill";
+var   lines_color_choice  = "Fill";
+var   frames_color_choice = "Fill";
+
 var            color_list = newArray(
    "Fill"
   ,"Series"
   ,"X Values"
   ,"Y Values"
   );
+
+var     points_fill_color = newArray(255,255,255); // color for image background
+var     labels_fill_color = newArray(255,255,255); // color for image background
+var      lines_fill_color = newArray(255,255,255); // color for image background
+var     frames_fill_color = newArray(0,0,0); // color for image background
+
 
 
 // ---------------------
@@ -125,7 +139,51 @@ var   ds = 1;
 // ---------------------
 // FUNCTIONS
 
+function draw_image(x, y) {
+
+  if(render_mode == "Progressive") {
+	  setBatchMode(true);
+	}
+
+  x = parseFloat(x);
+  y = parseFloat(y);
+
+  if (images_flag == 1) {
+    showProgress(i, lines.length);
+    // show progress in imageJ menu bar
+    image_path = dir + items[4];
+    open(image_path);
+
+    if (image_resize_width > 0) {
+        run("Size...", "width=" + image_resize_width + " constrain interpolate");
+    }
+
+    image_width = getWidth;
+    image_height = getHeight;
+    run("Copy");
+    // copy to memory
+    close();
+    // close the image file
+    selectImage(id_plot);
+    // select graph image
+    makeRectangle(x, y, image_width, image_height);
+    // default - drawing at the right coordinate
+    run("Paste");
+		setColor(frames_fill_color[0], frames_fill_color[1], frames_fill_color[2]);
+	  drawRect(x, y, image_width, image_height);
+  }
+
+  if(render_mode == "Progressive") {
+	  setBatchMode(false);
+	}
+
+}
+
+
 function draw_dot(x, y) {
+  x = parseFloat(x);
+  y = parseFloat(y);
+
   if (points_flag == 1) {
     if (points_style_choice == "Circle")
       drawOval(x - (point_size / 2), y - (point_size / 2), point_size, point_size);
@@ -191,14 +249,17 @@ call("java.lang.System.gc"); // call Java garbage collector to free memory
 if (GUI_mode == 1) {
 
   Dialog.create      ("IMAGEPLOT");
+
   Dialog.addChoice   ("Data", data_file_list, data_file);
   Dialog.addChoice   ("Images", image_dir_list, image_dir);
+  Dialog.addChoice   ("Render mode", render_mode_list, render_mode);
   Dialog.addCheckbox ("...configure", GUI_mode);
 
   Dialog.show();
 
   data_file = Dialog.getChoice();
   image_dir = Dialog.getChoice();
+  render_mode = Dialog.getChoice();
   GUI_mode = Dialog.getCheckbox();
 
   if (data_file == "Open...") {
@@ -223,6 +284,8 @@ if (GUI_mode == 1) {
     images_flag = 0;
   else dir = image_dir;
 
+
+
 }
 
 // Configure dialogs
@@ -236,6 +299,11 @@ if (GUI_mode == 1) {
     Dialog.addChoice   ("Color", newArray("RGB", "8-bit"), canvas_colorspace);
     Dialog.addCheckbox ("Blend", images_blend_flag);
     Dialog.addNumber   ("Thumbnail width", image_resize_width, 0, 5, "px");
+    Dialog.addCheckbox ("Frames", images_frames_flag);
+    Dialog.addMessage  ("Frame color");
+    Dialog.addNumber   ("R", frames_fill_color[0], 0, 5, "");
+    Dialog.addNumber   ("G", frames_fill_color[1], 0, 5, "");
+    Dialog.addNumber   ("B", frames_fill_color[2], 0, 5, "");
 
   Dialog.addMessage ("--- Canvas ---");
 
@@ -259,16 +327,16 @@ if (GUI_mode == 1) {
     Dialog.addCheckbox ("Plot values", points_values_flag);
     Dialog.addCheckbox ("Plot series labels", points_series_flag);
 
-  Dialog.addMessage ("--- Render ---");
-
-    Dialog.addCheckbox ("Fast (hidden) render", batch_mode_flag);
-    Dialog.addCheckbox ("Save w/out displaying", graph_save_flag);
 
   Dialog.show();
 
     canvas_colorspace  = Dialog.getChoice(); // RGB color image
     images_blend_flag  = Dialog.getCheckbox();
     image_resize_width = Dialog.getNumber();
+    images_frames_flag = Dialog.getCheckbox();
+    frames_fill_color[0] = Dialog.getNumber();
+    frames_fill_color[1] = Dialog.getNumber();
+    frames_fill_color[2] = Dialog.getNumber();
 
     canvas_width       = Dialog.getNumber();
     canvas_height      = Dialog.getNumber();
@@ -285,9 +353,6 @@ if (GUI_mode == 1) {
     points_fill_color[2]   = Dialog.getNumber();
     points_values_flag = Dialog.getCheckbox();
     points_series_flag = Dialog.getCheckbox();
-
-    batch_mode_flag    = Dialog.getCheckbox(); // Display while drawing
-    graph_save_flag    = Dialog.getCheckbox(); // Save without displaying
 
   Dialog.create ("IMAGEPLOT CONFIG AXES");
 
@@ -459,9 +524,11 @@ print("   y scale     = "+y_scale);
 // -----------------------------------------
 // MAKE CANVAS
 
-// set to display the graph as it is being made
-  if(batch_mode_flag == 1)
-    setBatchMode(true);
+  if(render_mode == "Progressive") {
+    setBatchMode(false); // set to display the graph as it is being made
+  } else {
+	  setBatchMode(true);
+  }
 
   print("making image "+ canvas_width + " x " + canvas_height);
   newImage("IMAGEPLOT", ""+canvas_colorspace+" black", canvas_width, canvas_height, 1);
@@ -657,41 +724,19 @@ for (i = 0; i < lines.length; i++) {
             // add offset here
         }
 
-        // draw images
-        if (images_flag == 1) {
-            showProgress(i, lines.length);
-            // show progress in imageJ menu bar
-            image_path = dir + items[4];
-            open(image_path);
-            if (image_resize_width > 0) {
-                run("Size...", "width=" + image_resize_width + " constrain interpolate");
-            }
-            image_width = getWidth;
-            image_height = getHeight;
-            run("Copy");
-            // copy to memory
-            close();
-            // close the image file
-            selectImage(id_plot);
-            // select graph image
-            makeRectangle(x, y, image_width, image_height);
-            // default - drawing at the right coordinate
-            run("Paste");
-        }
-
+        // draw image
+        draw_image(x,y);
     }
 
 }
 
+run("Select None");
 print("graph finished");
 
-if (batch_mode_flag == 1) {
-    if (graph_save_flag == 0)
-    setBatchMode(false);
-    // make the plot image visible
-    else {
-        // do not make the plot image visible - instead go to file save (use this for very large graphs)
-        selectImage(id_plot);
-        saveAs("JPG");
-    }
+if (render_mode == "Save") {
+  selectImage(id_plot);
+  saveAs("JPG");
+  close();
 }
+
+setBatchMode(false); // make the plot image visible
