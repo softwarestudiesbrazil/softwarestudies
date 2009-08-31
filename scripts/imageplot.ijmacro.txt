@@ -44,6 +44,14 @@ var   render_mode_list = newArray(
   ,"Progressive"
   ,"Save"
   );
+var   render_order = "Axes/Images+Labels";
+var   render_order_list = newArray(
+   "Axes/Images+Labels"
+  ,"Axes/Images/Labels"
+  ,"Images+Labels/Axes"
+  ,"Images/Labels/Axes"
+  ,"Labels/Images/Axes"
+  );
 
 var   points_style_choice = "Circle Filled";  // draw based on Series, based on Value, or in a fixed Fill color
 var     points_style_list = newArray(
@@ -144,9 +152,11 @@ function set_color(x, y, ds, rgb, color_choice) {
   if (color_choice == "Fill") {
 	    setColor(rgb[0], rgb[1], rgb[2]);
   } else if (color_choice == "Series") {
+      if ((ds*3) <= colors.length) {
       setColor(colors[3 * (ds - 1)], colors[3 * (ds - 1) + 1], colors[3 * (ds - 1) + 2]);
-      //  set up colors using the number of data series
-      //only works with 8 data series since colors array contains 8 sets of R,G,B values
+      // set up colors using the number of data series
+      // only works with 8 data series since colors array contains 8 sets of R,G,B values
+      }
   } else if (color_choice == "Black") {
 	    setColor(0,0,0);
   } else if (color_choice == "White") {
@@ -414,6 +424,7 @@ if (GUI_mode == 1) {
 
   Dialog.addChoice   ("Data", data_file_list, data_file);
   Dialog.addChoice   ("Images", image_dir_list, image_dir);
+  Dialog.addChoice   ("Render order", render_order_list, render_order);
   Dialog.addChoice   ("Render mode", render_mode_list, render_mode);
   Dialog.addCheckbox ("...configure", GUI_mode);
 
@@ -421,6 +432,7 @@ if (GUI_mode == 1) {
 
   data_file = Dialog.getChoice();
   image_dir = Dialog.getChoice();
+  render_order = Dialog.getChoice();
   render_mode = Dialog.getChoice();
   GUI_mode = Dialog.getCheckbox();
 
@@ -721,16 +733,46 @@ print("   y scale     = "+y_scale);
 // -----------------------------------------
 // GRAPH
 
-// Graph points, labels, images
+render_items = split(render_order, "/");
+for (i = 0; i < render_items.length; i++) {
 
-// Graph point+label+image
+  if (render_items[i] == "Axes") {
+    print("......"+render_items[i]);
+    draw_axis();
 
-print ("drawing graph");
-draw_graph();
-print ("drawing axis");
-draw_axis();
+  } else if (render_items[i] == "Images+Labels") {
+    print("......"+render_items[i]);
+    draw_graph();
 
-run("Select None");
+  } else if (render_items[i] == "Images") {
+    print("......"+render_items[i]);
+    temp_points_flag = points_flag;
+    temp_points_values_flag = points_values_flag;
+    temp_points_series_flag = points_series_flag;
+    points_flag = 0;
+    points_values_flag = 0;
+    points_series_flag = 0;
+
+    draw_graph();
+
+    points_flag = temp_points_flag;
+    points_values_flag = temp_points_values_flag;
+    points_series_flag = temp_points_series_flag;
+
+	} else if (render_items[i] == "Labels") {
+    print("......"+render_items[i]);
+    temp_images_flag = images_flag;
+    temp_images_frames_flag = images_frames_flag;
+    images_flag = 0;
+		images_frames_flag = 0;
+
+    draw_graph();
+
+    images_flag = temp_images_flag;
+		images_frames_flag = temp_images_frames_flag;
+
+	}    
+}
 
 print("Finished drawing");
 
@@ -741,3 +783,4 @@ if (render_mode == "Save") {
 }
 
 setBatchMode(false); // make the plot image visible
+run("Select None");
