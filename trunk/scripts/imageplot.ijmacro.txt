@@ -1,6 +1,8 @@
-// IMAGEPLOT
+//  IMAGEPLOT
 //
-//   ImageJ macro that plots image series to x,y points using a tab-delimited data file and a directory of images.
+//  Lev Manovich and Jeremy Douglass 2009
+//
+//  ImageJ macro that plots points, lines, and image series to x,y points using a tab-delimited data file and a directory of images.
 //  The macro automatically handles multple styles of of tab-separated-value data files:
 //
 //  TWO COLUMN DATA
@@ -20,46 +22,62 @@
 // ---------------------
 // FLAGS: either 0 or 1
 
-var             GUI_mode =     1;     // (1) GUI menus, (0) use default variables
+var              GUI_mode =    1;     // (1) GUI menus, (0) use default variables
 
 var       batch_mode_flag =    1;     // display while drawing (0) or at end (1)
 var       graph_save_flag =    0;     // save rather than displaying (1)
-var           images_flag =    1;     // flag (0 or 1): draw images on top of dots
+var           images_flag =    1;     // draw images on top of dots (1) or no images (0)
 var           points_flag =    1;     // draw dots; if set to 0, and image_flag set to 1, only images are drawn
 var     images_blend_flag =    1;     // (1) Blend mode copying of images
 var          x_fixed_flag =    0;     // fixed range for X
 var          y_fixed_flag =    0;     // fixed range for Y. Note: y_fixed_flag = 1 automatically if more than one data series
-var     points_white_flag =    0;     // draw dots in white regardless of the color automatically set up for multiple series
 var    points_values_flag =    1;     // draw values next to dot
 var    points_series_flag =    1;     // draw value in column 4 (for example, artist name, category, etc.) next to dot
-var     labels_white_flag =    0;     // draw labels next to dots in white regardless of the color used to draw dots
 var           axis_x_flag =    1;     // draw axis lines x
 var           axis_y_flag =    1;     // draw axis lines y
 var         x_labels_flag =    1;     // draw labels for X axis
 var         y_labels_flag =    1;     // draw labels for Y axis
 var           legend_flag =    1;     // draw legend for multiple series
 
+var   points_style_choice = "Circle Filled";  // draw based on Series, based on Value, or in a fixed Fill color
+var     points_style_list = newArray(
+   "Circle"
+  ,"Circle Filled"
+  ,"Rectangle"
+  ,"Rectangle Filled"
+  ,"None"
+  );
+
+var     points_fill_color = newArray(255,255,255); // color for image background
+var     labels_fill_color = newArray(255,255,255); // color for image background
+var      lines_fill_color = newArray(255,255,255); // color for image background
+var            color_list = newArray(
+   "Fill"
+  ,"Series"
+  ,"X Values"
+  ,"Y Values"
+  );
+
 
 // ---------------------
 // VARIABLES
 
-var data_default = "/Users/jdouglass/Desktop/webcomics_project/A Humument/1970 1st edition/images-all/results.levimagej-20.txt";
-var data_filelist = newArray(
+var data_file = "Open...";
+var data_file_list = newArray(
    "Open..."
   ,"/Users/jdouglass/Desktop/webcomics_project/A Humument/1970 1st edition/images-all/results.levimagej.txt"
   ,"/Users/jdouglass/Desktop/webcomics_project/A Humument/1970 1st edition/images-all/results.levimagej-3.txt"
   ,"/Users/jdouglass/Desktop/webcomics_project/A Humument/1970 1st edition/images-all/results.levimagej-20.txt"
   ,"/Users/jdouglass/Desktop/webcomics_project/A Humument/1970 1st edition/images-all/results.levimagej-20b.txt"
   );
-var data_file = "";
 
-var imagedir_default = "/Users/jdouglass/Desktop/webcomics_project/A Humument/1970 1st edition/images-all/"
-var imagedir_filelist = newArray(
-   "Open..."
+var image_dir = "Same as data"
+var image_dir_list = newArray(
+   "Same as data"
+  ,"Open..."
   ,"/Users/jdouglass/Desktop/webcomics_project/A Humument/1970 1st edition/images-all/"
   ,"None"
   );
-var image_dir = "";
 
 // variables: graph
 
@@ -67,8 +85,8 @@ var         canvas_width =   800;     // total output width
 var        canvas_height =   800;     // total output height
 var               border =   100;     // space around the graph -- subtracted from canvas to leave draw space
 var   image_resize_width =    64;     // resize width for thumbnails -- 0 or blank is original size
-var            oval_size =    10;     // size of ovals to draw
-var          labels_size =    12;     // font size for labels next to dots in the graph
+var           point_size =    10;     // size of points to draw
+var           label_size =    12;     // font size for labels next to dots in the graph
 var    canvas_colorspace = "RGB";     // RGB or 8-bit
 var        fill_bg_color = newArray(16,0,0); // color for image background
 
@@ -77,7 +95,7 @@ var              y_scale =     4;     // factor to scale y image size - use frac
 var         x_axis_start =     0;     // starting x axis value
 var        x_fixed_range =     0;     // e.g. 100 (1900-2000) instead of (xmax - xmin)
 var         y_axis_start =     0;     // starting y axis value
-var   y_fixed_range =     0;     // e.g. 255 (0-255) instead of (ymax - ymin); set to 0 to use data range
+var        y_fixed_range =     0;     // e.g. 255 (0-255) instead of (ymax - ymin); set to 0 to use data range
 
 var               origin = newArray(0,0,0); // coordinate (x,y,series) for line drawing
 var               ln_end = newArray(10,10,0); // coordinate (x,y,series) for line drawing
@@ -107,9 +125,28 @@ var   ds = 1;
 // ---------------------
 // FUNCTIONS
 
+function draw_dot(x, y) {
+  if (points_flag == 1) {
+    if (points_style_choice == "Circle")
+      drawOval(x - (point_size / 2), y - (point_size / 2), point_size, point_size);
+    else if (points_style_choice == "Circle Filled")
+      fillOval(x - (point_size / 2), y - (point_size / 2), point_size, point_size);
+    else if (points_style_choice == "Rectangle")
+      drawRect(x - (point_size / 2), y - (point_size / 2), point_size, point_size);
+    else if (points_style_choice == "Rectangle Filled")
+      fillRect(x - (point_size / 2), y - (point_size / 2), point_size, point_size);
+    else if (points_style_choice == "None")
+      print("points_style_choice: None");
+    else
+      print("Warning: points_style_choice failed to match style in draw_dot");
+  }
+}
+
 function plot_xy(x, y, ds) {
   // plot conversion -- takes raw data xy and series number d, returns absolute ImageJ pixel coordinates
   // For a series d, accepts the raw x/y and returns the plotting coordinates
+  x = parseFloat(x);
+  y = parseFloat(y);
 
   //   canvas   1000 x 1000
   // w borders   800 x  800 (100)
@@ -153,9 +190,9 @@ call("java.lang.System.gc"); // call Java garbage collector to free memory
 
 if (GUI_mode == 1) {
 
-  Dialog.create("IMAGEPLOT");
-  Dialog.addChoice   ("Data", data_filelist, data_default);
-  Dialog.addChoice   ("Images", imagedir_filelist, imagedir_default);
+  Dialog.create      ("IMAGEPLOT");
+  Dialog.addChoice   ("Data", data_file_list, data_file);
+  Dialog.addChoice   ("Images", image_dir_list, image_dir);
   Dialog.addCheckbox ("...configure", GUI_mode);
 
   Dialog.show();
@@ -177,7 +214,10 @@ if (GUI_mode == 1) {
   columns = items.length; // get the number of columns
   print("columns: "+columns);
 
-  if (image_dir == "Open...")
+  if (image_dir == "Same as data") {
+    dir = File.getParent(path);
+    dir = dir + "/";
+  } else if (image_dir == "Open...")
     dir = getDirectory("IMAGEPLOT \n LOAD IMAGES: \n Choose directory containing images to plot");
   else if (image_dir == "None")
     images_flag = 0;
@@ -210,10 +250,14 @@ if (GUI_mode == 1) {
   Dialog.addMessage ("--- Plot ---");
 
     Dialog.addCheckbox ("Plot points", points_flag);
-    Dialog.addCheckbox ("...force points white", points_white_flag);
+    Dialog.addNumber   ("Point size", point_size, 0, 5, "px");
+    Dialog.addChoice   ("Point style", points_style_list, points_style_choice);
+    Dialog.addMessage  ("Point color");
+    Dialog.addNumber   ("R", points_fill_color[0], 0, 5, "");
+    Dialog.addNumber   ("G", points_fill_color[1], 0, 5, "");
+    Dialog.addNumber   ("B", points_fill_color[2], 0, 5, "");
     Dialog.addCheckbox ("Plot values", points_values_flag);
     Dialog.addCheckbox ("Plot series labels", points_series_flag);
-    Dialog.addCheckbox ("...force text white", labels_white_flag);
 
   Dialog.addMessage ("--- Render ---");
 
@@ -234,10 +278,13 @@ if (GUI_mode == 1) {
     fill_bg_color[2]   = Dialog.getNumber();
 
     points_flag        = Dialog.getCheckbox(); // Plot points
-    points_white_flag  = Dialog.getCheckbox(); // Force dots white
+    point_size          = Dialog.getNumber();
+    points_style_choice = Dialog.getChoice();
+    points_fill_color[0]   = Dialog.getNumber();
+    points_fill_color[1]   = Dialog.getNumber();
+    points_fill_color[2]   = Dialog.getNumber();
     points_values_flag = Dialog.getCheckbox();
     points_series_flag = Dialog.getCheckbox();
-    labels_white_flag  = Dialog.getCheckbox(); // Force labels white
 
     batch_mode_flag    = Dialog.getCheckbox(); // Display while drawing
     graph_save_flag    = Dialog.getCheckbox(); // Save without displaying
@@ -281,8 +328,7 @@ if (GUI_mode == 1) {
     Dialog.addMessage  ("Note: e.g. 255 (0-255); 0 uses (ymax - ymin)");
     Dialog.addNumber   ("X scale factor", x_scale, 0, 5, "px/unit");
     Dialog.addNumber   ("Y scale factor", y_scale, 0, 5, "px/unit");
-    Dialog.addNumber   ("Oval size", oval_size, 0, 5, "px");
-    Dialog.addNumber   ("Label font size", labels_size, 0, 5, "pt");
+    Dialog.addNumber   ("Label font size", label_size, 0, 5, "pt");
 
   Dialog.show();
 
@@ -311,8 +357,7 @@ if (GUI_mode == 1) {
     y_fixed_range = Dialog.getNumber();
     x_scale            = Dialog.getNumber();
     y_scale            = Dialog.getNumber();
-    oval_size          = Dialog.getNumber();
-    labels_size        = Dialog.getNumber();
+    label_size        = Dialog.getNumber();
 
 }
 
@@ -330,7 +375,7 @@ if (columns > 3) { // if data series numbers and labels are present - i.e., data
   ds = 0;
   for (i=0; i<lines.length; i++) {
     items=split(lines[i], ",\t"); // read in data row
-    ds = parseInt(items[2]);      // read data series number (column 3)
+    ds = parseFloat(items[2]);      // read data series number (column 3)
     if (ds > dmax)                // if a new data series number is encountered
       dmax = ds;                  // set dmax to this number
     if (ds > labels_max) {        // if a new data series number is encountered
@@ -354,8 +399,8 @@ ymin=items[1];
 
 for (i=0; i<lines.length; i++) {
   items=split(lines[i], ",\t");
-  x = parseInt(items[0]);
-  y = parseInt(items[1]);
+  x = parseFloat(items[0]);
+  y = parseFloat(items[1]);
   if (x>xmax) xmax = x;
   if (x<xmin) xmin = x;
   if (y>ymax) ymax = y;
@@ -488,15 +533,15 @@ if (y_labels_flag == 1) {
       drawLine( x, y, x - tick_length, y); // draw axis tick line    
       print("-------i:"+i+" x:"+x+" y:"+y);//debug
       drawString(i, x-x_label_offset, y); // draw axis label
-  	}
-  	if (label_value != label_last) { // end cap line
+    }
+    if (label_value != label_last) { // end cap line
       ln_origin = split(plot_xy(xmin, ymax, dsi), ""); // plot_xy returns a string of delimited values
       x = ln_origin[0];
       y = ln_origin[1];
       drawLine( x + tick_length, y + y_label_offset, x - tick_length, y + y_label_offset); // draw axis tick line    
       //if (label_value > label_last-(0.9*y_label_step)) // smart xmax label
         drawString(ymax, x-x_label_offset, y+ y_label_offset);
-  	}
+    }
   }
 }
 
@@ -520,15 +565,15 @@ if (x_labels_flag == 1) {
     label_value = i;
     drawLine( x, y, x, y - tick_length); // draw axis tick line    
     drawString(i, x, y+y_label_offset); // draw axis label
-	}
-	if (label_value != label_last) { // end cap line
+  }
+  if (label_value != label_last) { // end cap line
     ln_origin = split(plot_xy(xmax, ymin, 1), ""); // plot_xy returns a string of delimited values
     x = ln_origin[0];
     y = ln_origin[1];
     drawLine( x, y + tick_length, x, y - tick_length); // draw axis tick line  
     //if (label_value > label_last-(0.9*x_label_step)) // smart xmax label
       drawString(xmax, x - x_label_offset, y+y_label_offset);
-	}
+  }
 }
 
 // -----------------------------------------
@@ -537,13 +582,15 @@ if (x_labels_flag == 1) {
 if (legend_flag == 1) {
   if (columns > 3) {
     setFont("SansSerif", legend_size, "antialiased");
-    x = oval_size + legend_size;
-    y_start = (oval_size + legend_size)*dmax;
-    for (i=0; i < dmax; i++)  {
-      y = y_start - i*(oval_size + legend_size);
-      setColor(colors[3*i], colors[3*i+1], colors[3*i+2] ); //  set up colors using the number of data series
-      fillOval(x - (oval_size / 2), y - (oval_size / 2), oval_size, oval_size);
-      drawString(ds_labels[i], x, y); // draw legends
+    x = point_size + legend_size;
+    y_start = (point_size + legend_size)*dmax;
+    if (ds <= 8) { // colorspace currently hardcoded to 8 or less
+      for (i=0; i < dmax; i++)  {
+        y = y_start - i*(point_size + legend_size);
+        setColor(colors[3*i], colors[3*i+1], colors[3*i+2] ); //  set up colors using the number of data series
+        draw_dot(x, y);
+        drawString(ds_labels[i], x, y); // draw legends
+      }
     }
   }
 }
@@ -555,7 +602,7 @@ if (legend_flag == 1) {
 
 setColor(255, 0, 0);
 // set default color for dots
-setFont("SansSerif", labels_size, "antialiased");
+setFont("SansSerif", label_size, "antialiased");
 // set font size for drawing labels next to poins
 
 // start loop
@@ -564,12 +611,12 @@ for (i = 0; i < lines.length; i++) {
 
     items = split(lines[i], ",\t");
 
-    x = parseInt(items[0]);
+    x = parseFloat(items[0]);
     // x-values
-    y = parseInt(items[1]);
+    y = parseFloat(items[1]);
     // y-values
     if (columns > 2) {
-        ds = parseInt(items[2]);
+        ds = parseFloat(items[2]);
         // read the number of data series
         setColor(colors[3 * (ds - 1)], colors[3 * (ds - 1) + 1], colors[3 * (ds - 1) + 2]);
         //  set up colors using  the number of data series
@@ -588,16 +635,13 @@ for (i = 0; i < lines.length; i++) {
 
         // draw point
         if (points_flag == 1) {
-            if (points_white_flag == 1) { setColor(255, 255, 255); }
-            fillOval(x - (oval_size / 2), y - (oval_size / 2), oval_size, oval_size);
+            setColor(points_fill_color[0], points_fill_color[1], points_fill_color[2]);
+            draw_dot(x,y);
         }
 
         // draw value labels
-        if (labels_white_flag == 1) {
-            setColor(255, 255, 255);
-        }
-        // option: always use white labels
         if (points_values_flag == 1) {
+            setColor(labels_fill_color[0], labels_fill_color[1], labels_fill_color[2]);
             drawString(items[0] + ", " + items[1], x, y);
         }
         if (points_series_flag == 1) {
@@ -605,10 +649,10 @@ for (i = 0; i < lines.length; i++) {
             label_name = items[3];
             // get the string contained in 4th column
             if (points_values_flag == 1) {
-                drawString(label_name, x, y-labels_size);
+                drawString(label_name, x, y-label_size);
             }
             else {
-                drawString(label_name, x, y-labels_size);
+                drawString(label_name, x, y-label_size);
             }
             // add offset here
         }
