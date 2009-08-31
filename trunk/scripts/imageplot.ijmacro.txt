@@ -197,28 +197,28 @@ if (GUI_mode == 1) {
     Dialog.addCheckbox ("Blend", images_blend_flag);
     Dialog.addNumber   ("Thumbnail width", image_resize_width, 0, 5, "px");
 
-  Dialog.addMessage ("--- Plot ---");
-
-    Dialog.addCheckbox ("Plot points", points_flag);
-    Dialog.addCheckbox ("... with values", points_values_flag);
-    Dialog.addCheckbox ("... with series labels", points_series_flag);
-    Dialog.addCheckbox ("Force dots white", points_white_flag);
-    Dialog.addMessage  ("Note: overrides color for dots");
-    Dialog.addCheckbox ("Force white labels", labels_white_flag);
-    Dialog.addMessage  ("Note: overrides automatic colors for multiple series");
-
   Dialog.addMessage ("--- Canvas ---");
 
+    Dialog.addNumber   ("Canvas Width", canvas_width, 0, 5, "px");
+    Dialog.addNumber   ("Canvas Height", canvas_height, 0, 5, "px");
+    Dialog.addNumber   ("Border size", border, 0, 5, "px");
     Dialog.addMessage  ("Background color");
     Dialog.addNumber   ("R", fill_bg_color[0], 0, 5, "");
     Dialog.addNumber   ("G", fill_bg_color[1], 0, 5, "");
     Dialog.addNumber   ("B", fill_bg_color[2], 0, 5, "");
-    Dialog.addNumber   ("Border size", border, 0, 5, "px");
+
+  Dialog.addMessage ("--- Plot ---");
+
+    Dialog.addCheckbox ("Plot points", points_flag);
+    Dialog.addCheckbox ("...force points white", points_white_flag);
+    Dialog.addCheckbox ("Plot values", points_values_flag);
+    Dialog.addCheckbox ("Plot series labels", points_series_flag);
+    Dialog.addCheckbox ("...force text white", labels_white_flag);
 
   Dialog.addMessage ("--- Render ---");
 
     Dialog.addCheckbox ("Fast (hidden) render", batch_mode_flag);
-    Dialog.addCheckbox ("Save w/out displaying?", graph_save_flag);
+    Dialog.addCheckbox ("Save w/out displaying", graph_save_flag);
 
   Dialog.show();
 
@@ -226,16 +226,18 @@ if (GUI_mode == 1) {
     images_blend_flag  = Dialog.getCheckbox();
     image_resize_width = Dialog.getNumber();
 
-    points_flag        = Dialog.getCheckbox(); // Plot points
-    points_values_flag = Dialog.getCheckbox();
-    points_series_flag = Dialog.getCheckbox();
-    points_white_flag  = Dialog.getCheckbox(); // Force dots white
-    labels_white_flag  = Dialog.getCheckbox(); // Force labels white
-
+    canvas_width       = Dialog.getNumber();
+    canvas_height      = Dialog.getNumber();
+    border             = Dialog.getNumber();
     fill_bg_color[0]   = Dialog.getNumber();
     fill_bg_color[1]   = Dialog.getNumber();
     fill_bg_color[2]   = Dialog.getNumber();
-    border             = Dialog.getNumber();
+
+    points_flag        = Dialog.getCheckbox(); // Plot points
+    points_white_flag  = Dialog.getCheckbox(); // Force dots white
+    points_values_flag = Dialog.getCheckbox();
+    points_series_flag = Dialog.getCheckbox();
+    labels_white_flag  = Dialog.getCheckbox(); // Force labels white
 
     batch_mode_flag    = Dialog.getCheckbox(); // Display while drawing
     graph_save_flag    = Dialog.getCheckbox(); // Save without displaying
