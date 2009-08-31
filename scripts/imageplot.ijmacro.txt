@@ -277,33 +277,25 @@ else {
 // ---------------------
 // CALCULATE
 
-// Series: count and label
+// Series
 
 // calculate the number of data series and read in data series labels
 // dmax is set to 1 by default
 
 if (columns > 3) { // if data series numbers and labels are present - i.e., data has at least 4 columns
-	for (i=0; i<lines.length; i++) {
-		items=split(lines[i], ",\t"); // read in data row
-		ds = parseInt(items[2]); 	// read data series number (column 3)
-		if (ds > dmax)  			// if a new data series number is encountered
-			dmax = ds;			// set dmax to this number
-	}
-print("number of data series as specified in column 3 = " + dmax);
-}
-
-// read all unique data series labels
-if (columns > 3) { // if data series numbers and labels are present - i.e., data has at least 4 columns
 	labels_max = 0;
 	ls = 0;
 	for (i=0; i<lines.length; i++) {
 		items=split(lines[i], ",\t"); // read in data row
-		ls = parseInt(items[2]); 	// read data series number (column 3)
-		if (ls > labels_max) { 			// if a new data series number is encountered
-			labels_max = ls;			
-			ds_labels[labels_max-1]=items[3]; // read the label corresponding to this number (column 4)			
+		ds = parseInt(items[2]);      // read data series number (column 3)
+		if (ds > dmax)                // if a new data series number is encountered
+			dmax = ds;                  // set dmax to this number
+		if (ls > labels_max) {        // if a new data series number is encountered
+			labels_max = ls;
+			ds_labels[labels_max-1]=items[3]; // read the label corresponding to this number (column 4)
 		}
 	}
+  print("number of data series as specified in column 3 = " + dmax);
 }
 
 // Image size
