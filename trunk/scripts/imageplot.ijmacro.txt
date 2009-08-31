@@ -298,7 +298,7 @@ if (columns > 3) { // if data series numbers and labels are present - i.e., data
   print("number of data series as specified in column 3 = " + dmax);
 }
 
-// Image size
+// Canvas, draw, and plot sizes
 
 // max values
 
@@ -333,12 +333,23 @@ y_values_range = ymax - ymin;
 if (x_fixed_flag == 1) { x_values_range = x_fixed_range; }
 if (y_fixed_flag == 1) { y_values_range = y_fixed_flag_range; }
 
-// calculate scale for the graph area:
+// define the drawing and plotting area
 
-draw_width = canvas_width - (border*2);
-plot_width = draw_width;
-draw_height = canvas_width - (border*2);
-plot_height = draw_height;
+draw_width  = canvas_width - (border*2);
+draw_height = canvas_height - (border*2);
+draw_xorig  = border;
+draw_yorig  = border;
+
+plot_width  = draw_width;
+plot_height = draw_height / dmax;
+
+plot_xorig  = draw_xorig;
+plot_xorig  = draw_xorig;
+
+plot_yorig = newArray(dmax)
+for (i=0; i<dmax; i++) {
+	plot_yorig[i] = 
+}
 if (dmax > 1) { // divide into stacked graph space for multiple data series
 	plot_height = draw_height / dmax;
 }
@@ -346,21 +357,36 @@ if (dmax > 1) { // divide into stacked graph space for multiple data series
 x_scale = plot_width / x_values_range;
 y_scale = plot_height / y_values_range;
 
-print("xmax = "+xmax);
-print("xmin = "+xmin);
-print("ymax = "+ymax);
-print("ymin = "+ymin);
+print("xmax           = "+xmax);
+print("xmin           = "+xmin);
+print("ymax           = "+ymax);
+print("ymin           = "+ymin);
 print("x_values_range = " +x_values_range);
 print("y_values_range = " +y_values_range);
-print("canvas_width = "+canvas_width);
-print("canvas_height = "+canvas_height);
-print("border = "+border);
-print("draw_width = "+draw_width);
-print("draw_height = "+draw_height);
-print("plot_width = "+plot_width);
-print("plot_height = "+plot_height);
-print("x_scale = "+x_scale);
-print("y_scale = "+y_scale);
+print("canvas_width   = "+canvas_width);
+print("canvas_height  = "+canvas_height);
+print("border         = "+border);
+print("draw_width     = "+draw_width);
+print("draw_height    = "+draw_height);
+print("plot_width     = "+plot_width);
+print("plot_height    = "+plot_height);
+print("x_scale        = "+x_scale);
+print("y_scale        = "+y_scale);
+
+function pxy(x, y, d) {
+  // For a series d, accepts the raw x/y and returns the plotting coordinates
+  x = border + (x * x_scale);
+  y = border + (y * y_scale) * (d-1);
+  y = cy(y);  // flip cartesian to ImageJ
+  coords = newArray(x,y,d);
+  return(coords);
+}
+
+function cy(y) {
+  // ImageJ puts the origin at the upper left, cartesian graphing happens from the lower left
+  // This function takes a cartesian y and returns the ImageJ equivalent.
+	return canvas - y;
+}
 
 
 // -----------------------------------------
