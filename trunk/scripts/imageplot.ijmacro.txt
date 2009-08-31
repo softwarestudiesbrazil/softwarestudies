@@ -1,0 +1,661 @@
+// IMAGEPLOT
+//
+// 	ImageJ macro that plots image series to x,y points using a tab-delimited data file and a directory of images.
+// 	It creates an output image using (max x, min x, max y, min y) - so it will work with dates and similar data sets which do not start at 0 
+//
+//   INPUT OPTION 1: 2 columns. Values in column 1 are used as X; values in column 2 are used as Y; 
+// 	if the data has two columns, assume one data series
+//   INPUT OPTION 2: 4 columns. Integer values in column 3 are used assumed to separate data series. 
+// 	they are used to 1) vertically offset data series graphs using y_fixed_range; 1) set diff. color for each data series
+// 	4th column values are used to draw labels explaining data series.
+//   INPUT OPTION 3: 5 columns. 5th column contains files names of images to render on top of the dots
+// 	images should be first scaled to the right size; set x_scale and y_scale parameters accordingly to create a large enough graph so they are visible
+// 	4th column values can contain strings (i.e., artist names, titles, etc.) which can be drawn next to the dots (or images)
+
+// FLAGS: either 0 or 1
+
+var gGUImode =    "1"		// 0 = headless, 1 = GUI
+var gPathSource = "/Users/jdouglass/Documents/programming/bash/vilinx/imagej/VilinxJ/video.avi"
+var gPathSave =   "/Users/jdouglass/Documents/programming/bash/vilinx/imagej/VilinxJ/out/"
+
+var       batch_mode_flag =    1;     // display while drawing (0) or at end (1)
+var       flag_graph_save =    0;     // save rather than displaying (1)
+var           images_flag =    1;     // flag (0 or 1): draw images on top of dots
+var           points_flag =    1;     // draw dots; if set to 0, and image_flag set to 1, only images are drawn
+var     flag_images_blend =    0;     // if 1, use Blend mode than copying images
+var     flag_canvas_black =    1;     // if 1, make black background; if 0, make white background
+var      flag_canvas_fill =    1;     // if 1, use fill_background_color to fill background
+var              flag_RGB =    1;     // if 1, make RGB image; if 0, make 8-bit grey scale image
+var               x_fixed =    0;     // fixed range for X
+var               y_fixed =    0;     // fixed range for Y. Note: If data contains only more than one data series, program automatically sets y_fixed =1
+var    points_color_white =    1;     // draw dots in white regardless of the color automatically set up for multiple series
+var    point_label_values =    1;     // draw values next to dot
+var      point_label_name =    0;     // draw value in column 4 (for example, artist name, category, etc.) next to dot
+var     label_color_white =    1;     // draw labels next to dots in white regardless of the color used to draw dots
+var           axis_flag_x =    1;     // draw axis lines x
+var           axis_flag_y =    1;     // draw axis lines y
+var         x_labels_flag =    1;     // draw labels for X axis
+var           legend_flag =    1;     // draw legend for multiple series
+
+// VARIABLES
+
+// variables: graph
+
+var          resize_width =   64;     // width for thumbnails -- 0 is original size
+var               x_scale =    4;     // factor to scale x image size - use fractions (i.e, 0.1) if x_max - x_min is too large
+var               y_scale =    4;     // factor to scale y image size - use fractions (i.e, 0.1) if x_max - x_min is too large
+var                  size =   10;     // size of ovals to draw
+var           labels_size =   12;     // font size for labels next to dots in the graph
+var                border =   10;     // space around the graph
+var fill_background_color =   64;     // color for image background
+
+// variables: legend, axis, ticks, labels 
+
+var    ds_labels = newArray(100);     // set up array to hold unique data series labels; change if data contains >100 series
+var           legend_size =   12;     // font size for the legend
+var       axis_label_size =   12;     // font size for axis labels
+var            axis_color =  192;     // grey value color for axis and labels
+var           tick_length =   10;     // axis tick lengths
+var            line_width =    2;     // width of X,Y axis lines and horizontal separation lines
+var          x_axis_start =    0;     // starting x axis value
+var         x_fixed_range =  255;     // e.g. 100 (1900-2000) instead of (xmax - xmin)
+var          x_label_step =   10;     // step for drawing x labels: draw label and a a tick every x_label_step 
+var          y_axis_start =    0;     // starting y axis value
+var         y_fixed_range =  255;     // e.g. 255 (0-255) instead of (ymax - ymin); set to 0 to use data range 
+var          y_label_step =   10;     // step for drawing y labels: draw label and a tick every y_label_step 
+
+// set default value -  if the data file only has 2 columns (X, Y), assume it is one data series;
+
+var dmax = 1;
+var   ds = 1;
+
+// calculate values to adjust dot x,y coordinates to compensate for its size
+
+var dot_adjust = round(size/2);
+
+// FREE MEMORY
+
+call("java.lang.System.gc"); // call Java garbage collector to free memory
+
+// DIALOG
+
+if (gGUImode == 1) {
+
+	path = File.openDialog("LOAD DATA: Select tab-delimited text file"); // read in data file
+		print("   path: ", path);
+  		text = File.openAsString(path);
+		lines = split(text, "\n");
+		print("   rows: " + lines.length);
+		items = split(lines[0], ",\t");
+		columns = items.length; // get the number of columns
+		print("columns: "+columns); 
+
+	Dialog.create("IMAGEPLOT");
+	Dialog.addCheckbox("Plot with images", true);
+	Dialog.show();
+
+	images_flag = Dialog.getCheckbox(); // plot images
+	if (images_flag == 1) 
+		dir = getDirectory("Choose directory containing images to plot"); 
+
+	Dialog.create ("IMAGEPLOT CONFIG");
+
+	Dialog.addMessage ("--- Images ---");
+	
+		Dialog.addCheckbox ("Color", flag_RGB);
+		Dialog.addCheckbox ("Blend", flag_images_blend);
+		Dialog.addNumber   ("Thumbnail width", resize_width, 0, 5, "px");
+
+	Dialog.addMessage ("--- Plot ---");
+
+		Dialog.addCheckbox ("Plot points?", points_flag);
+		Dialog.addCheckbox ("Plot values by dots", point_label_values);
+		Dialog.addCheckbox ("Plot series label", point_label_name);
+		Dialog.addMessage  ("Note: draw series value from column 4 (e.g. artist name) next to dot");
+		Dialog.addCheckbox ("Force dots white", points_color_white);
+		Dialog.addMessage  ("Note: overrides color for dots");
+		Dialog.addCheckbox ("Force white labels", label_color_white);
+		Dialog.addMessage  ("Note: overrides automatic colors for multiple series");
+
+	Dialog.addMessage("--- Canvas ---");
+	
+		Dialog.addCheckbox ("BG set to black?", flag_canvas_black);
+		Dialog.addCheckbox ("BG filled with color?", flag_canvas_fill);
+		Dialog.addNumber   ("Background color", fill_background_color, 0, 5, "255-gray");
+		Dialog.addNumber   ("Border size", border, 0, 5, "px");
+			
+	Dialog.addMessage("--- Render ---");
+	
+		Dialog.addCheckbox ("Fast (hidden) render", batch_mode_flag);
+		Dialog.addCheckbox ("Save w/out displaying?", flag_graph_save);
+
+	Dialog.show();
+
+		flag_RGB = Dialog.getCheckbox(); // RGB color image
+		flag_images_blend = Dialog.getCheckbox();
+		resize_width = Dialog.getNumber();
+
+		points_flag = Dialog.getCheckbox(); // Plot points
+		point_label_values = Dialog.getCheckbox();
+		point_label_name = Dialog.getCheckbox();
+		points_color_white = Dialog.getCheckbox(); // Force dots white
+		label_color_white = Dialog.getCheckbox(); // Force labels white
+
+		flag_canvas_black = Dialog.getCheckbox(); // BG set to black
+		flag_canvas_fill = Dialog.getCheckbox(); // BG filled with color
+		fill_background_color = Dialog.getNumber();
+		border = Dialog.getNumber();
+
+		batch_mode_flag = Dialog.getCheckbox(); // Display while drawing
+		flag_graph_save = Dialog.getCheckbox(); // Save without displaying
+
+	Dialog.create ("IMAGEPLOT CONFIG AXES");
+
+	Dialog.addMessage ("--- Axes ---");
+
+		Dialog.addCheckbox ("X axis lines", axis_flag_x);
+		Dialog.addCheckbox ("Y axis lines", axis_flag_y);
+		Dialog.addNumber   ("Axis tick length", tick_length, 0, 5, "px");
+		Dialog.addNumber   ("Line width (axes, separators)", line_width, 0, 5, "px");
+
+	Dialog.addMessage ("--- Axis Labels ---");
+
+		Dialog.addCheckbox ("X axis labels", x_labels_flag);
+		Dialog.addNumber   ("Axis label font size", axis_label_size, 0, 5, "pt");
+		Dialog.addNumber   ("Axis label color (grayscale)", axis_color, 0, 5, "pt");
+		Dialog.addNumber   ("X label step", x_label_step, 0, 5, "");
+		Dialog.addNumber   ("Y label step", y_label_step, 0, 5, "");
+
+	Dialog.addMessage ("--- Legend ---");
+
+		Dialog.addCheckbox ("Legend for series", legend_flag);
+		Dialog.addNumber   ("Legend font size", legend_size, 0, 5, "pt");
+
+	Dialog.addMessage ("--- Axis Ranges ---");
+
+		Dialog.addCheckbox ("X range fixed?", x_fixed);
+		Dialog.addCheckbox ("Y range fixed?", y_fixed);
+		Dialog.addMessage  ("Note: y range always fixed for more than one series");
+		Dialog.addNumber   ("starting x axis value", x_axis_start, 0, 5, "");
+		Dialog.addNumber   ("X fixed range", x_fixed_range, 0, 5, "units");
+		Dialog.addMessage  ("Note: e.g. 100 (1900-2000); 0 uses (xmax - xmin)");
+		Dialog.addNumber   ("starting y axis value", y_axis_start, 0, 5, "unit");
+		Dialog.addNumber   ("Y fixed range", y_fixed_range, 0, 5, "units");
+		Dialog.addMessage  ("Note: e.g. 255 (0-255); 0 uses (ymax - ymin)");
+		Dialog.addNumber   ("X scale factor", x_scale, 0, 5, "px/unit");
+		Dialog.addNumber   ("Y scale factor", y_scale, 0, 5, "px/unit");
+		Dialog.addNumber   ("Oval size", size, 0, 5, "px");
+		Dialog.addNumber   ("Label font size", labels_size, 0, 5, "pt");
+
+	Dialog.show();
+
+		axis_flag_x = Dialog.getCheckbox();
+		axis_flag_y = Dialog.getCheckbox();
+		tick_length = Dialog.getNumber();
+		line_width = Dialog.getNumber();
+
+		x_labels_flag = Dialog.getCheckbox();
+		axis_label_size = Dialog.getNumber();
+		axis_color = Dialog.getNumber();
+		x_label_step = Dialog.getNumber();
+		y_label_step = Dialog.getNumber();
+
+		legend_flag = Dialog.getCheckbox();
+		legend_size = Dialog.getNumber();
+
+		x_fixed = Dialog.getCheckbox();
+		y_fixed = Dialog.getCheckbox();
+		x_axis_start = Dialog.getNumber();
+		x_fixed_range = Dialog.getNumber();
+		y_axis_start = Dialog.getNumber();
+		y_fixed_range = Dialog.getNumber();
+		x_scale = Dialog.getNumber();
+		y_scale = Dialog.getNumber();
+		size = Dialog.getNumber();
+		labels_size = Dialog.getNumber();
+
+}
+else {
+}
+
+
+// ------------------------------------------
+
+
+// CALCULATE IMAGE SIZE
+
+// find max values
+	xmax=0; 
+	ymax=0;
+
+	for (i=0; i<lines.length; i++) {
+		items=split(lines[i], ",\t");
+		x = parseInt(items[0]);
+		y = parseInt(items[1]); 
+		if (x>xmax) xmax = x;
+		if (y>ymax) ymax = y;
+     }
+
+// find min values
+	xmin = xmax;
+	ymin = ymax;
+
+	for (i=0; i<lines.length; i++) {
+		items=split(lines[i], ",\t");
+		x = parseInt(items[0]);
+		y = parseInt(items[1]); 
+		if (x<xmin) xmin = x;
+      		if (y<ymin) ymin = y;
+     }
+
+	x_values_range = xmax - xmin;
+	y_values_range = ymax - ymin;
+
+
+
+// calculate the number of data series and read in data series labels
+// dmax is set to 1 by default
+
+	if (columns > 3) { // if data series numbers and labels are present - i.e., data has at least 4 columns
+		for (i=0; i<lines.length; i++) {
+			items=split(lines[i], ",\t"); // read in data row
+			ds = parseInt(items[2]); 	// read data series number (column 3)
+
+			if (ds > dmax)  			// if a new data series number is encountered
+				dmax = ds;			// set dmax to this number
+							
+     		}
+	print("number of data series as specified in column 3 = " + dmax);
+
+	}
+
+
+// read all unique data series labels
+	if (columns > 3) { // if data series numbers and labels are present - i.e., data has at least 4 columns
+		labels_max = 0;
+		ls = 0;
+		for (i=0; i<lines.length; i++) {
+			items=split(lines[i], ",\t"); // read in data row
+			ls = parseInt(items[2]); 	// read data series number (column 3)
+			if (ls > labels_max) { 			// if a new data series number is encountered
+				labels_max = ls;			
+				ds_labels[labels_max-1]=items[3]; // read the label corresponding to this number (column 4)			
+			}
+
+     		}
+	
+	}
+
+
+
+// if more than 1 data series, use fixed y range
+	if (dmax > 1) y_fixed = 1;
+
+
+// adjust maximum range if fixed data series
+	
+	 if (x_fixed == 1)
+		x_values_range = x_fixed_range;
+
+	if (y_fixed == 1) 
+		y_values_range = y_fixed_range*dmax; 
+
+	
+	print("xmax = "+xmax);
+	print("xmin = "+xmin);
+	print("ymax = "+ymax);
+	print("ymin = "+ymin);
+	print("x_values_range = " +x_values_range);
+	print("y_values_range = " +y_values_range);
+
+
+// calculate the size of graph area:
+
+// step 1
+	
+	scaled_image_width = x_values_range*x_scale;
+	scaled_image_height = y_values_range*y_scale;
+
+// step 2: adjust size if fixed range option	
+	if (x_fixed == 1) 
+		scaled_image_width = x_fixed_range*x_scale;
+	if (y_fixed == 1) 
+		scaled_image_height = y_fixed_range*y_scale;
+
+// step 3: multiply by number of data series
+	scaled_image_height = scaled_image_height*dmax;
+
+// step 3: add borders
+	scaled_image_width = scaled_image_width + border*2;
+	scaled_image_height = scaled_image_height + border*2;
+			
+
+// -----------------------------------------
+// MAKE IMAGE
+
+// set to display the graph as it is being made
+	if(batch_mode_flag == 1) 	
+		setBatchMode(true);
+	
+	print("making image "+ scaled_image_width + " x " + scaled_image_height);
+
+	if (flag_RGB == 1) {
+		if (flag_canvas_black == 1) 
+			newImage("2D Plot", "RGB black", scaled_image_width, scaled_image_height, 1);
+		else
+			newImage("2D Plot", "RGB white", scaled_image_width, scaled_image_height, 1);
+
+		if (flag_canvas_fill == 1) {
+			setColor(fill_background_color, fill_background_color, fill_background_color);
+			fill();
+		}	
+	}
+	if (flag_RGB == 0) {
+		if (flag_canvas_black == 1) 
+			newImage("2D Plot", "8-bit black", scaled_image_width, scaled_image_height, 1);
+		else
+			newImage("2D Plot", "8-bit white", scaled_image_width, scaled_image_height, 1);
+
+		if (flag_canvas_fill == 1) {
+			setColor(fill_background_color);
+			fill();
+		}
+	}
+
+	id_plot=getImageID;
+
+
+
+// -----------------------------------------
+// SET DRAWING PARAMETERS
+
+//set up a color pallete - this one is from beta.dailycolorscheme.com - 8 colors
+	colors = newArray(130, 15, 0, 255, 74, 18, 254, 246, 226, 148, 179, 197, 116, 198, 241, 88, 107, 122, 62, 79, 79, 171, 197, 7);
+	
+
+//set up font, drawing color for labels and axis lines, and line width
+	setFont("SansSerif", axis_label_size, "antialiased");
+	setColor(axis_color, axis_color, axis_color);
+	setLineWidth(line_width); 
+
+// set up blending mode
+	if (flag_images_blend == 1) 
+		setPasteMode("Blend"); // blend overlapping images
+	else 
+		setPasteMode("Copy");
+
+//set up offsets axis labels
+	x_label_offset = round(axis_label_size*1.4);
+	y_label_offset = round(axis_label_size*1.4); 
+
+// set up the length of horizontal separation line between each data series
+	tick_ds_length = scaled_image_width; 
+ 
+
+// -----------------------------------------
+// DRAW AXIS, LABELS
+
+	
+// option: draw horizontal and vertical axis
+
+if (axis_flag_x == 1 ) { 
+
+	// option: draw horizontal axis
+	drawLine(border, scaled_image_height-border, scaled_image_width-border, scaled_image_height-border); 
+}
+
+if (axis_flag_y == 1) {
+	// option: draw vertical axis
+	if (dmax == 1)  	 // if 1 data series, draw a single vertical axis line
+		drawLine(border, border, border, scaled_image_height-border);
+
+	else { 			
+		for (i=0; i < dmax; i++) {  
+			drawLine(border, border+i*y_fixed_range*y_scale, border, border+(i+1)*y_fixed_range*y_scale); // vertical axis line
+		}
+		for (i=1; i < dmax; i++) {   // skip drawing first separation line
+			drawLine(border, border+i*y_fixed_range*y_scale, border + tick_ds_length, border+i*y_fixed_range*y_scale); // horisontal separation line between each data series
+
+		}
+	}	
+}			
+
+
+// -----------------------
+// option: draw y label
+
+
+ // NEEDS TO BE ADDED
+
+
+// -----------------------
+// option: draw x label
+
+if (x_labels_flag == 1) {
+
+ if (x_fixed == 1) {
+	i=0;
+	label_value = x_axis_start;
+	label_last = x_axis_start + x_values_range;
+	while( label_value < label_last ) {
+		label_value = x_axis_start  + i*x_label_step;
+
+		x_position = i*x_label_step*x_scale + border;
+		y_position = scaled_image_height - border + y_label_offset;
+
+		drawString(label_value,  x_position-x_label_offset,  y_position); // draw axis label
+		drawLine( x_position, scaled_image_height - border, x_position, scaled_image_height - border - tick_length); // draw axis tick line
+		i = i + 1;
+	}
+}
+
+if (x_fixed == 0) {
+	i=0;
+	label_value = xmin;
+	label_last = xmin + x_values_range;
+	while( label_value < label_last ) {
+		label_value = xmin  + i*x_label_step;
+
+		x_position = i*x_label_step*x_scale + border;
+		y_position = scaled_image_height - border + y_label_offset;
+
+		drawString(label_value, x_position-x_label_offset,  y_position); // draw axis label
+		drawLine( x_position, scaled_image_height - border, x_position, scaled_image_height - border - tick_length); // draw axis tick line
+		i = i + 1;
+	}
+}
+
+}	
+
+// -----------------------------------------
+// DRAW LEGEND
+
+if (legend_flag == 1) {
+	if (columns > 3) {
+		setFont("SansSerif", legend_size, "antialiased"); 
+		x = 10;
+		y_start = 20*dmax;
+		for (i=0; i < dmax; i++)  {
+			y = y_start - i*20;	
+			setColor(colors[3*i], colors[3*i+1], colors[3*i+2] ); //  set up colors using  the number of data series
+			fillOval(x, y, size, size);  // draw legend dots twice the size of point dots
+			drawString(ds_labels[i], x+6+2*size, y+2*size); // draw legends
+		}
+	}
+}
+
+	
+		
+
+// -----------------------------------------
+// LOOP THROUGH DATA ROWS TO MAKE GRAPH
+
+
+setColor(255, 0, 0);  // set default color for dots
+
+setFont("SansSerif", labels_size, "antialiased");  // set font size for drawing labels next to poins
+
+
+// start loop
+for (i=0; i<lines.length; i++) {
+
+	items=split(lines[i], ",\t");
+
+	x = parseInt(items[0]);	// x-values
+	y = parseInt(items[1]);	// y-values
+
+
+// save X, Y values - to draw next to points	
+	x_original = x;
+	y_original = y;
+
+
+// MODIFY Y - STEP 1 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+// adjust coordinates
+	x = x - xmin; 
+	y = y - ymin;	
+
+
+// MODIFY Y - STEP 2 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^	
+	if (x_fixed == 1)
+		x = x + (xmin - x_axis_start); 
+
+// check if this works
+	if (y_fixed == 1)
+		y = y + (ymin - y_axis_start); 
+
+
+// only works with 8 data series since colors array contains 8 sets of R,G,B values
+	if (columns > 2) {
+		ds= parseInt(items[2]); // read the number of data series
+		setColor(colors[3*(ds-1)], colors[3*(ds-1)+1], colors[3*(ds-1)+2] ); //  set up colors using  the number of data series
+
+	
+		// MODIFY Y - STEP 3 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+		if (y_fixed == 1) 
+			y = y + y_fixed_range*(ds -1 );
+		else
+			y = y + y_values_range*(ds - 1);
+	 
+	}
+
+
+
+// MODIFY Y - STEP 4 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+// REVERSE Y coordinate since imageJ coordinate origin (0,0) is in upper left corner; 
+
+	if (y_fixed == 1)
+	 	y = y_fixed_range*dmax - y;
+	else 
+		y = y_values_range - y;
+		
+
+// MODIFY Y - STEP 5 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+// SCALE  X, Y coordinates before plotting
+	x = x*x_scale + border;
+	y = y*y_scale + border;
+
+
+
+// MODIFY Y - STEP 6 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+// adjust to compensate for the size of the dot
+	x = x - dot_adjust;
+	y = y - dot_adjust;
+
+
+// -----------------------------------------
+// PLOT POINT   
+
+if (points_flag == 1) {  // to disable drawing points when drawing images, set this flag to 0
+
+// option: draw dots in white regarless of the automatically set series color
+	if (points_color_white == 1)
+		setColor(255, 255, 255);
+
+
+//  default: use data in every single row
+	// fillOval(x, y, size, size); 
+
+// option: draw dot only if y_original > 0  --  to skip drawing dots which have y_original = 0
+	if (y_original > 0) 
+		fillOval(x, y, size, size); 
+
+}
+
+// option: draw values next to the point
+
+	if (y_original > 0) { 	// option: draw label only if (y_original > 0)
+
+		if (point_label_values == 1) {
+
+			// option: disregard color used to draw dots of this series and instead use white to draw value labels
+			if (label_color_white == 1) 
+				setColor(255, 255, 255); 
+
+			// option: draw x, y values
+			drawString(x_original  + ", " + y_original, x, y);
+
+			// option: draw x value only
+			// drawString( x_original, x, y);
+
+			// option: draw y value only
+			//drawString( y_original, x, y);
+
+		}
+
+		if (point_label_name == 1) {   // // option: draw value in column 4 (you can put anything there) 
+
+			// option: disregard color used to draw dots of this series and instead use white to draw value labels
+			if (label_color_white == 1) 
+				setColor(255, 255, 255); 
+
+			name = items[3]; // get the string contained in 4th column
+			if  (point_label_values == 1) 
+				drawString(name, x+130, y); // hack - adjust X value to look good; drawing this value after coordinates
+			else // option hack - if not drawing coordinates but only 4th value, draw it closer to left edge)
+				drawString(name, x, y); 
+
+		}
+
+// option: render image specified in column 5 on top of the dot
+	if (images_flag == 1) {
+		showProgress(i, lines.length); // show progress in imageJ menu bar
+		//print(items[4]);  // print the filename specified in column 5
+		image_path = dir+items[4];
+		open(image_path); 			// open the image file corresponding to the dot
+		if (resize_width > 0) {
+			run("Size...", "width="+resize_width+" constrain interpolate");	
+			}
+		image_width = getWidth;
+		image_height = getHeight;
+		run("Copy"); 					// copy to memory
+		close(); 						// close the image file
+
+		selectImage(id_plot);		// select graph image
+		makeRectangle(x, y, image_width, image_height);  // default - drawing at the right coordinate
+		//makeRectangle(x + random*300, y, image_width, image_height);     // option: offset by random X so images which are behind each other appear
+
+		run("Paste"); 
+
+		//run("Scale...", "x=.5 y=.5 width=120 height=120 interpolation=Bilinear fill title=[]");
+		
+	}	// end of the loop: if (y_original > 0)	
+	}
+
+	// finished rendering the data in one row
+//	print("x = " + x);
+//	print("y = " + y);
+//	print("image" + " " + i + " plotted");
+
+}
+
+print("graph finished");
+
+if(batch_mode_flag == 1) {
+	if (flag_graph_save == 0)	
+		setBatchMode(false);  // make the plot image visible 
+	else {   	// do not make the plot image visible - instead go to file save (use this for very large graphs)
+		selectImage(id_plot);				
+		saveAs("JPG");
+	}
+}	
