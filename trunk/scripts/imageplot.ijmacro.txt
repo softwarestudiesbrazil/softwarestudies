@@ -36,6 +36,7 @@ var     labels_white_flag =    0;     // draw labels next to dots in white regar
 var           axis_x_flag =    1;     // draw axis lines x
 var           axis_y_flag =    1;     // draw axis lines y
 var         x_labels_flag =    1;     // draw labels for X axis
+var         y_labels_flag =    1;     // draw labels for Y axis
 var           legend_flag =    1;     // draw legend for multiple series
 
 
@@ -94,8 +95,8 @@ var           axis_color = newArray(192,128,64); // color for axis and labels
 
 var          tick_length =     5;     // axis tick lengths
 var           line_width =     2;     // width of X,Y axis lines and horizontal separation lines
-var         x_label_step =    20;     // step for drawing x labels: draw label and a a tick every x_label_step
-var         y_label_step =    20;     // step for drawing y labels: draw label and a tick every y_label_step
+var         x_label_step =    10;     // step for drawing x labels: draw label and a a tick every x_label_step
+var         y_label_step =     2;     // step for drawing y labels: draw label and a tick every y_label_step
 
 // set default value -  if the data file only has 2 columns (X, Y), assume it is one data series;
 
@@ -251,6 +252,7 @@ if (GUI_mode == 1) {
   Dialog.addMessage ("--- Axis Labels ---");
 
     Dialog.addCheckbox ("X axis labels", x_labels_flag);
+    Dialog.addCheckbox ("Y axis labels", y_labels_flag);
     Dialog.addNumber   ("Axis label font size", axis_label_size, 0, 5, "pt");
     Dialog.addMessage  ("Axis color");
     Dialog.addNumber   ("R", axis_color[0], 0, 5, "");
@@ -288,6 +290,7 @@ if (GUI_mode == 1) {
     line_width         = Dialog.getNumber();
                        
     x_labels_flag      = Dialog.getCheckbox();
+    y_labels_flag      = Dialog.getCheckbox();
     axis_label_size    = Dialog.getNumber();
     axis_color[0]      = Dialog.getNumber();
     axis_color[1]      = Dialog.getNumber();
@@ -436,8 +439,8 @@ print("   y scale     = "+y_scale);
     setPasteMode("Copy");
 
 //set up offsets axis labels
-  x_label_offset = 0; // = round(axis_label_size*1.4);
-  y_label_offset = round(axis_label_size*1.5);
+  x_label_offset = 2*axis_label_size;
+  y_label_offset = 2*axis_label_size;
 
 // set up the length of horizontal separation line between each data series
 //  tick_ds_length = plot_width;
@@ -450,7 +453,7 @@ print("   y scale     = "+y_scale);
 
 if (axis_y_flag == 1) {
   for (i=0; i < dmax; i++) {
-      drawLine(border, border+(plot_height*(i+1)), border, 10 + border+(plot_height*(i)));
+      drawLine(border, border+(plot_height*(i+1)), border, y_label_offset + border+(plot_height*(i)));
   }
 }
 
@@ -461,11 +464,42 @@ if (axis_x_flag == 1 ) {
 }
 
 // -----------------------
-// draw y label -- NEEDS TO BE ADDED
+// draw y labels
 
+if (y_labels_flag == 1) {
+  if (y_fixed_flag == 0) {
+    label_value = ymin;
+    label_last = ymax;
+  } else {
+    label_value = y_axis_start;
+    label_last = y_axis_start + y_values_range;
+  }
+  print("label_value:"+label_value+"  label_last:"+label_last); // debug
+
+  for (dsi=1; dsi <= dmax; dsi++)  {
+    for (i=ymin; i < ymax; i=i+y_label_step)  {
+      print("  x(xmin):"+xmin+"  y(i):"+i);
+      ln_origin = split(plot_xy(xmin, i, dsi), ""); // plot_xy returns a string of delimited values
+      x = ln_origin[0];
+      y = ln_origin[1];
+      label_value = i;
+      drawLine( x, y, x - tick_length, y); // draw axis tick line    
+      print("-------i:"+i+" x:"+x+" y:"+y);//debug
+      drawString(i, x-x_label_offset, y); // draw axis label
+  	}
+  	if (label_value != label_last) { // end cap line
+      ln_origin = split(plot_xy(xmin, ymax, dsi), ""); // plot_xy returns a string of delimited values
+      x = ln_origin[0];
+      y = ln_origin[1];
+      drawLine( x + tick_length, y + y_label_offset, x - tick_length, y + y_label_offset); // draw axis tick line    
+      //if (label_value > label_last-(0.9*y_label_step)) // smart xmax label
+        drawString(ymax, x-x_label_offset, y+ y_label_offset);
+  	}
+  }
+}
 
 // -----------------------
-// draw x label
+// draw x labels
 
 if (x_labels_flag == 1) {
 
@@ -476,7 +510,6 @@ if (x_labels_flag == 1) {
     label_value = x_axis_start;
     label_last = x_axis_start + x_values_range;
   }
-  print("label_value:"+label_value+"  label_last:"+label_last); // debug
 
   for (i=xmin; i < xmax; i=i+x_label_step)  {
     ln_origin = split(plot_xy(i, ymin, 1), ""); // plot_xy returns a string of delimited values
@@ -484,15 +517,15 @@ if (x_labels_flag == 1) {
     y = ln_origin[1];
     label_value = i;
     drawLine( x, y, x, y - tick_length); // draw axis tick line    
-    drawString(i, x-x_label_offset, y); // draw axis label
+    drawString(i, x, y+y_label_offset); // draw axis label
 	}
 	if (label_value != label_last) { // end cap line
     ln_origin = split(plot_xy(xmax, ymin, 1), ""); // plot_xy returns a string of delimited values
     x = ln_origin[0];
     y = ln_origin[1];
-    drawLine( x, y, x, y - tick_length); // draw axis tick line  
-    if (label_value > label_last-(0.75*x_label_step)) // smart xmax label
-      drawString(xmax, x-x_label_offset, y);
+    drawLine( x, y + tick_length, x, y - tick_length); // draw axis tick line  
+    //if (label_value > label_last-(0.9*x_label_step)) // smart xmax label
+      drawString(xmax, x - x_label_offset, y+y_label_offset);
 	}
 }
 
