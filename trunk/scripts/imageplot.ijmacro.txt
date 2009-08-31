@@ -1,17 +1,23 @@
 // IMAGEPLOT
 //
 // 	ImageJ macro that plots image series to x,y points using a tab-delimited data file and a directory of images.
-// 	It creates an output image using (max x, min x, max y, min y) - so it will work with dates and similar data sets which do not start at 0 
+//  The macro automatically handles multple styles of of tab-separated-value data files:
 //
-//   INPUT OPTION 1: 2 columns. Values in column 1 are used as X; values in column 2 are used as Y; 
-// 	if the data has two columns, assume one data series
-//   INPUT OPTION 2: 4 columns. Integer values in column 3 are used assumed to separate data series. 
-// 	they are used to 1) vertically offset data series graphs using y_fixed_flag_range; 1) set diff. color for each data series
-// 	4th column values are used to draw labels explaining data series.
-//   INPUT OPTION 3: 5 columns. 5th column contains files names of images to render on top of the dots
-// 	images should be first scaled to the right size; set x_scale and y_scale parameters accordingly to create a large enough graph so they are visible
-// 	4th column values can contain strings (i.e., artist names, titles, etc.) which can be drawn next to the dots (or images)
+//  TWO COLUMN DATA
+//	   Column 1 = X (1950, 1977, 2008)
+//		 Column 2 = Y (192, 128, 256)
+//     Axes are independantly ranged and scaled to the plot space defined by canvas - borders. Values may be floating point.
+//  FOUR COLUMN DATA
+//	   Column 3 = Series IDs (1, 2, 3...)
+// 	   Column 4 = Series labels (Mondrian, Picasso, Rothko...)
+//     Series are used to:
+//         a) vertically offset data series graphs using y_fixed_flag_range;
+//         b) set diff. color for each data series
+//         c) draw labels
+//  FIVE COLUMN DATA
+//     Column 5 = image file names to render at x/y.
 
+// ---------------------
 // FLAGS: either 0 or 1
 
 var             GUI_mode =     1;     // (1) GUI menus, (0) use default variables
@@ -32,9 +38,9 @@ var           axis_y_flag =    1;     // draw axis lines y
 var         x_labels_flag =    1;     // draw labels for X axis
 var           legend_flag =    1;     // draw legend for multiple series
 
-// VARIABLES
 
-// variables: graph
+// ---------------------
+// VARIABLES
 
 var data_default = "/Users/jdouglass/Desktop/webcomics_project/A Humument/1970 1st edition/images-all/results.levimagej-20b.txt";
 var data_filelist = newArray(
@@ -53,6 +59,8 @@ var imagedir_filelist = newArray(
   );
 var image_dir = "";
 
+// variables: graph
+
 var         canvas_width =   800;     // total output width
 var        canvas_height =   800;     // total output height
 var               border =    10;     // space around the graph -- subtracted from canvas to leave draw space
@@ -68,6 +76,10 @@ var         x_axis_start =     0;     // starting x axis value
 var        x_fixed_range =     0;     // e.g. 100 (1900-2000) instead of (xmax - xmin)
 var         y_axis_start =     0;     // starting y axis value
 var   y_fixed_flag_range =     0;     // e.g. 255 (0-255) instead of (ymax - ymin); set to 0 to use data range 
+
+// variables: color pallete (8 colors)
+
+var colors = newArray(130, 15, 0, 255, 74, 18, 254, 246, 226, 148, 179, 197, 116, 198, 241, 88, 107, 122, 62, 79, 79, 171, 197, 7); //  from beta.dailycolorscheme.com - 8 colors
 
 // variables: legend, axis, ticks, labels 
 
@@ -90,11 +102,13 @@ var   ds = 1;
 
 var dot_adjust = round(oval_size/2);
 
-// FREE MEMORY
+
+// ---------------------
+// SETUP
 
 call("java.lang.System.gc"); // call Java garbage collector to free memory
 
-// DIALOG
+// Load dialog
 
 if (GUI_mode == 1) {
 
@@ -129,6 +143,8 @@ if (GUI_mode == 1) {
 	else dir = image_dir;
 
 }
+
+// Configure dialogs
 
 if (GUI_mode == 1) {
 
@@ -257,9 +273,11 @@ if (GUI_mode == 1) {
 else {
 }
 
-// ------------------------------------------
 
-// COUND AND LABEL SERIES
+// ---------------------
+// CALCULATE
+
+// Series: count and label
 
 // calculate the number of data series and read in data series labels
 // dmax is set to 1 by default
@@ -288,9 +306,9 @@ if (columns > 3) { // if data series numbers and labels are present - i.e., data
 	}
 }
 
-// CALCULATE IMAGE SIZE
+// Image size
 
-// find max values
+// max values
 
 xmax=0; 
 ymax=0;
@@ -303,7 +321,7 @@ for (i=0; i<lines.length; i++) {
 	if (y>ymax) ymax = y;
 	}
 
-// find min values
+// min values
 
 xmin = xmax;
 ymin = ymax;
@@ -316,11 +334,10 @@ for (i=0; i<lines.length; i++) {
 	if (y<ymin) ymin = y;
 	}
 
+// range
+
 x_values_range = xmax - xmin;
 y_values_range = ymax - ymin;
-
-// adjust maximum range if fixed data series
-
 if (x_fixed_flag == 1) { x_values_range = x_fixed_range; }
 if (y_fixed_flag == 1) { y_values_range = y_fixed_flag_range; }
 
@@ -369,9 +386,6 @@ print("y_scale = "+y_scale);
 
 // -----------------------------------------
 // SET DRAWING PARAMETERS
-
-//set up a color pallete - this one is from beta.dailycolorscheme.com - 8 colors
-	colors = newArray(130, 15, 0, 255, 74, 18, 254, 246, 226, 148, 179, 197, 116, 198, 241, 88, 107, 122, 62, 79, 79, 171, 197, 7);
 
 //set up font, drawing color for labels and axis lines, and line width
 	setFont("SansSerif", axis_label_size, "antialiased");
