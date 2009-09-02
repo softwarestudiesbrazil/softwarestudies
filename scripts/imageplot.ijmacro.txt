@@ -27,17 +27,17 @@ var              GUI_mode =    1;     // (1) GUI menus, (0) use default variable
 var           images_flag =    1;     // draw images on top of dots (1) or no images (0)
 var    images_frames_flag =    1;     // draw image frames
 var           points_flag =    1;     // draw dots; if set to 0, and image_flag set to 1, only images are drawn
-var           lines_flag  =    1;     // draw lines
+var           lines_flag  =    0;     // draw lines
 var     images_blend_flag =    0;     // (1) Blend mode copying of images
 var          x_fixed_flag =    0;     // fixed range for X
 var          y_fixed_flag =    0;     // fixed range for Y. Note: y_fixed_flag = 1 automatically if more than one data series
-var    points_values_flag =    1;     // draw values next to dot
-var    points_series_flag =    1;     // draw value in column 4 (for example, artist name, category, etc.) next to dot
+var    points_values_flag =    0;     // draw values next to dot
+var    points_series_flag =    0;     // draw value in column 4 (for example, artist name, category, etc.) next to dot
 var           axis_x_flag =    1;     // draw axis lines x
 var           axis_y_flag =    1;     // draw axis lines y
 var         x_labels_flag =    1;     // draw labels for X axis
 var         y_labels_flag =    1;     // draw labels for Y axis
-var           legend_flag =    1;     // draw legend for multiple series
+var           legend_flag =    0;     // draw legend for multiple series
 
 var   render_mode = "Progressinve";
 var   render_mode_list = newArray(
@@ -60,7 +60,7 @@ var   render_order_list = newArray(
   ,"Lines / Labels / Images / Axes"
    );
 
-var   points_style_choice = "Circle Filled";  // draw based on Series, based on Value, or in a fixed Fill color
+var   points_style_choice = "Circle";  // draw based on Series, based on Value, or in a fixed Fill color
 var     points_style_list = newArray(
    "Circle"
   ,"Circle Filled"
@@ -69,13 +69,13 @@ var     points_style_list = newArray(
   ,"None"
   );
 
-var   points_color_choice = "Series";
-var   labels_color_choice = "Series";
-var   lines_color_choice  = "Series";
-var   frames_color_choice = "Series";
+var   points_color_choice = "Manual";
+var   labels_color_choice = "Manual";
+var   lines_color_choice  = "Manual";
+var   frames_color_choice = "Manual";
 
 var            color_choice_list = newArray(
-   "Fill"
+   "Manual"
   ,"Series"
   ,"X Values"
   ,"Y Values"
@@ -95,7 +95,7 @@ var    fill_bg_color = newArray(0,0,0);
 var data_file = "Open...";
 var data_file_list = newArray(
    "Open..."
-  ,"/Users/jdouglass/Desktop/webcomics_project/A Humument/1970 1st edition/images-all/results.levimagej.txt"
+  ,"/Volumes/SWS02/projects/jeremy/comics/webcomics_project/Freakangels/cascript2/freakangels-brightness.imageplot.csv"
   ,"/Users/jdouglass/Desktop/webcomics_project/A Humument/1970 1st edition/images-all/results.levimagej-3.txt"
   ,"/Users/jdouglass/Desktop/webcomics_project/A Humument/1970 1st edition/images-all/results.levimagej-20.txt"
   ,"/Users/jdouglass/Desktop/webcomics_project/A Humument/1970 1st edition/images-all/results.levimagej-20b.txt"
@@ -145,7 +145,7 @@ var           axis_color = newArray(192,128,64); // color for axis and labels
 var          tick_length =     5;     // axis tick lengths
 var           line_width =     1;     // width of X,Y axis lines and horizontal separation lines
 var         x_label_step =    10;     // step for drawing x labels: draw label and tick every x_label_step units
-var         y_label_step =     2;     // step for drawing y labels: draw label and tick every y_label_step units 
+var         y_label_step =    10;     // step for drawing y labels: draw label and tick every y_label_step units 
 
 // set default value -  if the data file only has 2 columns (X, Y), assume it is one data series;
 
@@ -159,21 +159,26 @@ var   ds = 1;
 function float_print(float, precision){
   print("FLOAT: "+float);
   float_items = split(float, ".");
-  print("FLOAT[0]: "+float_items[0]);
-  print("FLOAT[1]: "+float_items[1]);
-  if (precision > lengthOf(float_items[1]))
-    precision =  lengthOf(float_items[1]);
-  if (precision > 0)
-    print("RETURN 0+1: "+float_items[0] + substring(float_items[1], 0, precision));
-    return (float_items[0] + "." + substring(float_items[1], 0, precision));
-  else
-    print("RETURN 0: "+float_items[0]);
-    return (float_items[0]);
+  if (lengthOf(float_items) > 1) {
+    print("FLOAT[0]: "+float_items[0]);
+    print("FLOAT[1]: "+float_items[1]);
+    if (precision > lengthOf(float_items[1])) {
+   	  precision =  lengthOf(float_items[1]);
+    }
+    if (precision > 0) {
+      print("RETURN 0+1: "+float_items[0] + substring(float_items[1], 0, precision));
+      return (float_items[0] + "." + substring(float_items[1], 0, precision));
+    } else {
+      print("RETURN 0: "+float_items[0]);	
+      return (float_items[0]);
+    }		
+  }
+  return (float);
 }
 
 function set_color(x, y, ds, rgb, color_choice) { 
   // print("set_color: x:"+x+"  y:"+y+"  ds:"+ds+"  rgb:"+rgb[0]+" "+rgb[1]+" "+rgb[2]+"  color_choice:"+color_choice);
-  if (color_choice == "Fill") {
+  if (color_choice == "Manual") {
 	    setColor(rgb[0], rgb[1], rgb[2]);
   } else if (color_choice == "Series") {
       if ((ds*3) <= colors.length) {
@@ -333,7 +338,7 @@ function draw_axis() {
         x = ln_origin[0];
         y = ln_origin[1];
         drawLine( x + tick_length, y + y_label_offset, x - tick_length, y + y_label_offset); // draw axis tick line    
-        //if (label_value > label_last-(0.9*y_label_step)) // smart xmax label
+        if(label_value > label_last-(0.75*y_label_step)) // smart xmax label
           drawString(float_print(ymax,labels_precision), x-x_label_offset, y+ y_label_offset);
       }
     }
@@ -363,7 +368,7 @@ function draw_axis() {
       x = ln_origin[0];
       y = ln_origin[1];
       drawLine( x, y + tick_length, x, y - tick_length); // draw axis tick line  
-      //if (label_value > label_last-(0.9*x_label_step)) // smart xmax label
+      if(label_value > label_last-(0.75*x_label_step)) // smart xmax label
         drawString(float_print(xmax,labels_precision), x - x_label_offset, y+y_label_offset);
     }
   }
@@ -496,7 +501,7 @@ if (GUI_mode == 1) {
   GUI_mode = Dialog.getCheckbox();
 
   if (data_file == "Open...") {
-    path = File.openDialog("IMAGEPLOT \n LOAD DATA: \n Select tab-delimited text file"); // read in data file
+    path = File.openDialog("IMAGEPLOT LOAD DATA: Select tab-delimited text file"); // read in data file
   } else {
     path = data_file;
   }
