@@ -37,7 +37,8 @@ function analyzeImage( inputFile, outputFile )
   for i=2:length(filenames)
       I = imread(char(filenames(i)));
       [d1] = basicInfo(I);
-      [d2] = GLCMInfo(I,2);
+      %[d2] = GLCMInfo(I,2);
+      d2 = [];
       data = [d1 d2];
       fprintf(ofid,'%s',char(filenames(i)));
       for j=1:length(data)
