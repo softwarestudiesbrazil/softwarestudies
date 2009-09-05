@@ -1,4 +1,4 @@
-function analyzeImage( inputFile, outputFile )
+function analyzeImage( inputFile, outputFile, logFile )
 
   % read files from the list
   fid = fopen(inputFile,'r');
