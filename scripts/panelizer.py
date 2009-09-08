@@ -30,6 +30,8 @@ ops = options
 
 imageDir = ops.imageDir
 
+ops.maxPanels = int(ops.maxPanels)
+
 imageFolder = "Images"
 #outputFolder = "Panels" #please don't change this without look through the whole file
 
