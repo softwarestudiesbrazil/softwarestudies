@@ -1,14 +1,15 @@
-import Image
+#!/usr/bin/env python
+
+from PIL import Image
 import numpy as np
 import scipy
 from scipy import ndimage
-from scipy.misc.pilutil import *
+#from scipy.misc.util import *
 from scipy.stats.distributions import *
 from scipy.ndimage.measurements import *
 
 import sys
 import os
-from PIL import Image
 import math
 import parser
 import csv
@@ -48,10 +49,15 @@ ops = options
 ops.thumbWidth = float(ops.thumbWidth)
 ops.space = float(ops.xspace)
 ops.csize = (ops.cwidth, ops.cheight)
-
-
 thumbsize = (20, 20)
 plot = Image.new("RGB", ops.csize, "black")
+
+def colorThumb(color, im):
+	im = fromimage(im)
+	im = im+color
+	im = toimage(im)
+	return im
+	
 ################ Data #############################
 data = csv.reader(open(ops.datafile, 'r'))
 plotdata = []
@@ -143,10 +149,22 @@ for path in picturePathNames:
 		print "ID:", id, "Color:", (color), "Key:", colorKey
 	lastID = id
 	id = []
+	
+	#im = colorThumb(color, im)
+	
 	print "Done"
-	im = fromimage(im)
-	im = im+color
-	im = toimage(im)
+	gutter = ops.thumbWidth * 2
+	
+	dataX = []
+	dataY = []
+	for index in range(len(plotdata)):
+		dataX.append(plotdata[index][1])
+	for index in range(len(plotdata)):
+		dataY.append(plotdata[index][2])
+		
+	ops.xspace = (ops.cwidth - gutter * 2) / max(dataX)
+	ops.yspace = (ops.cheight - gutter * 2) / (max(dataY)+1)
+
 	print "Pasting:", (ops.xspace*plotdata[picturePathNames.index(path)][1], ops.yspace*plotdata[picturePathNames.index(path)][2])
 	plot.paste(im, (ops.xspace*plotdata[picturePathNames.index(path)][1], ops.yspace*plotdata[picturePathNames.index(path)][2]))
 	#thumbs.append(im)
