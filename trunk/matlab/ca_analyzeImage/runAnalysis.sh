@@ -10,16 +10,16 @@ then
 fi
 
 ### constants
-ASTANA_LOGIN="sunsern@astana.ucsd.edu"
+ASTANA_LOGIN="jeremydouglass@astana.ucsd.edu"
 
 # path to source on Astana
 SOURCE_PREFIX="/Volumes/SWS02/projects/jeremy/comics/manga/onemanga-all"
 # path to results on Astana
-RESULT_PREFIX="/Users/sunsern/DELETEME"
-# path to scrips 
-WORKSPACE_PREFIX="/home/scheaman/Desktop"
+RESULT_PREFIX="/Volumes/SWS02/projects/jeremy/comics/manga/onemanga-all-results"
+# path to workspace
+WORKSPACE_PREFIX="/u1/jdouglas/workspace"
 
-MATLAB_PATH="/home/scheaman/workspace/softwarestudies/matlab/ca_analyzeImage"
+MATLAB_PATH="/u1/jdouglas/tools/softwarestudies/matlab/ca_analyzeImage"
 
 LOG_FILE="job.log"
 INPUT_FILE="input.txt"
@@ -43,7 +43,7 @@ then
 fi
 
 ### create a list of all images
-find $WORKSPACE_PREFIX/$TARGET -iname "*.jpg" >> $WORKSPACE_PREFIX/$TARGET$INPUT_FILE
+find $WORKSPACE_PREFIX/$TARGET -iname "*.jpg" > $WORKSPACE_PREFIX/$TARGET$INPUT_FILE
 
 if [ $? -ne 0 ]
 then
