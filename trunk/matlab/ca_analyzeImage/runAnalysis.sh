@@ -59,7 +59,7 @@ then
 fi
 
 ### remove *.jpg
-find $WORKSPACE_PREFIX/$TARGET -iname "*.jpg" -delete
+find $WORKSPACE_PREFIX/$TARGET -iname "*.jpg" -exec rm '{}' \;
 
 if [ $? -ne 0 ]
 then
@@ -67,7 +67,7 @@ then
 fi
 
 ### remove empty directories
-find $WORKSPACE_PREFIX/$TARGET -empty -delete
+find $WORKSPACE_PREFIX/$TARGET -empty -exec rmdir '{}' \;
 
 if [ $? -ne 0 ]
 then
@@ -84,6 +84,7 @@ fi
 
 
 ### rsync results back
+echo "[`date`] Rsyncing results back" >> $WORKSPACE_PREFIX/$TARGET$LOG_FILE
 rsync -avz $WORKSPACE_PREFIX/$TARGET $ASTANA_LOGIN:$RESULT_PREFIX/$TARGET
 
 if [ $? -ne 0 ]
