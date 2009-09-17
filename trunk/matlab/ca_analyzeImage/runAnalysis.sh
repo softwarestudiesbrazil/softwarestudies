@@ -39,7 +39,10 @@ rsync -avz --exclude=".DS_Store" $ASTANA_LOGIN:$SOURCE_PREFIX/$TARGET $WORKSPACE
 
 if [ $? -ne 0 ]
 then
-    echo "[`date`] ERROR: rsync from source" >> $WORKSPACE_PREFIX/$TARGET$LOG_FILE  
+    echo "[`date`] ERROR: rsync from source" >> $WORKSPACE_PREFIX/$TARGET$LOG_FILE
+    exit 1
+else
+    echo "[`date`] Rsync from source completed" >> $WORKSPACE_PREFIX/$TARGET$LOG_FILE  
 fi
 
 ### create a list of all images
@@ -47,7 +50,8 @@ find $WORKSPACE_PREFIX/$TARGET -iname "*.jpg" > $WORKSPACE_PREFIX/$TARGET$INPUT_
 
 if [ $? -ne 0 ]
 then
-    echo "[`date`] ERROR: creating list of images" >> $WORKSPACE_PREFIX/$TARGET$LOG_FILE  
+    echo "[`date`] ERROR: creating list of images" >> $WORKSPACE_PREFIX/$TARGET$LOG_FILE
+    exit 1
 fi
 
 ### run matlab
@@ -56,6 +60,9 @@ matlab -nodisplay -nojvm -r "path(path,'$MATLAB_PATH'); analyzeImage('$WORKSPACE
 if [ $? -ne 0 ]
 then
     echo "[`date`] ERROR: matlab" >> $WORKSPACE_PREFIX/$TARGET$LOG_FILE  
+    exit 1
+else
+    echo "[`date`] Matlab completed" >> $WORKSPACE_PREFIX/$TARGET$LOG_FILE  
 fi
 
 ### remove *.jpg
@@ -67,6 +74,7 @@ then
 fi
 
 ### remove empty directories
+find $WORKSPACE_PREFIX/$TARGET -empty
 find $WORKSPACE_PREFIX/$TARGET -empty -exec rmdir '{}' \;
 
 if [ $? -ne 0 ]
