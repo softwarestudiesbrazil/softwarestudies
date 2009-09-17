@@ -78,7 +78,9 @@ fi
 
 ### remove empty directories
 find $WORKSPACE_PREFIX/$TARGET -empty
-find $WORKSPACE_PREFIX/$TARGET -empty -exec rmdir '{}' \;
+#find $WORKSPACE_PREFIX/$TARGET -empty -exec rmdir '{}' \;
+find $WORKSPACE_PREFIX/$TARGET -empty | xargs -n1 rmdir
+
 
 if [ $? -ne 0 ]
 then
