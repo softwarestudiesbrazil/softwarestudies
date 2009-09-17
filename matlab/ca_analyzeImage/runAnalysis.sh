@@ -1,9 +1,8 @@
-#!/bin/bash
+#!/usr/bin/ssh-agent bash
 
 # example: ./runAnalysis.sh media.onemanga.com/
 
 ### enter ssh-agent shell for passwordless ssh and rsync
-ssh-agent bash
 ssh-add /u1/jdouglas/.ssh/id_rsa
 
 if [ $# -ne 1 ]
