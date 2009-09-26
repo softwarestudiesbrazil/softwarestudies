@@ -238,7 +238,7 @@ for fileName in pictureFileNames:
 	of.write(str(pictureVar[pictureFileNames.index(fileName)]))
 	of.write(",")
 	of.write(str(pictureStdDev[pictureFileNames.index(fileName)]))
-	of.write("\n")
+	of.write(",")
 	of.write(str(pictureAvgHue[pictureFileNames.index(fileName)]))
 	of.write("\n")
 	
