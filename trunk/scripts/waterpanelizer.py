@@ -41,9 +41,9 @@ global ops
 ops = options
 
 ############## Panelizer #########################
-def panelize(picture):
+def waterPanelize(picture):
 
-	print "Panalizing:", os.path.basename(picture)
+	print "Water Panalizing:", os.path.basename(picture)
 	
 	struct = np.array([[0,1,0],
 					   [1,1,1],
@@ -139,6 +139,8 @@ def panelize(picture):
 		print (os.path.join(ops.outDir,os.path.basename(picture)+'_mask.jpg'), "JPEG")
 		toimage(water).convert('RGB').save(os.path.join(ops.outDir,os.path.basename(picture)+'_mask.jpg'), "JPEG")
 		
+	return os.path.join(ops.outDir,os.path.basename(picture)+'_mask.jpg'), "JPEG"
+		
 	
 ################ Getting Images ###################
 print "Getting Images..."
@@ -156,4 +158,4 @@ for fileName in pictureFileNames:
 for path in picturePathNames:
 	if picturePathNames.index(path) == ops.imNum:
 		break
-	panelize(path)
+	waterPanelize(path)
