@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from PIL import Image
+from PIL import Image, ImageFilter
 import numpy as np
 import scipy
 from scipy import ndimage
@@ -14,35 +14,136 @@ import math
 import parser
 import csv
 
-from optparse import OptionParser
-
-oparser = OptionParser()
-oparser.add_option("-i", dest="imageDir",
-				  help="Image Directory. Default is the current directory", default=os.path.curdir)
-oparser.add_option("-t", dest="thumbWidth",
-				  help="Thumbnail width. Default is 20", type = "int", default = 20)
-oparser.add_option("-o", dest="outFile",
-				  help="Output file for data. Default is: data.txt", default = "data.txt")
-				  
-(options, args) = oparser.parse_args()
-
-global ops 
-ops = options
 
 ############ Image Analysis Functions #######
+def findShapes(picture, res):
+	print "Counting Shapes:", os.path.basename(picture) , '...', 
+	
+	struct = np.array([[0,1,0],
+					   [1,1,1],
+					   [0,1,0]])
+	
+	##open image
+	im = Image.open(picture)
+
+	#im.show()
+	im = im.convert("L")
+
+	xsize, ysize = im.size
+	im = im.resize((xsize*.3, ysize*.3), Image.ANTIALIAS)
+	xsize, ysize = im.size
+	
+	im = im.filter(ImageFilter.FIND_EDGES)
+
+	im = fromimage(im)
+	im = scipy.transpose(im)
+	im = scipy.divide(im, 30)
+	im = im *30
+	##make markers
+	mark = 0
+	markers = np.zeros_like(im).astype('int')
+	
+	for x in range(xsize):
+		for y in range(ysize):
+			if (x%(int(xsize/30)) == 0) and (y%(int(ysize/30)) == 0):
+				mark += 1
+				markers[x,y] = mark
+	
+	##run watershed
+	water = ndimage.watershed_ift(im.astype('uint8'), markers, structure = struct)
+	toimage(water).save("sw"+ os.path.basename(picture))
+	
+	##make some masks and count the size of each region
+	sizecount = []
+	
+	marks = range(mark+1)
+	for index in range(len(marks)):
+		sizecount.append(0)
+	
+	for x in range(0,xsize,(xsize/res)+1):
+		for y in range(0,ysize,(ysize/res)+1):
+			sizecount[marks.index(water[x,y])] += 1
+	
+	##make markers based on large regions
+	mark = 0
+	shapes = 0
+	markers = np.zeros_like(im).astype('int')
+	for mark in marks:
+		if sizecount[marks.index(mark)] >= 100:
+			shapes += 1
+			
+	print shapes
+	return shapes
+	
+def findColorRegions(picture, res):
+	print "Counting Color Regions:", os.path.basename(picture) , '...', 
+	
+	struct = np.array([[0,1,0],
+					   [1,1,1],
+					   [0,1,0]])
+	
+	##open image
+	im = Image.open(picture)
+
+	#im.show()
+	im = im.convert("L")
+
+	xsize, ysize = im.size
+	im = im.resize((xsize*.3, ysize*.3),Image.ANTIALIAS)
+	xsize, ysize = im.size
+	
+	im = fromimage(im)
+	im = scipy.transpose(im)
+	##reduce colors
+	im = scipy.divide(im, 30)
+	im = im *30
+	
+	##make markers
+	mark = 0
+	markers = np.zeros_like(im).astype('int')
+	
+	for x in range(xsize):
+		for y in range(ysize):
+			if (x%(int(xsize/30)) == 0) and (y%(int(ysize/30)) == 0):
+				mark += 1
+				markers[x,y] = mark
+	
+	##run watershed
+	water = ndimage.watershed_ift(im.astype('uint8'), markers, structure = struct)
+
+	##make some masks and count the size of each region
+	sizecount = []
+	
+	marks = range(mark+1)
+	for index in range(len(marks)):
+		sizecount.append(0)
+	
+	for x in range(0,xsize,(xsize/res)+1):
+		for y in range(0,ysize,(ysize/res)+1):
+			sizecount[marks.index(water[x,y])] += 1
+	
+	##make markers based on large regions
+	mark = 0
+	shapes = 0
+	markers = np.zeros_like(im).astype('int')
+	for mark in marks:
+		if sizecount[marks.index(mark)] >= 100:
+			shapes += 1
+			
+	print shapes
+	return shapes
+	
+	
 def findBrightness(picture):
 	print "Calculating Brightness:", os.path.basename(picture),
 	image = Image.open(picture)
-	print "Converting...",
 	image = image.convert("L") #converts to luminence
 	image = fromimage(image)
-	print "Averaging...",
 	brightness = image.mean()
-	print "Done"
+	print brightness
 	return brightness
 
 def findSize(picture):
-	print "Counting Pixels:", picture
 	image = Image.open(picture)
 	size = image.size[0] * image.size[1]
 	return size
@@ -58,27 +159,30 @@ def findYSize(picture):
 	return size
   	
 def findEntropy(picture):
-	print "Entropy:", os.path.basename(picture)
+	print "Entropy:", os.path.basename(picture),
 	im = Image.open(picture) ##PIL
 	im = im.convert("L") 
 	hist = im.histogram()
 	en = entropy(hist)
+	print en
 	return en
 	
 def findStdDev(picture):
-	print "StdDev:", os.path.basename(picture)
+	print "StdDev:", os.path.basename(picture),
 	im = Image.open(picture) ##PIL
 	im = im.convert("RGB") 
 	hist = im.histogram()
 	std = np.std(hist)
+	print std
 	return std
 	
 def findVarience(picture):
-	print "Varience:", os.path.basename(picture)
+	print "Varience:", os.path.basename(picture),
 	im = Image.open(picture) ##PIL
 	im = im.convert("L")
 	im = fromimage(im) ##scipy
 	var = variance(im)
+	print var
 	return var
 
 def findAvgHue(picture):
@@ -96,7 +200,6 @@ def findAvgHue(picture):
 	avgRed = R.mean()
 	avgGreen = G.mean()
 	avgBlue = B.mean()
-	print "R:", avgRed, "G:", avgGreen ,"B:" ,avgBlue, "H:",
 
 	xR = avgRed * math.cos(math.radians(60))
 	yR = avgRed * math.sin(math.radians(60))
@@ -120,126 +223,5 @@ def findAvgHue(picture):
 
 	if xH < 0 and yH > 0:
 		hue -= 180
-
 	print hue
 	return hue
-
-
-
-################ Getting Images ###################
-print "Getting Images..."
-allFileNames = os.listdir(ops.imageDir)
-pictureFileNames = []
-for name in allFileNames:
-	if name.endswith(".jpg"):
-		pictureFileNames.append(name)
-		
-print "File names:", pictureFileNames
-picturePathNames = []
-for fileName in pictureFileNames:
-	if (fileName.endswith(".jpg")):
-		picturePathNames.append(os.path.join(ops.imageDir, fileName))
-	
-############## Processing Images ###################
-vars = "filename"
-
-doBrightness = True
-doSize = True
-doXSize = True
-doYSize = True
-doEntropy = True
-doVarience = True
-doAvgHue = True
-doStdDev = True
-
-if doBrightness:
-	pictureBrightness = []
-	for picture in picturePathNames:
-		pictureBrightness.append ( findBrightness(picture) )
-	print "Brightness:", str(pictureBrightness)
-	if not ("brightness" in vars[0]):
-		vars += ",brightness"
-
-if doSize:
-	pictureSize = []
-	for picture in picturePathNames:
-		pictureSize.append ( findSize(picture))
-	print "Size:", str(pictureSize)
-	if "size" not in vars[0]:
-		vars += ",size"
-
-if doXSize:
-	pictureXSize = []
-	for picture in picturePathNames:
-		pictureXSize.append ( findXSize(picture))
-	print "XSize:", str(pictureXSize)
-	if "xsize" not in vars[0]:
-		vars += ",xsize"
-
-if doYSize:
-	pictureYSize = []
-	for picture in picturePathNames:
-		pictureYSize.append ( findYSize(picture))
-	print "YSize:", str(pictureYSize)
-	if "ysize" not in vars[0]:
-		vars += ",ysize"
-
-if doEntropy:
-	pictureEntropy = []
-	for picture in picturePathNames:
-		pictureEntropy.append ( findEntropy(picture))
-	print "Entropy:", pictureEntropy
-	if "entropy" not in vars[0]:
-		vars += ",entropy"
-		
-if doVarience:
-	pictureVar = []
-	for picture in picturePathNames:
-		pictureVar.append ( findVarience(picture))
-	print "Varience:", str(pictureVar)
-	if "varience" not in vars[0]:
-		vars += ",varience"
-		
-if doStdDev:
-	pictureStdDev = []
-	for picture in picturePathNames:
-		pictureStdDev.append ( findStdDev(picture))
-	print "Std Dev:", str(pictureStdDev)
-	if "stddev" not in vars[0]:
-		vars += ",stddev"
-		
-if doAvgHue:
-	pictureAvgHue = []
-	for picture in picturePathNames:
-		pictureAvgHue.append ( findAvgHue(picture))
-	print "Hue:", str(pictureAvgHue)
-	if "hue" not in vars[0]:
-		vars += ",hue"
-
-
-
-of = open(ops.outFile, "w")
-
-of.write(vars + "\n")
-of.write("\n") #still need to do var types
-for fileName in pictureFileNames:
-	of.write(fileName)
-	of.write(",")
-	of.write(str(pictureBrightness[pictureFileNames.index(fileName)]))
-	of.write(",")
-	of.write(str(pictureSize[pictureFileNames.index(fileName)]))
-	of.write(",")
-	of.write(str(pictureXSize[pictureFileNames.index(fileName)]))
-	of.write(",")
-	of.write(str(pictureYSize[pictureFileNames.index(fileName)]))
-	of.write(",")
-	of.write(str(pictureEntropy[pictureFileNames.index(fileName)]))
-	of.write(",")
-	of.write(str(pictureVar[pictureFileNames.index(fileName)]))
-	of.write(",")
-	of.write(str(pictureStdDev[pictureFileNames.index(fileName)]))
-	of.write(",")
-	of.write(str(pictureAvgHue[pictureFileNames.index(fileName)]))
-	of.write("\n")
-	
-	

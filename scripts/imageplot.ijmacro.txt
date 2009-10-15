@@ -117,7 +117,7 @@ var               border =   100;     // space around the graph -- subtracted fr
 var   image_resize_width =    64;     // resize width for thumbnails -- 0 or blank is original size
 var           point_size =    10;     // size of points to draw
 var           line_size =      2;     // width of lines to draw
-var           label_size =    12;     // font size for labels next to dots in the graph
+var           label_size =    16;     // font size for labels next to dots in the graph
 var     labels_precision =     1;     // decimal points to round printed labels
 var    canvas_colorspace = "RGB";     // RGB or 8-bit
 
@@ -457,7 +457,11 @@ function draw_graph() {
 	      setFont("SansSerif", label_size, "antialiased");
         setJustification("left");
         set_color(x,y,ds,labels_color,labels_color_choice);
-        drawString(label_name, x, y-label_size);
+        if (points_values_flag == 1) {
+        	drawString(label_name, x, y-label_size);
+        } else {
+        	drawString(label_name, x, y);
+        }
     }
 
     // draw value label
@@ -861,6 +865,8 @@ for (i = 0; i < render_items.length; i++) {
 }
 
 print("Finished drawing");
+
+call("java.lang.System.gc"); // call Java garbage collector to free memory
 
 if (render_mode == "Save") {
   selectImage(id_plot);
