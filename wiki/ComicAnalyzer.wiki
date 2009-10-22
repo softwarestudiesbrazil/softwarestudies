@@ -2,10 +2,10 @@
 
 = Introduction =
 Options:
- -h    display options
- -i    the image directory
- -o    the data output file
- -r    the abstract "resolution" of some of the image analysis algorithms
+ *'-h    display options
+ *'-i    the image directory
+ *'-o    the data output file
+ *'-r    the abstract "resolution" of some of the image analysis algorithms
        You can add multiple resolutions as a quoted space separated list of integers e.g. "150 300 200"
 
 = Example Command Line Options =
