@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009"
+		 xmlns:s="library://ns.adobe.com/flex/spark"
+		 xmlns:mx="library://ns.adobe.com/flex/halo"
+		 xmlns:eventMaps="classes.maps.*"
+		 xmlns:mate="http://mate.asfusion.com/" width="400" height="300">
+	<fx:Script>
+	<![CDATA[
+		import classes.events.SelectValueEvent;
+		import classes.models.Dataset;
+		[Bindable]
+		public var values:Dataset;
+		[Bindable]
+		public var selectedIdx:int;
+		
+		protected function pieseries1_clickHandler(event:MouseEvent):void
+		{
+			var selectValueEvent:SelectValueEvent = new SelectValueEvent(SelectValueEvent.VALUE_SELECTED);
+			selectValueEvent.selectedValue = pieseries1.selectedIndex;
+			dispatchEvent(selectValueEvent);
+			trace("zirloute"+selectValueEvent.selectedValue);
+		}
+
+	]]>
+	</fx:Script>
+<!--	<fx:Declarations>
+		<mate:Dispatcher generator="{SelectValueEvent}" type="{SelectValueEvent.VALUE_SELECTED}">
+			<mate:eventProperties>
+				<mate:EventProperties selectedValue = "{pieseries1.selectedIndex}" />
+			</mate:eventProperties>
+		</mate:Dispatcher>
+		<eventMaps:MainEventMap />
+	</fx:Declarations>
+-->
+	<mx:PieChart x="0" y="0" id="piechart1" width="100%" height="100%" selectionMode="multiple"  showDataTips="true"  click="pieseries1_clickHandler(event)">
+		<mx:series>
+			<mx:PieSeries id="pieseries1" selectable="true" selectedIndex="{selectedIdx}" displayName="values" dataProvider="{values.values}"/>
+		</mx:series>
+	</mx:PieChart>
+	<s:layout>
+		<s:BasicLayout/>
+	</s:layout>
+</s:Group>
