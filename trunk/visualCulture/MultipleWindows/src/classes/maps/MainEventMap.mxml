@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<EventMap xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark" xmlns:mx="library://ns.adobe.com/flex/halo"
+		  xmlns="http://mate.asfusion.com/">
+	
+	<fx:Script>
+	<![CDATA[
+		import classes.events.SelectValueEvent;
+		//import mx.controls.Alert;
+		import classes.controllers.GraphManager;
+		import classes.views.*;
+            
+	]]>
+		
+	</fx:Script>
+	
+	<fx:Declarations>
+		
+		<Debugger level="{Debugger.ALL}" />
+				
+		<EventHandlers type="{SelectValueEvent.VALUE_SELECTED}" debug="true" >
+			<MethodInvoker generator="{GraphManager}" method="setSelectedValue" arguments="{event.selectedValue}" />
+		</EventHandlers>
+		
+		<!-- -=-=-=-=-=-=-=-=-=-=-=-=-=- -->
+		
+		<Injectors target="{GraphHisto}" debug="true">
+			<PropertyInjector targetKey="values" source="{GraphManager}" sourceKey="data" />
+			<PropertyInjector targetKey="selectedIdx" source="{GraphManager}" sourceKey="selectedValue" />
+		</Injectors>
+		
+		<Injectors target="{GraphPie}" debug="true">
+			<PropertyInjector targetKey="values" source="{GraphManager}" sourceKey="data"  />
+			<PropertyInjector targetKey="selectedIdx" source="{GraphManager}" sourceKey="selectedValue" />
+		</Injectors>    
+	</fx:Declarations>
+	
+</EventMap>
