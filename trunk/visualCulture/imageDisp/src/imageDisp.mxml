@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:WindowedApplication xmlns:mx="http://www.adobe.com/2006/mxml" width="1000" height="800" layout="absolute"
+						backgroundColor="0x00000" xmlns:ns1="flare.flex.*" creationComplete="creationCompleteHandler(event);">
+	<mx:Script source="VisualizationNOMVC.as">
+	</mx:Script>
+	<!--mx:Script source="mmalab/softwarestudies/asianculture/Visualization.as"-->
+	
+	<mx:Canvas x="48" y="40" width="84%" height="86%" id="PictureBox" horizontalScrollPolicy="off"
+			   verticalScrollPolicy="off" clipContent="false">
+	</mx:Canvas>
+	<mx:Button x="10" y="10" label="load" click="onLoad()" width="56"/>
+	<mx:Button x="71" y="10" label="start" click="animate();" width="55"/>
+	<mx:Button x="130" y="10" label="arrange" click="arrangeDiag();" width="60"/>
+	<mx:HSlider x="196" y="7" width="349" minimum="0" maximum="360"
+				snapInterval="1" enabled="true" liveDragging="true" allowTrackClick="true" id="rotate"
+				rollOver="slider_rollOver(event);"
+				rollOut="slider_rollOut(event)" change="onSliderMoved(rotate.value);"/>
+	<mx:HSlider x="558" y="8" width="387" minimum="0" maximum="100" value="100" id="imgAlpha" 
+				rollOver="slider_rollOver(event);"
+				rollOut="slider_rollOut(event)" liveDragging="true" enabled="true" change="onAlphaChange(imgAlpha.value)"/>
+	<mx:VSlider x="950" y="195" height="372" id="zoom" change="onZoomChanged(zoom.value)"
+				rollOver="slider_rollOver(event);"
+				rollOut="slider_rollOut(event)" minimum="0" maximum="100" enabled="true" liveDragging="true"/>
+	<mx:Label x="950" y="10" text="Count" color="#FFFFFF" id="counter"/>
+	<mx:Label x="12" y="739" text="min" id="minValueY" color="#FFFFFF"/>
+	<mx:Label x="10" y="48" text="max" id="maxValueY" enabled="true" color="#FFFFFF"/>
+	<mx:Label x="46" y="752" text="min" id="minValueX" color="#FFFFFF"/>
+	<mx:Label x="927" y="749" text="max" id="maxValueX" enabled="true" color="#FFFFFF"/>
+	<mx:ComboBox x="822" y="725" id="statsX" change="chooseStat();" rowCount="16"></mx:ComboBox>
+	<mx:ComboBox x="825" y="40" id="statsY" change="chooseStat();" rowCount="16"></mx:ComboBox>
+</mx:WindowedApplication>
