@@ -1,0 +1,5 @@
+
+	Before invoking matlab interactively, you must increase
+	your virtual memory limit:
+		 ulimit -v 2097152  (bash or ksh)
+		 limit vmemoryuse 2097152 (csh or tcsh)
