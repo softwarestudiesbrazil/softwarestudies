@@ -1,0 +1,76 @@
+This is a variation on the original MSW (multiple sequential wrapper)
+package.  This one reads commands from a file, and runs them in parallel.  
+This version is for Jacquard.
+
+This MPI wrapper source file (mswl.c) can be compiled using the script 
+"ccmswl", which produces an MPI executable named "mswl".
+
+README  ccmswl  command_list  mswl.c  runmswl.pbs  runseq.csh
+
+There is a batch script named "runmswl.pbs" that shows an example of how to 
+use "mswl":
+
+#PBS -l nodes=3:ppn=2,walltime=00:10:00
+#PBS -N mswl
+#PBS -o mswl.out
+#PBS -e mswl.err
+#PBS -q debug 
+#PBS -V
+
+cd $PBS_O_WORKDIR
+mpirun -np 6 ./mswl command_list
+
+The above batch job creates six processes.  One of these acts as a 
+"master", and the other five act as "slaves".  The master will read
+each line from the file "command_list", and pass it to a waiting
+slave.  The slave will then attempt to execute the command line.
+Typically, this will be an invocation of a shell script with optional
+arguments.
+
+Note that the master does no work, other than coordinating the work
+of the slaves.
+
+For optimal load balancing, the list of commands should be sorted
+longest-running to shortest-running, if that information is available.
+
+In the above example, the file command_list contains:
+
+./runseq.csh 1 A
+./runseq.csh 2 B
+./runseq.csh 3 C
+./runseq.csh 4 D
+./runseq.csh 5 E
+./runseq.csh 6 F
+./runseq.csh 7 G
+./runseq.csh 8 H
+./runseq.csh 9 I
+./runseq.csh 10 J
+./runseq.csh 11 K
+./runseq.csh 12 L
+./runseq.csh 13 M
+./runseq.csh 14 N
+./runseq.csh 15 O
+./runseq.csh 16 P
+./runseq.csh 17 Q
+./runseq.csh 18 R
+./runseq.csh 19 S
+
+The shell script "runseq.csh" contains:
+
+#!/bin/csh
+mkdir -p Run$1
+cd Run$1
+echo "hello, world" > Data$2
+@ snooze = $1 * 2
+echo "about to sleep for " $snooze >> Data$2
+date >> Data$2
+sleep $snooze
+date >> Data$2
+echo "done with sleep for " $snooze >> Data$2
+exit
+
+
+This example creates directories Run1, Run2, ... Run19; in each
+directory it creates a file named DataA, DataB, ... DataS; these
+files contain "hello, world", and an indication that each slave
+then took a short nap.

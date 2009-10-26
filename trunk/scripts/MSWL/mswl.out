@@ -1,0 +1,31 @@
+
+PBS Leader node is jaccn362
+
+Job setup time: Mon Oct 26 13:39:44 PDT 2009
+
+Setting up security
+
+Job startup at  Mon Oct 26 13:39:50 PDT 2009
+
+----------------------------------------------------------------
+
+Warning: no access to tty (Bad file descriptor).
+Thus no job control in this shell.
+rank= 0 size= 6 
+rank= 5 size= 6 
+rank= 1 size= 6 
+rank= 4 size= 6 
+rank= 3 size= 6 
+rank= 2 size= 6 
+
+----------------------------------------------------------------
+Jobs exit status code is 0
+Job mswl/646931.jacin03-m.nersc.gov completed Mon Oct 26 13:41:24 PDT 2009
+Submitted by jdouglas/jdouglas using m860
+Job Limits: neednodes=3:ppn=2,nodes=3:ppn=2,walltime=00:10:00
+Job Resources used: cput=00:02:52,mem=139572kb,vmem=407528kb,walltime=00:01:34
+Nodes used: jaccn360 jaccn361 jaccn362 
+
+Killing any leftover processes...
+
+Job completed.

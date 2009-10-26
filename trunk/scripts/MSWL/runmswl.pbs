@@ -1,0 +1,9 @@
+#PBS -l nodes=3:ppn=2,walltime=00:10:00
+#PBS -N mswl
+#PBS -o mswl.out
+#PBS -e mswl.err
+#PBS -q debug 
+#PBS -V
+
+cd $PBS_O_WORKDIR
+mpiexec -n 6 ./mswl command_list
