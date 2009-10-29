@@ -135,16 +135,16 @@ for path in picturePathNames:
 		    color = "blue"
 		if colorKey == 7: #magenta
 		    color = "magenta"
-		if colorKey == 8: #purple
-		    color = "purple"
-		if colorKey == 9: #brown
+		if colorKey == 8: #yellow green
+		    color = "yelowgreen"
+		if colorKey == 9: #dark green
+		    color = "dark green"
+		if colorKey == 10:
+		    color = "dark blue"
+		if colorKey == 11:
 		    color = "brown"
-		if colorKey == 10: #dark
-		    color = "darkgreen"
-		if colorKey == 11:#yellow green
-		    color = "yellowgreen"
-		if colorKey == 12 : #dark blue
-		    color = "darkblue"
+		if colorKey == 12 :
+		    color = "magenta"
 		if colorKey == 13 :
 		    color = ""
 		print

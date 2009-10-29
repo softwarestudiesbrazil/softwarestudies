@@ -11,10 +11,10 @@ import getopt, sys, os, shutil, string, time
 mode = 'video'
 samplingRate = 10
 
-line_enable = False
-shot_enable = Fale
-uniformColorQ_enable = False
-adaptiveColorQ_enable = False
+line_enable = True
+shot_enable = True
+uniformColorQ_enable = True
+adaptiveColorQ_enable = True
 colorTexture_enable = True
 
 line_args = '--preset high'
