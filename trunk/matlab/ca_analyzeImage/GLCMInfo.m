@@ -35,5 +35,4 @@ function [output,header] = GLCMInfo(I,D)
   output(1,4) = mean(stats.Homogeneity);
   header(1,4) = cellstr(['Homogeneity_' num2str(D)]);
 
-  
 end
