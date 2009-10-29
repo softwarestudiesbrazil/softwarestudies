@@ -14,6 +14,9 @@ import math
 import parser
 import csv
 
+# To Add
+# -5 or 10 level histogram
+# -blur histogram
 
 ############ Image Analysis Functions #######
 def findShapes(picture, res):
@@ -37,8 +40,8 @@ def findShapes(picture, res):
 
 	im = fromimage(im)
 	im = scipy.transpose(im)
-	im = scipy.divide(im, 30)
-	im = im *30
+	im = scipy.divide(im, 10)
+	im = im *10
 	##make markers
 	mark = 0
 	markers = np.zeros_like(im).astype('int')
@@ -51,7 +54,7 @@ def findShapes(picture, res):
 	
 	##run watershed
 	water = ndimage.watershed_ift(im.astype('uint8'), markers, structure = struct)
-	toimage(water).save("sw"+ os.path.basename(picture))
+	toimage(water).save("sw"+ os.path.basename(picture)) #debug output
 	
 	##make some masks and count the size of each region
 	sizecount = []
@@ -60,8 +63,8 @@ def findShapes(picture, res):
 	for index in range(len(marks)):
 		sizecount.append(0)
 	
-	for x in range(0,xsize,(xsize/res)+1):
-		for y in range(0,ysize,(ysize/res)+1):
+	for x in range(0,xsize):
+		for y in range(0,ysize):
 			sizecount[marks.index(water[x,y])] += 1
 	
 	##make markers based on large regions
@@ -69,7 +72,7 @@ def findShapes(picture, res):
 	shapes = 0
 	markers = np.zeros_like(im).astype('int')
 	for mark in marks:
-		if sizecount[marks.index(mark)] >= 100:
+		if sizecount[marks.index(mark)] >= (xsize/30 + ysize/30)/2:
 			shapes += 1
 			
 	print shapes
@@ -95,8 +98,8 @@ def findColorRegions(picture, res):
 	im = fromimage(im)
 	im = scipy.transpose(im)
 	##reduce colors
-	im = scipy.divide(im, 30)
-	im = im *30
+	im = scipy.divide(im, 10)
+	im = im *10
 	
 	##make markers
 	mark = 0
@@ -116,18 +119,18 @@ def findColorRegions(picture, res):
 	
 	marks = range(mark+1)
 	for index in range(len(marks)):
-		sizecount.append(0)
+		sizecount.append([])
 	
-	for x in range(0,xsize,(xsize/res)+1):
-		for y in range(0,ysize,(ysize/res)+1):
-			sizecount[marks.index(water[x,y])] += 1
+	for x in range(0,xsize):
+		for y in range(0,ysize):
+			sizecount[marks.index(water[x,y])].append((x,y))
 	
 	##make markers based on large regions
 	mark = 0
 	shapes = 0
 	markers = np.zeros_like(im).astype('int')
 	for mark in marks:
-		if sizecount[marks.index(mark)] >= 100:
+		if len(sizecount[marks.index(mark)]) >= (xsize/30 + ysize/30)/2: #should be ratio
 			shapes += 1
 			
 	print shapes
