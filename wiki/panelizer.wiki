@@ -17,4 +17,6 @@ Options:
 
  The output is a list of corners of the panels in a text file.
 
- panelizer.py relies on panelops.py
+ panelizer.py relies on panelops.py, which contains the core finding and cutting functions.
+
+= Example Output =
