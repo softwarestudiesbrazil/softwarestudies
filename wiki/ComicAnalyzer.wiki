@@ -1,5 +1,7 @@
 #summary Options and examples for comicanalyzer.py
 
+comicanalyzer.py takes an image directory and outputs a csv file with a variety of statistics and other image features.
+
 = Introduction =
 Options:
  *'-h    display options
