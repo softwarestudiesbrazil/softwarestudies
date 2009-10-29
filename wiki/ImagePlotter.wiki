@@ -1,7 +1,7 @@
 Options for imagePlotter.py
 = Introduction =
 
-imagePlotter.py takes a csv file and an image directory and outputs a plot of the images.
+imagePlotter.py takes a csv file and an image directory and outputs a plot of the images as a standard image file.
 
 
 = Details =
