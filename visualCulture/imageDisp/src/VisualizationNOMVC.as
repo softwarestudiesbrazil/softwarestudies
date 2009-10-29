@@ -23,7 +23,7 @@ import mx.events.FlexEvent;
 import mx.graphics.*;
 
 private const DATASET_ROOT:String = "/AsianCult/SWS02/projects/Lev/Mondrian_600dpi/run";
-private const IMAGES_PATH:String = "images/resized";
+private const IMAGES_PATH:String = "images";
 
 private var par:Parallel;
 private var images : Array = new Array();
