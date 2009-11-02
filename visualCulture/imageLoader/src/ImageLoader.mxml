@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:WindowedApplication xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					   xmlns:s="library://ns.adobe.com/flex/spark" 
+					   xmlns:mx="library://ns.adobe.com/flex/halo"
+					   width="800" height="600" xmlns:local="*" xmlns:views="views.*"
+					   initialize="init();">
+	<fx:Script>
+		<![CDATA[
+			import flash.display.Loader;
+			import flash.events.Event;
+			import flash.events.MouseEvent;
+			import flash.net.URLLoader;
+			import flash.utils.Dictionary;
+			
+			import mx.controls.Image;
+			import mx.events.FlexEvent;
+			
+			import spark.components.Group;
+			import spark.events.TextOperationEvent;
+			
+			import views.*;
+			
+			[Bindable]
+			private var dataset_root:String = "/AsianCult/SWS02/projects/Lev/Mondrian_600dpi/run";
+			
+			private var imagesPath:String = dataset_root + "/images/resized";
+			
+			private var componentBag:Dictionary = new Dictionary();
+			//private var images : Array = new Array();
+			//			private const GRAPH_WIDTH:uint = 1000;
+			//			private const GRAPH_HEIGHT:uint = 800;
+			
+			private var hidden:Boolean = false;
+			private var imgCounter:int;
+			
+			private var scale:Number = Math.random();
+			private var mat:Matrix = new Matrix();
+
+			private function displayImage():void {
+				for (imgCounter = 0; imgCounter<200; imgCounter++) {
+					createImage();
+				}
+			}
+			
+			private function createImage():void {
+				var img_:String = "1905_a_mondrian.jpg";
+				var imageFile:File = new File();
+				imageFile.nativePath = imagesPath + "/" + img_;
+				
+				
+				var imageLoader:Loader = new Loader();
+				// useWeakReference permits the GC to collect the memory when the eventListener is dropped
+				imageLoader.contentLoaderInfo.addEventListener(Event.COMPLETE, loaded, false, 0, true);
+				imageLoader.load(new URLRequest(imageFile.url));
+				imageFile = null;
+			}
+			
+			private function triggerGC():void {
+				try
+				{
+					trace("triggerGC");
+					//yes you need to call the garbage collector twice, once to flag objects, once to remove them
+					flash.system.System.gc();
+					flash.system.System.gc();
+					
+					// alternative way: seems more efficient
+//					new LocalConnection().connect('foo');
+//					new LocalConnection().connect('foo');
+				}
+				catch (e:Error) {trace("GC failed")}
+			}
+			
+			private function loaded(e:Event):void
+			{
+				e.target.content.removeEventListener(Event.COMPLETE, loaded);
+				var myImage:BitmapData = Bitmap(e.target.content).bitmapData;
+				delete e.target.content;
+
+				var image:Image = new Image();
+//				image.cacheAsBitmap = true;
+				image.scaleContent = true;
+				image.maintainAspectRatio = true;
+				image.height = myImage.height*scale;///5;
+				image.width = myImage.width*scale;///5;
+				
+				image.graphics.beginBitmapFill(myImage, mat, false, true);
+				image.graphics.drawRect(0, 0, image.width, image.height);
+				image.graphics.endFill();
+				
+				var str:Array = e.target.url.split("/");
+				image.toolTip = str[str.length-1];
+								
+//				images.push(image);
+				
+				var pnl1:ImgPanel = new ImgPanel();
+				pnl1.image = image;
+				//pnl1.img_.source =  e.target.content;
+				
+				var group1:Group = new Group();
+				group1.x = 100+Math.random()*400;
+				group1.y = 200+Math.random()*200;
+				group1.addElement(pnl1);
+				group1.cacheAsBitmap = true;
+				this.addElement(group1);
+				
+				componentBag[group1.uid] = group1;
+				
+				image.addEventListener(FlexEvent.UPDATE_COMPLETE, updated, false, 0, true);
+				image = null;
+				str = null;
+				group1 = null;
+				
+//				if (imgCounter == 499) triggerGC();
+				//imageLoader = null;
+				
+				//myImage.dispose();
+				//counter.text
+				//statsModel.imgCounter = images.length.toString();
+				
+			}
+			
+			private function updated(e:Event):void {
+				//var spr:Sprite = new Sprite();
+				
+				var image:Image = e.target as Image;
+				image.removeEventListener(FlexEvent.UPDATE_COMPLETE, updated);
+				delete e.target.content;
+				image = null;
+			}
+			
+			
+			protected function rotZ_changeHandler(event:Event):void
+			{
+				for each ( var g : Group in componentBag )
+				{   
+					g.rotationZ = rotZ.value;
+				}
+			}
+			
+			
+			protected function hide_clickHandler(event:MouseEvent):void
+			{
+/*				for each (var img:Image in images) {
+					img.visible = !hidden;
+				}
+				hidden = !hidden;
+*/			}
+			
+			
+			protected function textinput1_changeHandler(event:TextOperationEvent):void
+			{
+				dataset_root = event.target.toString();
+				imagesPath = dataset_root + "/images";
+			}
+
+			protected function init():void
+			{
+				mat.scale(scale,scale);///5, scale/5);
+			}
+
+			protected function button1_clickHandler(event:MouseEvent):void
+			{
+				for each ( var g : Group in componentBag )
+				{   
+					((ImgPanel)(g.getChildAt(0))).img_.unloadAndStop(false);
+					((ImgPanel)(g.getChildAt(0))).image = null;
+					delete componentBag[g.uid];
+					g.removeElementAt(0);
+					this.removeElement(g);
+					g = null;
+				}
+/*				for (var i:int=0; i<images.length; i++) {
+					delete images[i];
+				}
+*/				triggerGC();
+			}
+
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<s:Button x="298" y="23" label="Load" id="load" enabled="true" click="displayImage();"/>
+	<s:Button x="27" y="52" label="Hide" id="hide" click="hide_clickHandler(event)"/>
+	<s:HSlider x="362" y="10" width="428" id="rotZ" minimum="0" maximum="360" stepSize="1" value="45" change="rotZ_changeHandler(event)"/>
+	<s:TextInput x="27" y="22" width="263" text="{dataset_root}" change="textinput1_changeHandler(event)"/>
+	<s:Button x="119" y="52" label="empty bag" enabled="true" click="button1_clickHandler(event)"/>
+</s:WindowedApplication>
