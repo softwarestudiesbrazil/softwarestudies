@@ -33,7 +33,7 @@ def findShapes(picture, res):
 	im = im.convert("L")
 
 	xsize, ysize = im.size
-	im = im.resize((xsize*.3, ysize*.3), Image.ANTIALIAS)
+	im = im.resize((xsize*res, ysize*res), Image.ANTIALIAS)
 	xsize, ysize = im.size
 	
 	im = im.filter(ImageFilter.FIND_EDGES)
@@ -48,7 +48,7 @@ def findShapes(picture, res):
 	
 	for x in range(xsize):
 		for y in range(ysize):
-			if (x%(int(xsize/30)) == 0) and (y%(int(ysize/30)) == 0):
+			if (x%(int(xsize*res/10)) == 0) and (y%(int(ysize*res/10)) == 0):
 				mark += 1
 				markers[x,y] = mark
 	
@@ -72,7 +72,7 @@ def findShapes(picture, res):
 	shapes = 0
 	markers = np.zeros_like(im).astype('int')
 	for mark in marks:
-		if sizecount[marks.index(mark)] >= (xsize/30 + ysize/30)/2:
+		if sizecount[marks.index(mark)] >= (xsize*res/10 + ysize*res/10)/2:
 			shapes += 1
 			
 	print shapes
@@ -92,7 +92,7 @@ def findColorRegions(picture, res):
 	im = im.convert("L")
 
 	xsize, ysize = im.size
-	im = im.resize((xsize*.3, ysize*.3),Image.ANTIALIAS)
+	im = im.resize((xsize*res, ysize*res),Image.ANTIALIAS)
 	xsize, ysize = im.size
 	
 	im = fromimage(im)
@@ -107,7 +107,7 @@ def findColorRegions(picture, res):
 	
 	for x in range(xsize):
 		for y in range(ysize):
-			if (x%(int(xsize/30)) == 0) and (y%(int(ysize/30)) == 0):
+			if (x%(int(xsize*res/10)) == 0) and (y%(int(ysize*res/10)) == 0):
 				mark += 1
 				markers[x,y] = mark
 	
@@ -130,7 +130,7 @@ def findColorRegions(picture, res):
 	shapes = 0
 	markers = np.zeros_like(im).astype('int')
 	for mark in marks:
-		if len(sizecount[marks.index(mark)]) >= (xsize/30 + ysize/30)/2: #should be ratio
+		if len(sizecount[marks.index(mark)]) >= (xsize*res/10 + ysize*res/10)/2: #should be a better ratio
 			shapes += 1
 			
 	print shapes
