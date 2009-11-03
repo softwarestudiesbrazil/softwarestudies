@@ -26,12 +26,11 @@ oparser.add_option("-i", dest="imageDir",
 oparser.add_option("-o", dest="outFile",
 				  help="Output file name. Default is /data.txt.", default="data.txt")
 oparser.add_option("-r", dest="res",
-				  help='Shape counting resolutions. Input as a quoted space seperated list. Default is "50 100".', default="50 100", type='str')
+				  help= 'Shape counting resolutions. Default is 0.3.', default=.3, type='float')
 (options, args) = oparser.parse_args()
 
 global ops 
 ops = options
-ops.res = ops.res.split()
 
 ################ Defs ######################
 def unique(a):
@@ -125,33 +124,39 @@ def analyze(path):
 	data.append(findVarience(path)) #varience
 	data.append(findEntropy(path)) #entropy
 	for res in ops.res:
-		data.append(findColorRegions(path, int(res))) #shapecount
+		data.append(findColorRegions(path, float(res))) #shapecount
 	for res in ops.res:
-		data.append(findShapes(path,int(res)))
+		data.append(findShapes(path,float(res)))
 	return data
 
+def recFind(path):
+	files = os.listdir(path)
+	imageFiles = []
+	for name in files:
+		name = os.path.abspath(os.path.join(path, name))
+		if os.path.isdir(name):
+			print "Found Dir:", os.path.basename(name)
+			for image in recFind(name):
+				imageFiles.append(image)
+			continue
+		if name.endswith(".jpg") or  name.endswith(".JPG"):
+			print "Found Image:", os.path.basename(name)
+			imageFiles.append(name)
+	
+	return imageFiles
+			
 ################ Getting Images ###################
 print "Getting Images..."
-allFileNames = os.listdir(ops.imageDir)
-pictureFileNames = []
-for name in allFileNames:
-	if name.endswith(".jpg") or  name.endswith(".JPG"):
-		pictureFileNames.append(name)
-		
-print len(pictureFileNames), "JPEGs found."
-picturePathNames = []
-for fileName in pictureFileNames:
-	if (fileName.endswith(".jpg")):
-		picturePathNames.append(os.path.join(ops.imageDir, fileName))
+
+picturePathNames = recFind(ops.imageDir)
+
+print 'Got', len(picturePathNames), 'JPEGS'
 
 ########################## Magic ######################
 
 dataTable = [] #ram verion of data.txt
-dataNames = ['filename','filepath','size','xsize','ysize','meanhue','meanbrightness','stddev','varience','entropy'] #table first row
-for res in ops.res:
-	dataNames.append('colorregions'+str(res))
-for res in ops.res:
-	dataNames.append('shapes'+str(res))
+dataNames = ['filename','filepath','size','xsize','ysize','meanhue','meanbrightness',
+			 'stddev','varience','entropy','colorregions'+str(ops.res),'shapes'+str(ops.res)] #table first row
 
 print "Data Names:", dataNames
 dataTypes = []
