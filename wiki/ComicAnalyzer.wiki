@@ -7,7 +7,7 @@ Options:
  *'-h    display options
  *'-i    the image directory
  *'-o    the data output file
- *'-r    the prescaling resolution for the shape and color region counting algorithms. A value of 1.0 is no prescailing. A value of less than one should decrease precessing time but may be less accutrate. A value greater than one is supported but is useless. At too small a value on too small of an image the results become meaningless and the resolution is automatically ajusted upwards.
+ *'-r    the prescaling resolution for the shape and color region counting algorithms. A value of 1.0 is no prescailing. A value of less than one should decrease precessing time but may be less accutrate. A value greater than one is supported but is useless. At a too small value on a too small of an image the results become meaningless and the resolution is automatically ajusted upwards.
 
 = Example Command Line Options =
 
