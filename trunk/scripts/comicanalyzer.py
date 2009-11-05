@@ -26,7 +26,7 @@ oparser.add_option("-i", dest="imageDir",
 oparser.add_option("-o", dest="outFile",
 				  help="Output file name. Default is /data.txt.", default="data.txt")
 oparser.add_option("-r", dest="res",
-				  help= 'Shape counting resolutions. Default is 0.3.', default=.3, type='float')
+				  help= 'Shape counting resolutions. Default is 1.0.', default=1.0, type='float')
 (options, args) = oparser.parse_args()
 
 global ops 
@@ -123,10 +123,8 @@ def analyze(path):
 	data.append(findStdDev(path)) #stddev
 	data.append(findVarience(path)) #varience
 	data.append(findEntropy(path)) #entropy
-	for res in ops.res:
-		data.append(findColorRegions(path, float(res))) #shapecount
-	for res in ops.res:
-		data.append(findShapes(path,float(res)))
+	data.append(findColorRegions(path, float(ops.res))) #shapecount
+	data.append(findShapes(path,float(ops.res)))
 	return data
 
 def recFind(path):
@@ -149,6 +147,7 @@ def recFind(path):
 print "Getting Images..."
 
 picturePathNames = recFind(ops.imageDir)
+
 
 print 'Got', len(picturePathNames), 'JPEGS'
 
@@ -176,10 +175,16 @@ for path in picturePathNames:
 		
 	endTime = time.clock()
 	thisTime = endTime-startTime
-	cycleTimes.append(thisTime)
+	
+	if(thisTime > 1): #weird, sometimes thisTime will be this really large neg. number for one or two cycles randomly
+		cycleTimes.append(thisTime)
+	else:
+		cycleTimes.append(avgTime)
+		
 	totalTime = sum(cycleTimes)
 	avgTime = totalTime/len(cycleTimes)
 	print "This cycle:", int(thisTime), "s Average Cycle:", int(avgTime), "s Run Time:", int(totalTime/60), "m"
+	print "Cycles completed:", len(cycleTimes), "Cycles to go:", len(picturePathNames - len(cycleTimes)
 	print "Time Till Completion:", int((avgTime*len(picturePathNames)/60)-totalTime/60), 'm'
 	print
 	
