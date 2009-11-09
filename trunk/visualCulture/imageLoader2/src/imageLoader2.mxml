@@ -29,17 +29,17 @@
 					this.thumbnailsList.addElement(group1);
 					
 				}
-				count.text = imageLoader.counter.toString();
+				count.text = imageLoader.images.length.toString();//imageLoader.counter.toString();
 			}
 			
 			private function deleteImages():void {
 				imageLoader.Delete();
-/* 				while (this.thumbnailsList.numElements > 0) {
-					this.thumbnailsList.removeElementAt(0);
-				}
- */			
+ 			
 				for (var i:int=0; i<this.thumbnailsList.numElements; i++) {
 					((Group)(this.thumbnailsList.getChildAt(i))).getChildAt(0).removeElementAt(0);
+				}
+				while (this.thumbnailsList.numElements > 0) {
+					this.thumbnailsList.removeElementAt(0);
 				}
 			}
 			
@@ -53,8 +53,8 @@
 	
 	
 	<s:VGroup width="100%" height="100%">
-		<s:HGroup>			
-			<s:Button label="load images" click="{imageLoader.Load( '/AsianCult/SWS02/projects/Lev/Mondrian_600dpi/run/images/resized' )}" />
+		<s:HGroup>
+			<s:Button label="load images" click="{imageLoader.Load( '/AsianCult/SWS02/projects/resized' )}" />
 			<s:Button label="delete images" click="{deleteImages()}" />
 			<s:Button label="display" click="{displayImages()}" />
 			<s:Button label="Button" click="{rotateTest()}"/>
