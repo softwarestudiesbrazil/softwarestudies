@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/halo" 
+		 x="-5" y="-5"  width="10" height="10" >
+	<!-- The trick is right above this line: offset the anchor point to center the component around -->
+	
+	<fx:Script>
+		<![CDATA[
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<!-- impair width and height results in problems for centering the ellipse (e.g. for rotation) -->
+	<s:Ellipse height="4" width="4"  horizontalCenter="0" verticalCenter="0" >
+		<s:fill>
+			<s:SolidColor color="0x00FF00"/>
+		</s:fill>
+	</s:Ellipse>
+</s:Group>
