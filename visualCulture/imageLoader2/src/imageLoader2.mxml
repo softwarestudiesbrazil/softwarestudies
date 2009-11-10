@@ -7,6 +7,8 @@
 		<![CDATA[
 			import flash.events.Event;
 			
+			import mx.events.FlexEvent;
+			
 			import spark.primitives.BitmapImage;
 			
 			import views.ImgGroup;
@@ -18,10 +20,15 @@
 				count.text = "loading..."
 				imageLoader.Load( '/AsianCult/SWS02/projects/resized' );
 				imageLoader.addEventListener(Event.COMPLETE, onImagesloaded);
+				imageLoader.addEventListener(FlexEvent.UPDATE_COMPLETE, onBatchUpdate);
 			}
 			
 			private function onImagesloaded(e:Event):void {
 				btn_display.enabled = true;
+				count.text = imageLoader.images.length.toString();
+			}
+			
+			private function onBatchUpdate(e:FlexEvent): void {
 				count.text = imageLoader.images.length.toString();
 			}
 			

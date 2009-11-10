@@ -4,34 +4,42 @@ package
 	import flash.display.Loader;
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
-	import flash.events.TimerEvent;
 	import flash.filesystem.File;
 	import flash.net.URLLoader;
 	import flash.net.URLLoaderDataFormat;
 	import flash.net.URLRequest;
 	import flash.system.System;
 	
+	import mx.events.FlexEvent;
+	
 	import spark.primitives.BitmapImage;
 	
 	public class ImageLoader extends EventDispatcher
 	{
 		
-		public var counter:int = 0;
-		public var finished:int = 0;
-		
 		private var files:Array;
-		
+
+		private var _images: Array = new Array;
+
 		private var offset:int = 0;
-		private const BATCH:int = 100;
+		private var batchCounter:int = 0;
+		private var imgFilesCounter:int = 0;
+		private var finished:int = 0;
+		private var batchSize:int = 0;
+
+		public const DEFAULT_BATCH_SIZE:int = 10;
 		
 /*		private var myFile:File;
 		private var myStream:FileStream = new FileStream ();
 */		
-		//
-		// Construction
-		//
-		public function ImageLoader()
+
+		/**
+		 * Default Constructor 
+		 * 
+		 */
+		public function ImageLoader(batchSize:int = DEFAULT_BATCH_SIZE)
 		{
+			this.batchSize = batchSize;
 /*			myStream.open( myFile, FileMode.WRITE);
 			
 			myFile = new File (File.applicationDirectory.nativePath + File.separator + "config2.txt");
@@ -48,12 +56,17 @@ package
 		}
 		
 		
-		//
-		// Methods
-		//
+//
+// Methods
+//
+		/**
+		 * Load all images from the specified path 
+		 * @param path
+		 * 
+		 */		
 		public function Load( path: String ):void
 		{
-			counter = 0;
+			batchCounter = 0;
 			offset = 0;
 			/*
 			These consume a lot of memory:
@@ -67,6 +80,13 @@ package
 
 				var loadingFinished:Boolean = false;
 				var loadingBegun:Boolean = false;
+				
+				for each (var file:File in files) {
+					if ( ! file.isDirectory && file.extension == "jpeg" || file.extension == "jpg" || file.extension == "png" ) {
+						imgFilesCounter++;
+					}
+				}
+
 				/*
 				while (true) {
 					if ((!loadingFinished && (finished == BATCH)) || ((finished == 0)&& !loadingBegun) ) {
@@ -77,7 +97,7 @@ package
 						break;
 				}
 				*/
-				batchLoad2();
+				batchLoad();
 				
 
 /*				var timer:Timer = new Timer(2000, Math.ceil(files.length/BATCH));
@@ -98,10 +118,10 @@ package
 			System.gc();
 		}
 		
-		private function batchLoad(e:TimerEvent):void {
+		private function batchLoad():void {
 			var file:File;
 			var urlLoader: URLLoader;
-			for (var i:int=offset; i<offset+BATCH && i<files.length; i++)  {
+			for (var i:int=offset; i<offset+batchSize && i<files.length; i++)  {
 				//				for each( var file: File in files ) {
 				file = files[i]; 
 				if ( ! file.isDirectory && file.extension == "jpeg" || file.extension == "jpg" || file.extension == "png" ) {
@@ -109,20 +129,20 @@ package
 					urlLoader.dataFormat = URLLoaderDataFormat.BINARY;
 					urlLoader.addEventListener(Event.COMPLETE, onLoadingComplete );
 					urlLoader.load( new URLRequest(file.url) );
-					counter++;
+					batchCounter++;
 				}
-			trace ("i: "+i);
+			//trace ("i: "+i);
 			}
-			trace ("counter: "+counter);
-			offset += BATCH;
+			trace ("counter: "+batchCounter);
+			offset += batchSize;
 		}
 
-		private function batchLoad2():Boolean {
+		private function sequentialLoad():Boolean {
 			var file:File;
 			var urlLoader: URLLoader;
 			//for (var i:int=offset; i<offset+BATCH && i<files.length; i++)  {
 				//				for each( var file: File in files ) {
-			var i:int = counter;
+			var i:int = batchCounter;
 				file = files[i]; 
 				if ( ! file.isDirectory && file.extension == "jpeg" || file.extension == "jpg" || file.extension == "png" ) {
 					urlLoader = new URLLoader( );
@@ -130,26 +150,28 @@ package
 					urlLoader.addEventListener(Event.COMPLETE, onLoadingComplete );
 					urlLoader.load( new URLRequest(file.url) );
 					trace("load "+i);
-					counter++;
+					batchCounter++;
 				//}
-				trace ("i: "+i);
+				//trace ("i: "+i);
 			}
-			trace ("counter: "+counter);
-			offset += BATCH;
+			trace ("counter: "+batchCounter);
+			offset += batchSize;
 			if (i >= files.length)
 				return true; // loading finished
 			return false;
 		}
-		//
-		// Internal logic
-		//		
+		
+//****************************
+// Internal logic
+//****************************
+		
 		private function onLoadingComplete( e: Event ):void
 		{
 			var dispLoader: Loader = new Loader( );
 			
 			dispLoader.contentLoaderInfo.addEventListener( Event.COMPLETE, onParsingComplete);
 			dispLoader.loadBytes( e.currentTarget.data );
-			trace("loadingComplete");
+			//trace("loadingComplete");
 		}
 		private function onParsingComplete( e: Event ):void
 		{
@@ -158,19 +180,25 @@ package
 			img.source = (e.currentTarget.content as Bitmap).bitmapData;
 			_images.push( img );
 			finished++;
-			trace("parsingComplete");
-			if(counter < files.length)
-			{
-				batchLoad2();
-			}
-			else
-				dispatchEvent(new Event(Event.COMPLETE));
+			trace("finished1 "+finished);
+//			if(finished <= batchCounter)
+//			{
+				trace("finished2 "+finished);
+				if (finished%batchSize == 0) {
+					batchLoad();
+					trace("counter"+batchCounter);
+					trace("finished3 "+finished);
+				}
+//			}
 			
-			trace("parsing really Complete");
+				dispatchEvent(new FlexEvent(FlexEvent.UPDATE_COMPLETE));
+			
+			if (finished >= imgFilesCounter)
+				dispatchEvent(new Event(Event.COMPLETE));
 		}
 		
-		
-/*		private function onImageLoaded( e:Event ):void
+/*		
+		private function onImageLoaded( e:Event ):void
 		{
 			var img: Image = e.target as Image;			
 			img.removeEventListener( Event.COMPLETE, onImageLoaded );
@@ -178,10 +206,5 @@ package
 			_images.push( img );
 		}
 */		
-		
-		//
-		// Internal Properties
-		//
-		private var _images: Array = new Array;
 	}
 }
