@@ -7,14 +7,14 @@
 		<![CDATA[
 			import spark.primitives.BitmapImage;
 			
-			import views.ImgPanel;
+			import views.ImgGroup;
 			
 			private var imageLoader: ImageLoader = new ImageLoader;
 			
 			private function displayImages( ):void 
 			{
 				for each( var img:BitmapImage in imageLoader.images ) {
-					var pnl1:ImgPanel = new ImgPanel();
+					var pnl1:ImgGroup = new ImgGroup();
 					img.horizontalCenter = 0;
 					img.verticalCenter = 0;
 					pnl1.addElement(img);
