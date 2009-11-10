@@ -163,6 +163,8 @@ package
 			{
 				batchLoad2();
 			}
+			else
+				dispatchEvent(new Event(Event.COMPLETE));
 			
 			trace("parsing really Complete");
 		}
