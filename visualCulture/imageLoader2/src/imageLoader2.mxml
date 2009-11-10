@@ -5,11 +5,25 @@
 					   width="800" height="600">
 	<fx:Script>
 		<![CDATA[
+			import flash.events.Event;
+			
 			import spark.primitives.BitmapImage;
 			
 			import views.ImgGroup;
 			
-			private var imageLoader: ImageLoader = new ImageLoader;
+			private var imageLoader: ImageLoader = new ImageLoader();
+			
+			private function load():void {
+				btn_display.enabled = false;
+				count.text = "loading..."
+				imageLoader.Load( '/AsianCult/SWS02/projects/resized' );
+				imageLoader.addEventListener(Event.COMPLETE, onImagesloaded);
+			}
+			
+			private function onImagesloaded(e:Event):void {
+				btn_display.enabled = true;
+				count.text = imageLoader.images.length.toString();
+			}
 			
 			private function displayImages( ):void 
 			{
@@ -19,17 +33,14 @@
 					img.verticalCenter = 0;
 					pnl1.addElement(img);
 					pnl1.swapElementsAt(0, 1);
-					//pnl1.img_.source =  e.target.content;
 					
 					var group1:Group = new Group();
 					group1.x = 100+Math.random()*600;
 					group1.y = 100+Math.random()*400;
 					group1.addElement(pnl1);
-					//group1.cacheAsBitmap = true;
 					this.thumbnailsList.addElement(group1);
 					
 				}
-				count.text = imageLoader.images.length.toString();//imageLoader.counter.toString();
 			}
 			
 			private function deleteImages():void {
@@ -54,11 +65,10 @@
 	
 	<s:VGroup width="100%" height="100%">
 		<s:HGroup>
-			<s:Button label="load images" click="{imageLoader.Load( '/AsianCult/SWS02/projects/resized' )}" />
+			<s:Button label="load images" click="{load()}" />
+			<s:Button id="btn_display" label="display" click="{displayImages()}" />
 			<s:Button label="delete images" click="{deleteImages()}" />
-			<s:Button label="display" click="{displayImages()}" />
-			<s:Button label="Button" click="{rotateTest()}"/>
-			<s:HSlider id="rotZ" minimum="0" maximum="360" value="0" change="{rotateTest()}"/>
+			<s:HSlider id="rotZ" minimum="0" maximum="360" value="0"  change="{rotateTest()}" height="20" width="203"/>
 			<s:Label id="count" />
 		</s:HGroup>
 		<s:Scroller  width="100%" height="100%" >
