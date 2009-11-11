@@ -27,7 +27,8 @@ package
 		private var finished:int = 0;
 		private var batchSize:int = 0;
 
-		public const DEFAULT_BATCH_SIZE:int = 10;
+		public const DEFAULT_BATCH_SIZE:int = 5;
+//		private var timer:Timer;
 		
 /*		private var myFile:File;
 		private var myStream:FileStream = new FileStream ();
@@ -37,9 +38,9 @@ package
 		 * Default Constructor 
 		 * 
 		 */
-		public function ImageLoader(batchSize:int = DEFAULT_BATCH_SIZE)
+		public function ImageLoader(batchSize_:int = DEFAULT_BATCH_SIZE)
 		{
-			this.batchSize = batchSize;
+			this.batchSize = batchSize_;
 /*			myStream.open( myFile, FileMode.WRITE);
 			
 			myFile = new File (File.applicationDirectory.nativePath + File.separator + "config2.txt");
@@ -66,6 +67,10 @@ package
 		 */		
 		public function Load( path: String ):void
 		{
+/*			timer = new Timer(DEFAULT_TIMEOUT); // 20s
+			timer.addEventListener(TimerEvent.TIMER_COMPLETE, onTimeout);
+			timer.start();
+*/
 			batchCounter = 0;
 			offset = 0;
 			/*
@@ -81,10 +86,14 @@ package
 				var loadingFinished:Boolean = false;
 				var loadingBegun:Boolean = false;
 				
-				for each (var file:File in files) {
+				
+				for (var i:int=0; i<files.length; i++) {
+					var file:File = files[i];
 					if ( ! file.isDirectory && file.extension == "jpeg" || file.extension == "jpg" || file.extension == "png" ) {
 						imgFilesCounter++;
 					}
+					else
+						files.splice(i, 1); // remove non-image files
 				}
 
 				/*
@@ -99,11 +108,7 @@ package
 				*/
 				batchLoad();
 				
-
-/*				var timer:Timer = new Timer(2000, Math.ceil(files.length/BATCH));
-				timer.addEventListener(TimerEvent.TIMER, batchLoad);
-				timer.start();
-*/			}
+			}
 		}
 		
 		
@@ -161,6 +166,11 @@ package
 			return false;
 		}
 		
+/*		private function onTimeout(e:TimerEvent):void {
+			trace ("timeout");
+			dispatchEvent(new Event(Event.CANCEL));
+		}
+*/		
 //****************************
 // Internal logic
 //****************************
@@ -183,7 +193,7 @@ package
 			trace("finished1 "+finished);
 //			if(finished <= batchCounter)
 //			{
-				trace("finished2 "+finished);
+//				trace("finished2 "+finished);
 				if (finished%batchSize == 0) {
 					batchLoad();
 					trace("counter"+batchCounter);
@@ -197,6 +207,7 @@ package
 				dispatchEvent(new Event(Event.COMPLETE));
 		}
 		
+
 /*		
 		private function onImageLoaded( e:Event ):void
 		{

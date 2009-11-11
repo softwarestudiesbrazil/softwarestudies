@@ -13,14 +13,14 @@
 			
 			import views.ImgGroup;
 			
-			private var imageLoader: ImageLoader = new ImageLoader();
+			private var imageLoader: ImageLoader = new ImageLoader(10);
 			
 			private function load():void {
 				btn_display.enabled = false;
-				count.text = "loading..."
-				imageLoader.Load( '/AsianCult/SWS02/projects/resized' );
+				count.text = "loading...";
 				imageLoader.addEventListener(Event.COMPLETE, onImagesloaded);
 				imageLoader.addEventListener(FlexEvent.UPDATE_COMPLETE, onBatchUpdate);
+				imageLoader.Load( '/AsianCult/SWS02/projects/Lev/Mondrian_600dpi/run/images');// /AsianCult/SWS02/projects/resized' );
 			}
 			
 			private function onImagesloaded(e:Event):void {
@@ -31,7 +31,7 @@
 			private function onBatchUpdate(e:FlexEvent): void {
 				count.text = imageLoader.images.length.toString();
 			}
-			
+						
 			private function displayImages( ):void 
 			{
 				for each( var img:BitmapImage in imageLoader.images ) {
