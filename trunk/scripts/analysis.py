@@ -19,7 +19,7 @@ import csv
 # -blur histogram
 
 ############ Image Analysis Functions #######
-def findHist(picture):
+def findHist(picture, res):
 	print "Counting Colors:", os.path.basename(picture) , '...',
 	##open image
 	im = Image.open(picture)
@@ -27,24 +27,22 @@ def findHist(picture):
 	#im.show()
 	im = im.convert("L")
 	
-	#reduce colors
-	im = fromimage(im)
-	im = scipy.transpose(im)
-	im = scipy.divide(im, 4)
-	im = im *4
+	if res == 256: return toimage(im).histogram()
 	
-	hist = im.histogram
+	hist = im.histogram()
+	s = int(math.ceil(256.0/(res)))	
 	
-	s = 255/4
-	
-	black = hist[0]
-	dark = hist[s]
-	mid = hist[s*2]
-	light = hist[s*3]
-	white = hist[255]
-	
-	print [black,dark,mid,light,white]
-	return [black,dark,mid,light,white]
+	print "s:", s
+
+	ohist =[]
+	for index in range(res):
+		ohist.append(0)
+
+	for color in range(256):
+		ohist[int(math.floor(color/s))] += hist[color]
+
+	print ohist
+	return ohist
 
 def findShapes(picture, res):
 	print "Counting Shapes:", os.path.basename(picture) , '...', 
@@ -60,9 +58,10 @@ def findShapes(picture, res):
 	im = im.convert("L")
 
 	xsize, ysize = im.size
-	if (xsize*res < 300) or (ysize*res < 300):
+	
+	if (xsize*res < 60) or (ysize*res < 60):
 		print "Image to small for given resolution..."
-		res = 300.0 / min([xsize, ysize])
+		res = 60.0 / min([xsize, ysize])
 		print "New resolution for this image:", res
 		
 	im = im.resize((xsize*res, ysize*res), Image.ANTIALIAS)
@@ -124,12 +123,14 @@ def findColorRegions(picture, res):
 	im = im.convert("L")
 
 	xsize, ysize = im.size
-	if (xsize*res < 300) or (ysize*res < 300):
+
+	if (xsize*res < 60) or (ysize*res < 60):
 		print "Image to small for given resolution..."
-		res = 300.0 / min([xsize, ysize])
+		res = 60.0 / min([xsize, ysize])
 		print "New resolution for this image:", res
 			
 	im = im.resize((xsize*res, ysize*res),Image.ANTIALIAS)
+	
 	xsize, ysize = im.size
 	
 	im = fromimage(im)
@@ -153,7 +154,6 @@ def findColorRegions(picture, res):
 			if (x%(int(xsize/30)) == 0) and (y%(int(ysize/30)) == 0):
 				mark += 1
 				markers[x,y] = mark
-	print
 	##run watershed
 	water = ndimage.watershed_ift(im.astype('uint8'), markers, structure = struct)
 
@@ -167,10 +167,8 @@ def findColorRegions(picture, res):
 	pd = 0
 	opd = 0
 	for x in range(0,xsize):
-		print x/xsize
 		for y in range(0,ysize):
 			sizecount[marks.index(water[x,y])].append((x,y))
-	print
 	
 	##make markers based on large regions
 	mark = 0
