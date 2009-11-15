@@ -1,0 +1,31 @@
+#summary Database scripts
+
+= Database Structure =
+
+  * *object_set* - a table containing information about object sets.
+    * _name_ - set name
+    * _description_ - set description
+  * *object`_`* - a table containing information about objects.
+    * _name_ - object name (filename)
+    * _path_ - object path/URL
+  * *statistic* - a table containing information about statistic (i.e feature).
+    * _name_ - statistic name (i.e. feature name)
+  * *stat_real* - a table containing statistic values of type REAL.
+    * _value_ - REAL value
+  * *stat_text* - a table containing statistic values of type TEXT.
+    * _value_ - TEXT value
+
+==Notes==
+  * `db/visualCultures.sql` can create the database table structure as described here.
+
+----
+
+= db/importToSqlite.py =
+
+`importToSqlite.py` is a script for importing our "results.txt" into a SQLite database. 
+
+== Usage ==
+`./importToSqlite.py <sqlite-db> <result file> <set name> <set description>`
+Example: `./importToSqlite.py <sqlite-db> <result file> <set name> <set description>` 
+
+----
