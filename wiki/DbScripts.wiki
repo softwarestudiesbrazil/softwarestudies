@@ -1,4 +1,5 @@
 #summary Database scripts
+#sidebar TableOfContents
 
 =Database Structure=
 
