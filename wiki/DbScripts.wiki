@@ -1,5 +1,6 @@
 #summary Database scripts
-#sidebar TableOfContents
+
+<wiki:toc max_depth="2" />
 
 =Database Structure=
 
@@ -33,5 +34,3 @@
   * `$ sqlite3 test < visualCultures.sql` - create a SQLite database `test` and create table s according to the description in [DbScripts#Database_Structure]
   * `$ ./importToSqlite.py test sample-results.txt set1 testset`
   * `$ echo "select * from object_;" | sqlite3 test` - print `object_` table
-
-----
