@@ -1,6 +1,6 @@
 #summary Database scripts
 
-= Database Structure =
+=Database Structure=
 
   * *object_set* - a table containing information about object sets.
     * _name_ - set name
@@ -26,6 +26,11 @@
 
 == Usage ==
 `./importToSqlite.py <sqlite-db> <result file> <set name> <set description>`
-Example: `./importToSqlite.py <sqlite-db> <result file> <set name> <set description>` 
+
+== Example ==
+  * `$ cd db`
+  * `$ sqlite3 test < visualCultures.sql` - create a SQLite database `test` and create table s according to the description in [DbScripts#Database_Structure]
+  * `$ ./importToSqlite.py test sample-results.txt set1 testset`
+  * `$ echo "select * from object_;" | sqlite3 test` - print `object_` table
 
 ----
