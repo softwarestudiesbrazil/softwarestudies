@@ -5,51 +5,56 @@ Created on Oct 9, 2009
 @author: Sunsern
 '''
 
-import sys,getopt,string,sqlite3
+import sys,getopt,string,sqlite3,datetime
 
 
 def usage():
-    return 'importToSqlite v1.0' \
-           'USAGE: importToSqlite.py <dbname> <results.txt> <set-name> <set-description>'
+    return 'importToSqlite v1.0\n' \
+           'USAGE: importToSqlite.py <dbname> <resultfile> <set-name> <set-description>'
 
 def die(msg):
     print msg
     sys.exit(2)
 
 
-def addSet(setName,setDescription):
-    # cast to lower case
+def addSet(c,setName,setDescription):
+    # cast setName to lower case
     setName = setName.lower()
-    retval = 'INSERT INTO object_set(name,description) ' \
-             'VALUES (\"%s\",\"%s\");'%(setName,setDescription)
-    return retval
+    now = datetime.datetime.now()
+    c.execute('INSERT INTO object_set(name,description,update_date) ' \
+              'VALUES (?,?,?);',(setName,setDescription,now))
+    return c.lastrowid
 
-def addFeatureType(featureName):
-    # cast to lower case
+
+def addFeatureType(c,featureName):
+    # cast featureName to lower case
     featureName = featureName.lower()
-    retval = 'INSERT INTO statistic(name) ' \
-             'VALUES (\"%s\");'%(featureName)
-    return retval
+    now = datetime.datetime.now()
+    c.execute('INSERT INTO statistic(name,update_date) ' \
+              'VALUES (?,?);',(featureName,now))
+    return c.lastrowid
 
 
-def addObject(objectName,url,setId):
+def addObject(c,objectName,url,setId):
     # cast to lower case
     objectName = objectName.lower()
-    retval = 'INSERT INTO object_(set_id,name,path) ' \
-             'VALUES (%s,\"%s\",\"%s\");'%(setId,objectName,url)
-    return retval
+    now = datetime.datetime.now()
+    c.execute('INSERT INTO object_(set_id,name,path,update_date) ' \
+              'VALUES (?,?,?,?);',(setId,objectName,url,now))
+    return c.lastrowid
 
 
-def addFeatureValue(objectId,featureTypeId,value):
+def addFeatureValue(c,objectId,featureTypeId,value):
+    now = datetime.datetime.now()
     if (type(value) is float) and value == value:
         #print 'float case'
-        retval = 'INSERT INTO stat_real(obj_id,stat_id,val) ' \
-                 'VALUES (%s,%s,%s);'%(objectId,featureTypeId,value)
+        c.execute('INSERT INTO stat_real(obj_id,stat_id,val,update_date) ' \
+                  'VALUES (?,?,?,?);',(objectId,featureTypeId,value,now))
     else:
         #print 'string case'
-        retval = 'INSERT INTO stat_text(obj_id,stat_id,val) ' \
-                 'VALUES (%s,%s,\"%s\");'%(objectId,featureTypeId,str(value))
-    return retval
+        c.execute('INSERT INTO stat_text(obj_id,stat_id,val,update_date) ' \
+                  'VALUES (?,?,?,?);',(objectId,featureTypeId,value,now))
+    return c.lastrowid
 
 
 def main():
@@ -86,8 +91,7 @@ def sqlite_import(inputFile,dbname,setName,setDescription):
     conn = sqlite3.connect(dbname)
     c = conn.cursor()
 
-    c.execute(addSet(setName,setDescription))
-    setID = str(c.lastrowid)
+    setID = addSet(c,setName,setDescription)
 
     infile = open(inputFile,'r')
         
@@ -99,8 +103,7 @@ def sqlite_import(inputFile,dbname,setName,setDescription):
     fid = []
     i = 1
     for elem in headers:
-        c.execute(addFeatureType(elem))
-        featureTypeID = str(c.lastrowid)
+        featureTypeID = addFeatureType(c,elem)
         fid.append(featureTypeID)
         i = i + 1
     
@@ -113,8 +116,7 @@ def sqlite_import(inputFile,dbname,setName,setDescription):
         fvec = line.split(',')
         obj = fvec[0]
         print 'processing %s'%obj
-        c.execute(addObject(obj,'',setID))
-        objectID = str(c.lastrowid)
+        objectID = addObject(c,obj,'',setID)
         fvec = fvec[1:]
         for i in range(len(fvec)):
             feature = fvec[i]
@@ -123,7 +125,7 @@ def sqlite_import(inputFile,dbname,setName,setDescription):
                 fv = float(feature)
             except ValueError:
                 fv = feature
-            c.execute(addFeatureValue(objectID, fid[i], fv))
+            addFeatureValue(c, objectID, fid[i], fv)
         
     infile.close()
     conn.commit()
