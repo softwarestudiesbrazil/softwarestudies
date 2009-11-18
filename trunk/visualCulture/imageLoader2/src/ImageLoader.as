@@ -9,7 +9,7 @@ package
 	import flash.net.URLLoaderDataFormat;
 	import flash.net.URLRequest;
 	import flash.system.System;
-	
+	import mx.charts.renderers.DiamondItemRenderer;
 	import mx.events.FlexEvent;
 	
 	import spark.primitives.BitmapImage;
@@ -27,7 +27,7 @@ package
 		private var finished:int = 0;
 		private var batchSize:int = 0;
 
-		public const DEFAULT_BATCH_SIZE:int = 5;
+		public const DEFAULT_BATCH_SIZE:int = 10;
 //		private var timer:Timer;
 		
 /*		private var myFile:File;
@@ -35,12 +35,13 @@ package
 */		
 
 		/**
-		 * Default Constructor 
+		 * Default Constructor
+		 * @param batchSize_ the size of the batch of concurrent loading
 		 * 
 		 */
 		public function ImageLoader(batchSize_:int = DEFAULT_BATCH_SIZE)
 		{
-			this.batchSize = batchSize_;
+			this.batchSize = batchSize_>0?batchSize_:DEFAULT_BATCH_SIZE;
 /*			myStream.open( myFile, FileMode.WRITE);
 			
 			myFile = new File (File.applicationDirectory.nativePath + File.separator + "config2.txt");
@@ -61,7 +62,7 @@ package
 // Methods
 //
 		/**
-		 * Load all images from the specified path 
+		 * Load all images from the specified path by batch of specified sized
 		 * @param path
 		 * 
 		 */		
