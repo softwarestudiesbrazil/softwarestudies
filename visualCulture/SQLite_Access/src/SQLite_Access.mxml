@@ -14,7 +14,7 @@
 			private function btn_click(evt:MouseEvent):void {
 				file = new File();
 				file.addEventListener(Event.SELECT, file_select);
-				file.browseForOpen("Please select a directory...", [new FileFilter("Data File", "*.csv")]);
+				file.browseForOpen("Please select a csv file...", [new FileFilter("Data File", "*.csv")]);
 			}
 			
 			private function file_select(evt:Event):void {
