@@ -246,6 +246,9 @@ CREATE INDEX "idx_object_date" on object_ (obj_date ASC);
 -- Describe IDX_OBJECT_NAME
 CREATE INDEX "idx_object_name" on object_ (name ASC);
 
+-- Describe IDX_STATISTIC_NAMETYPE
+CREATE UNIQUE INDEX "idx_statistic_nametype" on statistic (name ASC, type ASC);
+
 -- Describe IDX_STATINT_VALUE
 CREATE INDEX "idx_statint_value" on stat_int (stat_id ASC, val ASC);
 
