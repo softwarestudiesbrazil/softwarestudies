@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:WindowedApplication xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					   xmlns:s="library://ns.adobe.com/flex/spark" 
+					   xmlns:mx="library://ns.adobe.com/flex/halo" width="753" height="579">
+	<fx:Script>
+		<![CDATA[
+			import flash.events.MouseEvent;
+			
+			import mmalab.softwarestudies.visualcultures.dataaccess.CsvReader;
+			import mmalab.softwarestudies.visualcultures.dataaccess.SQLiteWriter;
+
+			private var file:File;
+			
+			private function btn_click(evt:MouseEvent):void {
+				file = new File();
+				file.addEventListener(Event.SELECT, file_select);
+				file.browseForOpen("Please select a directory...", [new FileFilter("Data File", "*.csv")]);
+			}
+			
+			private function file_select(evt:Event):void {
+				var path:String = file.nativePath.slice(0, file.nativePath.lastIndexOf("/"));
+
+				var csvReader:CsvReader = new CsvReader(path);
+				var array:Array = csvReader.csvLoadAsArray(file.name);
+
+				//var sqlInjector:SqlInjector = new SqlInjector("database.db");
+				//sqlInjector.connect();
+
+				// stats.dataProvider = array;
+				var sqliteWriter:SQLiteWriter = new SQLiteWriter(dataFile.text);
+				sqliteWriter.connect(array);
+			}
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:HGroup verticalAlign="middle">
+		<s:Label text="Data File:"/>
+		<s:TextInput width="186" id="dataFile" text="visualCultures.db"/>
+		<s:Button label="Open..." id="open" enabled="true" click="btn_click(event)"/>
+	</s:HGroup>
+	<mx:DataGrid x="10" y="149" id="stats" width="100%" height="420">
+	</mx:DataGrid>
+</s:WindowedApplication>
