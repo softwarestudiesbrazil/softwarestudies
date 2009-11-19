@@ -27,6 +27,8 @@ oparser.add_option("-o", dest="outFile",
 				  help="Output file name. Default is /data.txt.", default="data.txt")
 oparser.add_option("-r", dest="res",
 				  help= 'Shape counting resolutions. Default is 1.0.', default=1.0, type='float')
+oparser.add_option("--hres", dest="hres",
+				  help= 'histogram resolutions. Default is 5.', default=5, type='int')
 (options, args) = oparser.parse_args()
 
 global ops 
@@ -113,6 +115,7 @@ def analyze(path):
 
 	data = []
 	#houghTransform(Image.open(path))
+	ac = time.clock()
 	data.append(os.path.basename(path)) #filename
 	data.append(path) #path
 	data.append(findSize(path)) #size  
@@ -123,8 +126,16 @@ def analyze(path):
 	data.append(findStdDev(path)) #stddev
 	data.append(findVarience(path)) #varience
 	data.append(findEntropy(path)) #entropy
+	qc = time.clock()
 	data.append(findColorRegions(path, float(ops.res))) #shapecount
+	cc = time.clock()
 	data.append(findShapes(path,float(ops.res)))
+	sc = time.clock()
+	hist = findHist(path, ops.hres)
+	hc = time.clock()
+	print "Quick stuff took:", ((qc-ac) + (hc-sc)), 's, Color regions took:', (cc-qc), 's, Shapes took:', (sc-cc), 's'
+	for index in range(len(hist)):
+		data.append(hist[index])
 	return data
 
 def recFind(path):
@@ -156,7 +167,9 @@ print 'Got', len(picturePathNames), 'JPEGS'
 dataTable = [] #ram verion of data.txt
 dataNames = ['filename','filepath','size','xsize','ysize','meanhue','meanbrightness',
 			 'stddev','varience','entropy','colorregions'+str(ops.res),'shapes'+str(ops.res)] #table first row
-
+for res in range(ops.hres):
+	dataNames.append("hist"+str(res))
+	
 print "Data Names:", dataNames
 dataTypes = []
 dataTable.append(dataNames)
@@ -166,7 +179,17 @@ dataTable = ezDataMerge(dataTable)
 cycleTimes = []
 for path in picturePathNames:
 	startTime = time.clock()
-	dataTable.append(analyze(path))
+	try:
+		dataTable.append(analyze(path))
+	except KeyboardInterrupt:
+		print
+		exit(0)
+	except:
+		print
+		print "Error:", sys.exc_info()
+		print
+		dataTable.append([os.path.basename(path), path, "Error", sys.exc_info()])
+		
 	if not dataTable == "Error":
 		dataSave(dataTable, ops.outFile)
 	else:
@@ -184,7 +207,7 @@ for path in picturePathNames:
 	totalTime = sum(cycleTimes)
 	avgTime = totalTime/len(cycleTimes)
 	print "This cycle:", int(thisTime), "s Average Cycle:", int(avgTime), "s Run Time:", int(totalTime/60), "m"
-	print "Cycles completed:", len(cycleTimes), "Cycles to go:", len(picturePathNames - len(cycleTimes)
+	print "Cycles completed:", len(cycleTimes), "Cycles to go:", (len(picturePathNames) - len(cycleTimes))
 	print "Time Till Completion:", int((avgTime*len(picturePathNames)/60)-totalTime/60), 'm'
 	print
 	
