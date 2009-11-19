@@ -45,7 +45,7 @@ def findHist(picture, res):
 	return ohist
 
 def findShapes(picture, res):
-	print "Counting Shapes:", os.path.basename(picture) , '...', 
+	print "Counting Shapes:", os.path.basename(picture), '(', res, ')...', 
 	
 	struct = np.array([[0,1,0],
 					   [1,1,1],
@@ -110,7 +110,7 @@ def findShapes(picture, res):
 	return shapes
 	
 def findColorRegions(picture, res):
-	print "Counting Color Regions:", os.path.basename(picture) , '...', 
+	print "Counting Color Regions:", os.path.basename(picture) , '(', res, ')...', 
 	
 	struct = np.array([[0,1,0],
 					   [1,1,1],
