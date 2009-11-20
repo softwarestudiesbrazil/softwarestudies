@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009"
+		 xmlns:s="library://ns.adobe.com/flex/spark"
+		 xmlns:mx="library://ns.adobe.com/flex/halo"
+		 width="400" height="300">
+	<fx:Script>
+		<![CDATA[
+			import mmalab.softwarestudies.asianculture.graph.events.SelectValueEvent;
+			import mmalab.softwarestudies.asianculture.data.models.Dataset;
+			[Bindable]
+			public var dataset:Dataset;
+			[Bindable]
+			public var selectedIdx:Array;
+			[Bindable]
+			public var statIdx:String;
+			
+			protected function pieseries1_clickHandler(event:MouseEvent):void
+			{
+				var selectValueEvent:SelectValueEvent = new SelectValueEvent(SelectValueEvent.VALUE_SELECTED);
+				selectValueEvent.selectedValues = pieseries1.selectedIndices;
+				dispatchEvent(selectValueEvent);
+				trace("zirloute"+selectValueEvent.selectedValues);
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+	</fx:Declarations>
+	<mx:PieChart x="0" y="0" id="piechart1" width="100%" height="100%" selectionMode="multiple"  showDataTips="true"  mouseUp="pieseries1_clickHandler(event)" dataProvider="{dataset.values}">
+		<mx:series>
+			<mx:PieSeries id="pieseries1" selectable="true" selectedIndices="{selectedIdx}" displayName="values" field="{statIdx}"/>
+		</mx:series>
+	</mx:PieChart>
+	<s:layout>
+		<s:BasicLayout/>
+	</s:layout>
+</s:Group>
