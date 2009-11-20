@@ -2,14 +2,13 @@
 <s:Group xmlns:fx="http://ns.adobe.com/mxml/2009"
 		 xmlns:s="library://ns.adobe.com/flex/spark"
 		 xmlns:mx="library://ns.adobe.com/flex/halo"
-		 width="400" height="300">
+		 width="300" height="300">
 	<fx:Script>
 		<![CDATA[
 			import mmalab.softwarestudies.asianculture.data.models.Dataset;
 			import mmalab.softwarestudies.asianculture.graph.events.SelectValueEvent;
 			
 			import mx.charts.HitData;
-			import mx.charts.renderers.CircleItemRenderer;
 			import mx.charts.series.items.PlotSeriesItem;
 			
 			[Bindable]
@@ -31,8 +30,8 @@
 				var chartItem:PlotSeriesItem = item.chartItem as PlotSeriesItem;
 				var str:String = chartItem.item.name as String;
 				var tip:String = "<b>" + str.slice(0, str.lastIndexOf(".")) + "</b><br/>"
-					+ "<b>" + statIdx + ":</b>" + chartItem.item[statIdx] + "<br/>"
-					+ "<b>" + statIdy + ":</b>" + chartItem.item[statIdy];
+					+ "<b>" + statIdx + ":</b> " + chartItem.item[statIdx] + "<br/>"
+					+ "<b>" + statIdy + ":</b> " + chartItem.item[statIdy];
 				return tip;
 			}
 			
@@ -47,7 +46,7 @@
 				  >
 		<mx:series>
 			<mx:PlotSeries id="series1" selectable="true" selectedIndices="{selectedIdx}" xField="{statIdx}" yField="{statIdy}"
-						   itemRenderer="mmalab.softwarestudies.asianculture.graph.components.pointRenderer"/>
+						   itemRenderer="mx.charts.renderers.CircleItemRenderer"/>
 		</mx:series>
 		<mx:horizontalAxis>
 			<mx:LinearAxis title="{statIdx}"/>
