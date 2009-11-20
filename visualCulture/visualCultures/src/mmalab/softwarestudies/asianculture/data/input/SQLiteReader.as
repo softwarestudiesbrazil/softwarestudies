@@ -1,5 +1,8 @@
 package mmalab.softwarestudies.asianculture.data.input
 {
+	import flare.query.methods.max;
+	import flare.util.Maths;
+	
 	import flash.data.SQLConnection;
 	import flash.data.SQLResult;
 	import flash.data.SQLStatement;

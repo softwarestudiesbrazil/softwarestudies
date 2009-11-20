@@ -4,6 +4,9 @@ package mmalab.softwarestudies.asianculture.data.models
 	public class Dataset
 	{
 		public var values:Array = new Array();
+		
+		public var min:Array = new Array();
+		public var max:Array = new Array();
 
 		public function Dataset(values:Array) {
 			this.values = values;
