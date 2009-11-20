@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<EventMap xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark" xmlns:mx="library://ns.adobe.com/flex/halo"
+		  xmlns="http://mate.asfusion.com/">
+	
+	<fx:Script>
+		<![CDATA[
+			import mmalab.softwarestudies.asianculture.graph.controllers.GraphManager;
+			import mmalab.softwarestudies.asianculture.graph.events.SelectValueEvent;
+			import mmalab.softwarestudies.asianculture.graph.views.*;
+			
+		]]>
+		
+	</fx:Script>
+	
+	<fx:Declarations>
+		
+		<Debugger level="{Debugger.ALL}" />
+		
+		<EventHandlers type="{SelectValueEvent.VALUE_SELECTED}" debug="true" >
+			<MethodInvoker generator="{GraphManager}" method="setSelectedValue" arguments="{event.selectedValues}" />
+		</EventHandlers>
+		
+		<!-- -=-=-=-=-=-=-=-=-=-=-=-=-=- -->
+		
+		<Injectors target="{GraphHisto}" debug="true">
+			<PropertyInjector targetKey="dataset" source="{GraphManager}" sourceKey="data" />
+			<PropertyInjector targetKey="selectedIdx" source="{GraphManager}" sourceKey="selectedValues" />
+		</Injectors>
+		
+		<Injectors target="{GraphPie}" debug="true">
+			<PropertyInjector targetKey="dataset" source="{GraphManager}" sourceKey="data"  />
+			<PropertyInjector targetKey="selectedIdx" source="{GraphManager}" sourceKey="selectedValues" />
+		</Injectors>    
+		
+		<Injectors target="{GraphScatter}" debug="true">
+			<PropertyInjector targetKey="dataset" source="{GraphManager}" sourceKey="data"  />
+			<PropertyInjector targetKey="selectedIdx" source="{GraphManager}" sourceKey="selectedValues" />
+		</Injectors>    
+	</fx:Declarations>
+	
+</EventMap>

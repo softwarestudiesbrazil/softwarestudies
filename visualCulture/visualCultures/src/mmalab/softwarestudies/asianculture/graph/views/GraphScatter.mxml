@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009"
+		 xmlns:s="library://ns.adobe.com/flex/spark"
+		 xmlns:mx="library://ns.adobe.com/flex/halo"
+		 width="400" height="300">
+	<fx:Script>
+		<![CDATA[
+			import mmalab.softwarestudies.asianculture.data.models.Dataset;
+			import mmalab.softwarestudies.asianculture.graph.events.SelectValueEvent;
+			
+			import mx.charts.HitData;
+			import mx.charts.renderers.CircleItemRenderer;
+			import mx.charts.series.items.PlotSeriesItem;
+			
+			[Bindable]
+			public var dataset:Dataset;
+			[Bindable]
+			public var selectedIdx:Array;
+			[Bindable]
+			public var statIdx:String;
+			[Bindable]
+			public var statIdy:String;
+			
+			protected function barseries1_clickHandler(event:MouseEvent):void
+			{
+				var selectValueEvent:SelectValueEvent = new SelectValueEvent(SelectValueEvent.VALUE_SELECTED);
+				selectValueEvent.selectedValues = series1.selectedIndices;
+				dispatchEvent(selectValueEvent);
+			}
+			private function chart_dataTipFunction(item:HitData):String {
+				var chartItem:PlotSeriesItem = item.chartItem as PlotSeriesItem;
+				var str:String = chartItem.item.name as String;
+				var tip:String = "<b>" + str.slice(0, str.lastIndexOf(".")) + "</b><br/>"
+					+ "<b>" + statIdx + ":</b>" + chartItem.item[statIdx] + "<br/>"
+					+ "<b>" + statIdy + ":</b>" + chartItem.item[statIdy];
+				return tip;
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+
+	</fx:Declarations>
+	<mx:PlotChart x="0" y="0" id="barchart1" width="100%" height="100%" selectionMode="multiple" 
+				  showDataTips="true" dataTipRenderer="{MyDataTip}" dataTipFunction="chart_dataTipFunction" dataTipMode="single"
+				  mouseUp="barseries1_clickHandler(event)" dataProvider="{dataset.values}"
+				  >
+		<mx:series>
+			<mx:PlotSeries id="series1" selectable="true" selectedIndices="{selectedIdx}" xField="{statIdx}" yField="{statIdy}"
+						   itemRenderer="mmalab.softwarestudies.asianculture.graph.components.pointRenderer"/>
+		</mx:series>
+		<mx:horizontalAxis>
+			<mx:LinearAxis title="{statIdx}"/>
+		</mx:horizontalAxis>
+		<mx:verticalAxis>
+			<mx:LinearAxis title="{statIdy}"/>
+		</mx:verticalAxis>
+	</mx:PlotChart>
+</s:Group>

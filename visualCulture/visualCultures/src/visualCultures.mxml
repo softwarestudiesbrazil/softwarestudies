@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:WindowedApplication xmlns:fx="http://ns.adobe.com/mxml/2009"
+					   xmlns:s="library://ns.adobe.com/flex/spark"
+					   xmlns:mx="library://ns.adobe.com/flex/halo"
+					   xmlns:eventMaps="mmalab.softwarestudies.asianculture.*"
+					   xmlns:views="mmalab.softwarestudies.asianculture.graph.views.*"
+					   width="842" height="800" creationComplete="creationCompleteHandler(event)">
+	<fx:Script>
+		<![CDATA[
+			import flash.events.MouseEvent;
+			import mmalab.softwarestudies.asianculture.data.input.SQLiteReader;
+			
+			private var file:File;
+			
+			private function creationCompleteHandler(event: Event): void
+			{
+				nativeWindow.x = (Capabilities.screenResolutionX - nativeWindow.width) / 2;
+				nativeWindow.y = (Capabilities.screenResolutionY - nativeWindow.height) / 2;
+			}
+
+			protected function loadDB_clickHandler(event:MouseEvent):void
+			{
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<eventMaps:MainEventMap />
+	</fx:Declarations>
+	
+	<s:Border>
+		<s:layout>
+			<s:VerticalLayout/>
+		</s:layout>
+		<s:Border height="26">
+			<s:Button  id="loadDB" label="Load" enabled="true" click="loadDB_clickHandler(event)"/>			
+		</s:Border>
+		<s:Border>
+			<s:layout>
+				<s:TileLayout/>
+			</s:layout>
+				<views:GraphScatter statIdx="Color7_R" statIdy="Correlation"/>
+				<views:GraphScatter statIdx="EdgeAmountSobel" statIdy="Correlation"/>
+				<views:GraphScatter statIdx="Color7_R" statIdy="Entropy"/>
+				<views:GraphScatter statIdx="EdgeAmountSobel" statIdy="Entropy"/>
+		</s:Border>
+	</s:Border>
+</s:WindowedApplication>
