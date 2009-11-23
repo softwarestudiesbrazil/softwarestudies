@@ -2,14 +2,30 @@
 <s:Group xmlns:fx="http://ns.adobe.com/mxml/2009"
 		 xmlns:s="library://ns.adobe.com/flex/spark"
 		 xmlns:mx="library://ns.adobe.com/flex/halo"
-		 width="300" height="300">
+		 width="300" height="300" >
+	<fx:Style>
+		@namespace s "library://ns.adobe.com/flex/spark";
+		@namespace mx "library://ns.adobe.com/flex/halo";
+		
+		.itemrendererstyle {
+			radius: 3;
+			item-roll-over-color: "0xFFFF00";
+			item-disabled-color: "0x00FF00";
+			item-selection-color: "0x0000FF";
+			
+		}
+		
+	</fx:Style>
 	<fx:Script>
 		<![CDATA[
 			import mmalab.softwarestudies.asianculture.data.models.Dataset;
 			import mmalab.softwarestudies.asianculture.graph.events.SelectValueEvent;
 			
+			import mx.charts.AxisRenderer;
 			import mx.charts.HitData;
+			import mx.charts.LinearAxis;
 			import mx.charts.series.items.PlotSeriesItem;
+			import mx.events.FlexEvent;
 			
 			[Bindable]
 			public var dataset:Dataset;
@@ -19,13 +35,18 @@
 			public var statIdx:String;
 			[Bindable]
 			public var statIdy:String;
+			[Bindable]
+			public var min:Object;
+			[Bindable]
+			public var max:Object;
 			
-			protected function barseries1_clickHandler(event:MouseEvent):void
+			private function barseries1_clickHandler(event:MouseEvent):void
 			{
 				var selectValueEvent:SelectValueEvent = new SelectValueEvent(SelectValueEvent.VALUE_SELECTED);
 				selectValueEvent.selectedValues = series1.selectedIndices;
 				dispatchEvent(selectValueEvent);
 			}
+			
 			private function chart_dataTipFunction(item:HitData):String {
 				var chartItem:PlotSeriesItem = item.chartItem as PlotSeriesItem;
 				var str:String = chartItem.item.name as String;
@@ -37,22 +58,27 @@
 			
 		]]>
 	</fx:Script>
-	<fx:Declarations>
 
+	<fx:Declarations>
+		<!-- Define custom colors for use as plot point fills. -->
+		<mx:SolidColor id="sc1" color="green" alpha=".3"/>
+		<!-- Define custom Strokes. -->
+		<mx:Stroke id="s1" color="green" weight="1"/>
 	</fx:Declarations>
-	<mx:PlotChart x="0" y="0" id="barchart1" width="100%" height="100%" selectionMode="multiple" 
+	
+	<mx:PlotChart left="{0}" x="0" y="0" id="barchart1" selectionMode="multiple" width="100%" height="100%"
 				  showDataTips="true" dataTipRenderer="{MyDataTip}" dataTipFunction="chart_dataTipFunction" dataTipMode="single"
-				  mouseUp="barseries1_clickHandler(event)" dataProvider="{dataset.values}"
-				  >
+				  mouseUp="barseries1_clickHandler(event)" dataProvider="{dataset.values}" >
+		<mx:verticalAxis>
+			<mx:LinearAxis id="axisObj" title="{statIdy}" autoAdjust="true" baseAtZero="false" />
+		</mx:verticalAxis>
+		<mx:horizontalAxis>
+			<mx:LinearAxis title="{statIdx}" autoAdjust="true" baseAtZero="false"/>
+		</mx:horizontalAxis>
 		<mx:series>
 			<mx:PlotSeries id="series1" selectable="true" selectedIndices="{selectedIdx}" xField="{statIdx}" yField="{statIdy}"
-						   itemRenderer="mx.charts.renderers.CircleItemRenderer"/>
+						   itemRenderer="mx.charts.renderers.CircleItemRenderer" displayName="{statIdy}"
+						   styleName="itemrendererstyle" fill="{sc1}" stroke="{s1}" />
 		</mx:series>
-		<mx:horizontalAxis>
-			<mx:LinearAxis title="{statIdx}"/>
-		</mx:horizontalAxis>
-		<mx:verticalAxis>
-			<mx:LinearAxis title="{statIdy}"/>
-		</mx:verticalAxis>
 	</mx:PlotChart>
 </s:Group>

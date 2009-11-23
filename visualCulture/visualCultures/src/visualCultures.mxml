@@ -4,7 +4,8 @@
 					   xmlns:mx="library://ns.adobe.com/flex/halo"
 					   xmlns:eventMaps="mmalab.softwarestudies.asianculture.*"
 					   xmlns:views="mmalab.softwarestudies.asianculture.graph.views.*"
-					   width="1000" height="800" creationComplete="creationCompleteHandler(event)">
+					   width="1000" height="800"
+					   creationComplete="creationCompleteHandler(event)">
 	<fx:Script>
 		<![CDATA[
 			import flash.events.MouseEvent;

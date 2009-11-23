@@ -20,6 +20,7 @@ package mmalab.softwarestudies.asianculture.graph.controllers
 			dbReader.connect();
 			data = dbReader.getDataset(new Array("Color7_R", "Correlation", "EdgeAmountSobel", "Entropy"));
 			selectedValues = null;
+			dbReader.closeConnection();
 		}
 		
 		public function setSelectedValue(idx:Array):void {
