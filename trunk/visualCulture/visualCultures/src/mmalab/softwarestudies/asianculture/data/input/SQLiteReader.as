@@ -71,6 +71,12 @@ package mmalab.softwarestudies.asianculture.data.input
 			return null;
 		}
 
+		/**
+		 * Returns a Dataset object containing the specified statistic categories and values for each object of the database 
+		 * @param colnames the statistical categories
+		 * @return Dataset
+		 * 
+		 */
 		public function getDataset(colnames:Array):Dataset {
 			var sql:SQLStatement = new SQLStatement();
 			//set the statement to connect to our database
@@ -78,9 +84,9 @@ package mmalab.softwarestudies.asianculture.data.input
 			sql.sqlConnection = conn;
 			conn.addEventListener(SQLErrorEvent.ERROR, errorHandler);
 			
-			var selectString:String = "";
-			var joinString:String= "";
-			var whereString:String = "";
+			var selectString	:String = "";
+			var joinString		:String = "";
+			var whereString		:String = "";
 			for (var i:int=0; i<colnames.length; i++) {
 				selectString += "r"+i+".val as " + colnames[i] +", ";
 				joinString += "join stat_real r"+i+" on r"+i+".obj_id = o.id " +
@@ -106,6 +112,10 @@ package mmalab.softwarestudies.asianculture.data.input
 		
 		private function errorHandler(event:SQLErrorEvent):void {
 			trace("An error occured while executing the statement.");
+		}
+		
+		public function closeConnection():void {
+			conn.close();
 		}
 	}
 }
