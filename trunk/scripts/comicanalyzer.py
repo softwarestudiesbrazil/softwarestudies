@@ -26,13 +26,22 @@ oparser.add_option("-i", dest="imageDir",
 oparser.add_option("-o", dest="outFile",
 				  help="Output file name. Default is /data.txt.", default="data.txt")
 oparser.add_option("-r", dest="res",
-				  help= 'Shape counting resolutions. Default is 1.0.', default=1.0, type='float')
+				  help= 'Shape counting resolutions. Should be a quoted space seperated list" Default is "0.1 1.0".', default="0.1 1.0", type='str')
 oparser.add_option("--hres", dest="hres",
 				  help= 'histogram resolutions. Default is 5.', default=5, type='int')
 (options, args) = oparser.parse_args()
 
 global ops 
 ops = options
+ops.res = ops.res.split()
+
+floatres = []
+
+for r in ops.res:
+	floatres.append(float(r))
+
+ops.res = floatres
+	
 
 ################ Defs ######################
 def unique(a):
@@ -127,9 +136,11 @@ def analyze(path):
 	data.append(findVarience(path)) #varience
 	data.append(findEntropy(path)) #entropy
 	qc = time.clock()
-	data.append(findColorRegions(path, float(ops.res))) #shapecount
+	for r in ops.res:
+		data.append(findColorRegions(path, float(r))) #shapecount
 	cc = time.clock()
-	data.append(findShapes(path,float(ops.res)))
+	for r in ops.res:
+		data.append(findShapes(path,float(r)))
 	sc = time.clock()
 	hist = findHist(path, ops.hres)
 	hc = time.clock()
@@ -166,7 +177,11 @@ print 'Got', len(picturePathNames), 'JPEGS'
 
 dataTable = [] #ram verion of data.txt
 dataNames = ['filename','filepath','size','xsize','ysize','meanhue','meanbrightness',
-			 'stddev','varience','entropy','colorregions'+str(ops.res),'shapes'+str(ops.res)] #table first row
+			 'stddev','varience','entropy'] #table first row
+for r in ops.res:
+	dataNames.append('colorregios' + str(r))
+for r in ops.res:
+	dataNames.append('shapes' + str(r))
 for res in range(ops.hres):
 	dataNames.append("hist"+str(res))
 	
