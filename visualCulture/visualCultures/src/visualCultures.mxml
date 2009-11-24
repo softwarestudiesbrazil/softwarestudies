@@ -3,26 +3,48 @@
 					   xmlns:s="library://ns.adobe.com/flex/spark"
 					   xmlns:mx="library://ns.adobe.com/flex/halo"
 					   xmlns:eventMaps="mmalab.softwarestudies.asianculture.*"
-					   xmlns:views="mmalab.softwarestudies.asianculture.graph.views.*"
-					   width="1000" height="800"
+					   width="1000" height="800" backgroundColor="0x000000"
 					   creationComplete="creationCompleteHandler(event)">
 	<fx:Script>
 		<![CDATA[
 			import flash.events.MouseEvent;
-			import mmalab.softwarestudies.asianculture.data.input.SQLiteReader;
+			
+			import mmalab.softwarestudies.asianculture.data.event.ChooseStatisticsEvent;
+			import mmalab.softwarestudies.asianculture.data.models.Statistic;
+			import mmalab.softwarestudies.asianculture.graph.views.GraphScatter;
 			
 			private var file:File;
+			
+			[Bindable]
+			public var statsNames:Array;
 			
 			private function creationCompleteHandler(event: Event): void
 			{
 				nativeWindow.x = (Capabilities.screenResolutionX - nativeWindow.width) / 2;
 				nativeWindow.y = (Capabilities.screenResolutionY - nativeWindow.height) / 2;
+								
 			}
 			
 			protected function loadDB_clickHandler(event:MouseEvent):void
 			{
+				group1.removeAllElements();
+				var chooseStatsEvent:ChooseStatisticsEvent = new ChooseStatisticsEvent(ChooseStatisticsEvent.CHOOSE_STATS_EVENT);
+				chooseStatsEvent.numStats = parseInt(numStatsInput.text) * 2;
+				dispatchEvent(chooseStatsEvent);
 			}
 			
+
+			protected function displayGraphs_clickHandler(event:MouseEvent):void
+			{
+				group1.removeAllElements();
+				for (var i:int=0; i<statsNames.length; i += 2) {
+					var graph:GraphScatter = new GraphScatter();
+					graph.statIdx = (statsNames[i] as Statistic).name;
+					graph.statIdy = (statsNames[i+1] as Statistic).name;
+					group1.addElement(graph);
+				}
+			}
+
 		]]>
 	</fx:Script>
 	
@@ -30,23 +52,23 @@
 		<eventMaps:MainEventMap />
 	</fx:Declarations>
 	
-	<s:Group>
+	<s:Group width="100%" height="100%">
 		<s:layout>
 			<s:VerticalLayout/>
 		</s:layout>
-		<!--s:Border height="26">
-			<s:Button  id="loadDB" label="Load" enabled="true" click="loadDB_clickHandler(event)"/>			
-		</s:Border-->
 		<s:Group>
 			<s:layout>
-				<s:TileLayout/>
+				<s:HorizontalLayout/>
 			</s:layout>
-			<views:GraphScatter statIdx="EdgeAmountSobel" statIdy="Correlation"/>
-			<views:GraphScatter statIdx="EdgeAmountSobel" statIdy="Entropy"/>
-			<views:GraphScatter statIdx="EdgeAmountSobel" statIdy="Color7_R"/>
-			<views:GraphScatter statIdx="Color7_R" statIdy="Entropy"/>
-			<views:GraphScatter statIdx="Color7_R" statIdy="Correlation"/>
-			<views:GraphScatter statIdx="Correlation" statIdy="Entropy"/>
+			<s:Label text="Number of graphs: " verticalAlign="middle" height="100%"/>
+			<s:TextInput id="numStatsInput" width="24" text="6"/>
+			<s:Button  id="loadDB" label="Load" enabled="true" click="loadDB_clickHandler(event)"/>			
+			<s:Button  id="displayGraphs" label="display" enabled="true" click="displayGraphs_clickHandler(event)"/>			
+		</s:Group>
+		<s:Group id="group1" width="100%" height="100%">
+			<s:layout>
+				<s:TileLayout clipAndEnableScrolling="true" orientation="rows"  />
+			</s:layout>
 		</s:Group>
 	</s:Group>
 </s:WindowedApplication>

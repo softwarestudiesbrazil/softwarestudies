@@ -17,6 +17,7 @@ package mmalab.softwarestudies.asianculture.graph.views
 			super.updateDisplayList(w, h);
 			
 			this.setStyle("textAlign","left");
+			this.setStyle("color", "0xCCCCCC");
 			var g:Graphics = graphics; 
 			g.clear();  
 			var m:Matrix = new Matrix();
