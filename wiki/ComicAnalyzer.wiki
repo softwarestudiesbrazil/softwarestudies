@@ -5,19 +5,24 @@ comicanalyzer.py takes an image directory and outputs a csv file with a variety 
 = Introduction =
 Options:
  *'-h    display options
- *'-i    the image directory
+
+ *'-i    the image directory to process. This will be recursively searched downward
+
  *'-o    the data output file
- *'-r    the prescaling resolution for the shape and color region counting algorithms. A value of 1.0 is no prescailing. A value of less than one should decrease precessing time but may be less accutrate. A value greater than one is supported but is useless. At a too small value on a too small of an image the results become meaningless and the resolution is automatically ajusted upwards.
+
+ *'-r    the prescaling resolution for the shape and color region counting algorithms. A value of 1.0 is no prescailing. A value of less than one should decrease precessing time but may be less accutrate. A value greater than one is supported but is useless. At a too small value on a too small of an image the results become meaningless and the resolution is automatically ajusted upwards. This can be a quoted, space-separated list like: "1.0 0.3 0.1". Also, the number of shapes counted will vary with the resolution. A lower resolution will give more shapes. It will vary differently with different images and this difference says something about the type of shapes in the image.
+
+ *'--hres    The number of bins for the histogram
+
+ *'-l    this is a text file with the paths to the images to be processed. If this is present it overrides the -i option. Each path should be on a separate line
 
 = Example Command Line Options =
-
-There is still a problem with the environment path so it is necessary to call it with python.
 
 astana: _python /Applications/Programming/softwarestudies/scripts/comicanalyzer.py -i /the/directory/to/analyze/ -o /the/data/file/to/output/to.txt -r 1.0_
 
 astana: _python /Applications/Programming/softwarestudies/scripts/comicanalyzer.py -i /Users/devon/Desktop/manga-testset/ -o /Users/devon/Desktop/data-1.txt -r 1.0_
 
-A resolution of 300 or greater will about max out the effective resolution of the algorithm. 
+A resolution of 1.0 will about max out the effective resolution of the algorithm. 
 
 = Example Output =
 This is an example of what would be written to the output file at resolutions of 1.0:
