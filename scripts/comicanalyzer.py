@@ -25,6 +25,9 @@ oparser.add_option("-i", dest="imageDir",
 				  help="Image Directory. Default is the current directory.", default=os.path.curdir)
 oparser.add_option("-o", dest="outFile",
 				  help="Output file name. Default is /data.txt.", default="data.txt")
+oparser.add_option("-l", dest="fileList",
+				  help="A path to a text file with a list of images to process. This should have each path on a seperate line. If None then the script will use the -i option. Default is None", default=None)
+				  
 oparser.add_option("-r", dest="res",
 				  help= 'Shape counting resolutions. Should be a quoted space seperated list" Default is "0.1 1.0".', default="0.1 1.0", type='str')
 oparser.add_option("--hres", dest="hres",
@@ -168,8 +171,13 @@ def recFind(path):
 ################ Getting Images ###################
 print "Getting Images..."
 
-picturePathNames = recFind(ops.imageDir)
-
+if ops.fileList == None:
+	picturePathNames = recFind(ops.imageDir)
+else:
+	listFile = open(ops.fileList, "rb")
+	rawPathNames = listFile.read()
+	picturePathNames = rawPathNames.split('\n')
+	
 
 print 'Got', len(picturePathNames), 'JPEGS'
 
