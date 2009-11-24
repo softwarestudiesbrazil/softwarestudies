@@ -9,6 +9,7 @@
 		
 		.itemrendererstyle {
 			radius: 3;
+			color: "0xFFFFFF";
 			item-roll-over-color: "0xFFFF00";
 			item-disabled-color: "0x00FF00";
 			item-selection-color: "0x0000FF";
@@ -35,10 +36,6 @@
 			public var statIdx:String;
 			[Bindable]
 			public var statIdy:String;
-			[Bindable]
-			public var min:Object;
-			[Bindable]
-			public var max:Object;
 			
 			private function barseries1_clickHandler(event:MouseEvent):void
 			{
@@ -61,14 +58,14 @@
 
 	<fx:Declarations>
 		<!-- Define custom colors for use as plot point fills. -->
-		<mx:SolidColor id="sc1" color="green" alpha=".3"/>
+		<mx:SolidColor id="sc1" color="0x005500" alpha="1"/>
 		<!-- Define custom Strokes. -->
 		<mx:Stroke id="s1" color="green" weight="1"/>
 	</fx:Declarations>
 	
 	<mx:PlotChart left="{0}" x="0" y="0" id="barchart1" selectionMode="multiple" width="100%" height="100%"
 				  showDataTips="true" dataTipRenderer="{MyDataTip}" dataTipFunction="chart_dataTipFunction" dataTipMode="single"
-				  mouseUp="barseries1_clickHandler(event)" dataProvider="{dataset.values}" >
+				  mouseUp="barseries1_clickHandler(event)" dataProvider="{dataset.values}"  styleName="itemrendererstyle">
 		<mx:verticalAxis>
 			<mx:LinearAxis id="axisObj" title="{statIdy}" autoAdjust="true" baseAtZero="false" />
 		</mx:verticalAxis>

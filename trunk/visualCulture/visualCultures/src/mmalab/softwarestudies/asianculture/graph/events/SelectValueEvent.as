@@ -11,7 +11,6 @@ package mmalab.softwarestudies.asianculture.graph.events
         
 		public function SelectValueEvent(type:String, bubbles:Boolean=true, cancelable:Boolean=false)
 		{
-			trace("toundra");
 			super(type, bubbles, cancelable);
 		}
 	}

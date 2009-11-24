@@ -4,6 +4,7 @@
 	
 	<fx:Script>
 		<![CDATA[
+			import mmalab.softwarestudies.asianculture.data.event.ChooseStatisticsEvent;
 			import mmalab.softwarestudies.asianculture.graph.controllers.GraphManager;
 			import mmalab.softwarestudies.asianculture.graph.events.SelectValueEvent;
 			import mmalab.softwarestudies.asianculture.graph.views.*;
@@ -20,8 +21,16 @@
 			<MethodInvoker generator="{GraphManager}" method="setSelectedValue" arguments="{event.selectedValues}" />
 		</EventHandlers>
 		
+		<EventHandlers type="{ChooseStatisticsEvent.CHOOSE_STATS_EVENT}" debug="true" >
+			<MethodInvoker generator="{GraphManager}" method="setRandomSet" arguments="{event.numStats}" />
+		</EventHandlers>
+		
 		<!-- -=-=-=-=-=-=-=-=-=-=-=-=-=- -->
 		
+		<Injectors target="{visualCultures}" debug="true">
+			<PropertyInjector targetKey="statsNames" source="{GraphManager}" sourceKey="statsList" />
+		</Injectors>
+
 		<Injectors target="{GraphHisto}" debug="true">
 			<PropertyInjector targetKey="dataset" source="{GraphManager}" sourceKey="data" />
 			<PropertyInjector targetKey="selectedIdx" source="{GraphManager}" sourceKey="selectedValues" />

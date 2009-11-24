@@ -1,8 +1,5 @@
 package mmalab.softwarestudies.asianculture.data.input
 {
-	import flare.query.methods.max;
-	import flare.util.Maths;
-	
 	import flash.data.SQLConnection;
 	import flash.data.SQLResult;
 	import flash.data.SQLStatement;
@@ -87,11 +84,11 @@ package mmalab.softwarestudies.asianculture.data.input
 			var selectString	:String = "";
 			var joinString		:String = "";
 			var whereString		:String = "";
-			for (var i:int=0; i<colnames.length; i++) {
-				selectString += "r"+i+".val as " + colnames[i] +", ";
-				joinString += "join stat_real r"+i+" on r"+i+".obj_id = o.id " +
-					"join statistic s"+i+" on r"+i+".stat_id = s"+i+".id ";
-				whereString += "s"+i+".name='"+colnames[i]+"' AND ";
+			for (var i:int=0; colnames != null && i<colnames.length; i++) {
+				selectString += "r"+i+".val as " + colnames[i].name +", ";
+				joinString += "join stat_real r"+i+" on r"+i+".obj_id = o.id "
+				//	"join statistic s"+i+" on r"+i+".stat_id = s"+i+".id ";
+				whereString += "r"+i+".stat_id = "+colnames[i].id+" AND ";
 			}
 			
 			sql.text = "select o.name as name, " + selectString.slice(0, selectString.lastIndexOf(",")) +
@@ -107,6 +104,39 @@ package mmalab.softwarestudies.asianculture.data.input
 				return new Dataset(result.data);
 			}
 			trace(result.data.length);
+			return null;
+		}
+		
+		/**
+		 * Returns an array of Objects(id, name) matching the names of the stat columns specified 
+		 * @param colnames
+		 * @return Array
+		 * 
+		 */
+		public function getStatsList(colnames:Array):Array {
+			var sql:SQLStatement = new SQLStatement();
+			//set the statement to connect to our database
+			
+			sql.sqlConnection = conn;
+			conn.addEventListener(SQLErrorEvent.ERROR, errorHandler);
+			
+			var whereString:String = "";
+			if (colnames != null && colnames.length > 0)
+				whereString = " where ";
+			for (var i:int=0; colnames != null && i<colnames.length; i++) {
+				whereString += "s.name = '" + colnames[i] + "' OR ";
+			}
+			sql.text = "select s.id as id, s.name as name from statistic s " + whereString.slice(0, whereString.lastIndexOf("OR")) + " order by s.name";
+			
+			sql.execute();
+			
+			var result:SQLResult = sql.getResult();
+			if (result != null && result.data.length > 0)
+			{
+				//trace("id:", row.id, ", name:", row.name, ", type:", row.type);
+				trace(result.data.length);
+				return result.data;
+			}
 			return null;
 		}
 		
