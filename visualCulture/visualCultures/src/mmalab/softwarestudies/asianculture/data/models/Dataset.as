@@ -9,6 +9,10 @@ package mmalab.softwarestudies.asianculture.data.models
 			this.values = values;
 		}
 		
+		public function addValue(value:Object):void {
+			this.values.push(value);
+		}
+		
 /*		public function Dataset() {
 			var obj:Object = new Object();
 			obj.stat1 = 10;
