@@ -28,26 +28,28 @@ package mmalab.softwarestudies.asianculture.graph.controllers
 			selectedValues = idx;
 		}
 		
-		public function setRandomSet(numStats:int):void {
+		public function setRandomSet(numStats:int, maxNumObjects:int):void {
 
 			var fullStatsList:Array = dbReader.getStatsList(null);
 			var randomStat:int;
 			
+			// clear previous statistic list
 			var statItem:Statistic;
 			for (var j:int=0; statsList != null && j<statsList.length; j++) {
 				statsList[j] = null;
 				delete statsList[j]
 			}
 			
+			// create random statistics list of length numStats
 			statsList = new Array();
 			for (var i:int=0; i<numStats; i++) {
 				randomStat = Math.floor( Math.random() * fullStatsList.length);
 				statItem = new Statistic(fullStatsList[randomStat].id, fullStatsList[randomStat].name);
 				statsList.push(statItem);
-				trace (statItem.name);
 			}
 
-			this.data = dbReader.getStatObjects(statsList);
+			// retrieve dataset of specified statistics
+			this.data = dbReader.getStatObjects(statsList, maxNumObjects);
 		}
 	}
 }

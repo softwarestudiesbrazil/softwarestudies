@@ -22,7 +22,7 @@
 			{
 				nativeWindow.x = (Capabilities.screenResolutionX - nativeWindow.width) / 2;
 				nativeWindow.y = (Capabilities.screenResolutionY - nativeWindow.height) / 2;
-								
+				
 			}
 			
 			protected function loadDB_clickHandler(event:MouseEvent):void
@@ -30,10 +30,12 @@
 				group1.removeAllElements();
 				var chooseStatsEvent:ChooseStatisticsEvent = new ChooseStatisticsEvent(ChooseStatisticsEvent.CHOOSE_STATS_EVENT);
 				chooseStatsEvent.numStats = parseInt(numStatsInput.text) * 2;
+				chooseStatsEvent.maxNumObjects = parseInt(maxNumObjectsInput.text);
+				
 				dispatchEvent(chooseStatsEvent);
 			}
 			
-
+			
 			protected function displayGraphs_clickHandler(event:MouseEvent):void
 			{
 				group1.removeAllElements();
@@ -44,7 +46,7 @@
 					group1.addElement(graph);
 				}
 			}
-
+			
 		]]>
 	</fx:Script>
 	
@@ -62,13 +64,17 @@
 			</s:layout>
 			<s:Label text="Number of graphs: " verticalAlign="middle" height="100%" color="#FFFFFF" fontWeight="normal" fontSize="12"/>
 			<s:TextInput id="numStatsInput" width="24" text="6"/>
+			<s:Label text="Max number of objects (0 for all): " verticalAlign="middle" height="100%" color="#FFFFFF" fontWeight="normal" fontSize="12"/>
+			<s:TextInput id="maxNumObjectsInput" width="24" text="0"/>
 			<s:Button  id="loadDB" label="Load" enabled="true" click="loadDB_clickHandler(event)"/>			
 			<s:Button  id="displayGraphs" label="display" enabled="true" click="displayGraphs_clickHandler(event)"/>			
 		</s:Group>
-		<s:Group id="group1" width="100%" height="100%">
-			<s:layout>
-				<s:TileLayout clipAndEnableScrolling="true" orientation="rows"  />
-			</s:layout>
-		</s:Group>
+		<s:Scroller width="100%" height="100%">
+			<s:Group id="group1" width="100%" height="100%">
+				<s:layout>
+					<s:TileLayout clipAndEnableScrolling="true" orientation="rows" />
+				</s:layout>
+			</s:Group>
+		</s:Scroller>
 	</s:Group>
 </s:WindowedApplication>
