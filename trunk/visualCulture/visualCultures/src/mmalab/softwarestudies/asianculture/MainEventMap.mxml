@@ -22,7 +22,7 @@
 		</EventHandlers>
 		
 		<EventHandlers type="{ChooseStatisticsEvent.CHOOSE_STATS_EVENT}" debug="true" >
-			<MethodInvoker generator="{GraphManager}" method="setRandomSet" arguments="{event.numStats}" />
+			<MethodInvoker generator="{GraphManager}" method="setRandomSet" arguments="{[event.numStats, event.maxNumObjects]}" />
 		</EventHandlers>
 		
 		<!-- -=-=-=-=-=-=-=-=-=-=-=-=-=- -->

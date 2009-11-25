@@ -71,19 +71,29 @@ package mmalab.softwarestudies.asianculture.data.input
 		/**
 		 * Returns a Dataset object containing the specified statistic categories and values for each object of the database 
 		 * @param colnames the statistical categories
-		 * @param batchSize controls the number of objects to be treated for each query (default 100)
+		 * @param size the max number of objects wanted in the Dataset (0 for all objects)
+		 * @param batchSize controls the number of objects to be treated for each query (default 100, must be <= size)
 		 * @return Dataset
 		 * 
 		 */
-		public function getStatObjects(colnames:Array, batchSize:int = 100):Dataset {
+		public function getStatObjects(colnames:Array, size:int = 0, batchSize:int = 100):Dataset {
 			var sql:SQLStatement = new SQLStatement();
 			//set the statement to connect to our database
 			
 			sql.sqlConnection = conn;
 			conn.addEventListener(SQLErrorEvent.ERROR, errorHandler);
 			
+			if (colnames == null)
+				return null;
+			if (size < 0)
+				size = 0;
+			if (batchSize < 0)
+				batchSize = 100;
+
 			var limit		:int = batchSize * colnames.length;
 			var offset		:int = 0;
+			var objectCounter:int = 0;
+			
 			var whereClause	:String = "";
 			for (var i:int=0; colnames != null && i<colnames.length; i++) {
 				whereClause += "s.id = "+colnames[i].id+" OR ";
@@ -97,25 +107,29 @@ package mmalab.softwarestudies.asianculture.data.input
 					"where " + whereClause.slice(0, whereClause.lastIndexOf("OR")) +
 					" order by o.name, s.name " +
 					"limit :limit offset :offset";
-				sql.parameters[":limit"] = limit;
+				sql.parameters[":limit"] = size>0 ? Math.min(limit, (size - objectCounter-1)*colnames.length) : limit;
 				sql.parameters[":offset"] = offset;
 				sql.execute();
 				
 				// get SQL result
-				var result:SQLResult = sql.getResult();
+				var resultSet:SQLResult = sql.getResult();
 				
-				if (result != null && result.data != null && result.data.length > 0)
+				if (resultSet != null && resultSet.data != null && resultSet.data.length > 0
+					&& (objectCounter < size || size == 0))
 				{
 					var nameCary:String;
 					
 					// first object
 					var statObject:Object = new Object();
-					statObject.name = result.data[0].obj_name;
-					for each (var row:Object in result.data) {
+					statObject.name = resultSet.data[0].obj_name;
+					
+					// loop over each object stats
+					for each (var row:Object in resultSet.data) {
 						
 						// detect break in name
 						if (nameCary != null && nameCary != row.obj_name) {
 							dataset.push(statObject);
+							objectCounter++;
 							statObject = new Object();
 							statObject.name = row.obj_name;
 						}
@@ -123,12 +137,17 @@ package mmalab.softwarestudies.asianculture.data.input
 						nameCary = row.obj_name;
 					}
 					
-					// push last object
+					// push last object of the resultSet
 					dataset.push(statObject);
 					offset += limit;
+					
 				}
-				else
+				else {
+					// count Last object
+					objectCounter++;
+					trace (objectCounter);
 					return new Dataset(dataset);
+				}
 			}
 			return null;
 		}
