@@ -1,6 +1,5 @@
 package mmalab.softwarestudies.asianculture.data.models
 {
-	[Bindable]
 	public class Statistic
 	{
 		

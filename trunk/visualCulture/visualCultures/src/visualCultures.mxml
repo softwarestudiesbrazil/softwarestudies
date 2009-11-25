@@ -60,7 +60,7 @@
 			<s:layout>
 				<s:HorizontalLayout/>
 			</s:layout>
-			<s:Label text="Number of graphs: " verticalAlign="middle" height="100%"/>
+			<s:Label text="Number of graphs: " verticalAlign="middle" height="100%" color="#FFFFFF" fontWeight="normal" fontSize="12"/>
 			<s:TextInput id="numStatsInput" width="24" text="6"/>
 			<s:Button  id="loadDB" label="Load" enabled="true" click="loadDB_clickHandler(event)"/>			
 			<s:Button  id="displayGraphs" label="display" enabled="true" click="displayGraphs_clickHandler(event)"/>			

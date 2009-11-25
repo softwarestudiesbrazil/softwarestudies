@@ -20,8 +20,6 @@ package mmalab.softwarestudies.asianculture.graph.controllers
 			dbReader = new SQLiteReader("visualCultures.db");
 			dbReader.connect();
 			
-//			data = dbReader.getDataset(getRandomStatNames(12));
-
 			selectedValues = null;
 //			dbReader.closeConnection();
 		}
@@ -30,13 +28,9 @@ package mmalab.softwarestudies.asianculture.graph.controllers
 			selectedValues = idx;
 		}
 		
-		public function setDataset(colNames:Array):void {
-			this.data = dbReader.getDataset(colNames);
-		}
-
 		public function setRandomSet(numStats:int):void {
 
-			var fullStatsList:Array = dbReader.getStatsList(null);			
+			var fullStatsList:Array = dbReader.getStatsList(null);
 			var randomStat:int;
 			
 			var statItem:Statistic;
@@ -45,14 +39,15 @@ package mmalab.softwarestudies.asianculture.graph.controllers
 				delete statsList[j]
 			}
 			
-			statsList = new Array()
+			statsList = new Array();
 			for (var i:int=0; i<numStats; i++) {
 				randomStat = Math.floor( Math.random() * fullStatsList.length);
 				statItem = new Statistic(fullStatsList[randomStat].id, fullStatsList[randomStat].name);
 				statsList.push(statItem);
+				trace (statItem.name);
 			}
 
-			this.data = dbReader.getDataset(statsList);
+			this.data = dbReader.getStatObjects(statsList);
 		}
 	}
 }
