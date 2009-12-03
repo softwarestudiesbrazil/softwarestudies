@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Window xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		  xmlns:s="library://ns.adobe.com/flex/spark" 
+		  xmlns:mx="library://ns.adobe.com/flex/halo"
+		  width="450" height="300" xmlns:mate="http://mate.asfusion.com/">
+	<s:layout>
+		<s:VerticalLayout/>
+	</s:layout>
+	<fx:Script>
+		<![CDATA[
+			import flash.events.MouseEvent;
+			
+			import mmalab.softwarestudies.asianculture.data.event.ChooseStatisticsEvent;
+			
+			import mx.collections.ArrayCollection;
+			import mx.core.FlexGlobals;
+			import mx.events.DragEvent;
+			
+			[Bindable]
+			public var statsList:Array;
+			
+			protected function stats_dragDropHandler(event:DragEvent):void
+			{
+				// Cancel the drop
+				event.preventDefault();
+			}
+			
+			protected function chooseBtn_clickHandler(event:MouseEvent):void
+			{
+				var chooseStatEvent:ChooseStatisticsEvent = new ChooseStatisticsEvent(ChooseStatisticsEvent.CHOOSE_STATS_EVENT);
+				chooseStatEvent.statsList = (selectedStats.dataProvider as ArrayCollection).toArray();
+				//chooseStatEvent.numStats = 0;
+				
+				FlexGlobals.topLevelApplication.dispatchEvent(chooseStatEvent);
+				
+				this.close();
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+		
+		<!-- necessary to bubble up events -->
+		<mate:LocalEventMap dispatcher="{this}" />
+	</fx:Declarations>
+	
+	<s:Group width="100%" height="100%">
+		<s:layout>
+			<s:VerticalLayout/>
+		</s:layout>
+		
+		<s:Group width="100%" height="24">
+			<s:layout>
+				<s:HorizontalLayout/>
+			</s:layout>
+			<s:Label text="Available Statistics" verticalAlign="middle" width="50%" height="100%"/>
+			<s:Label text="Statistics to displays (by pairs of 2)" verticalAlign="middle" width="50%" height="100%"/>
+		</s:Group>
+		<s:Group width="100%" height="100%">
+			<s:layout>
+				<s:HorizontalLayout/>
+			</s:layout>
+			<mx:List id="stats" 
+					 dataProvider="{statsList}"
+					 allowMultipleSelection="true"
+					 labelField="name"
+					 dragEnabled="true"
+					 dropEnabled="true"
+					 width="50%" height="100%" dragDrop="stats_dragDropHandler(event)"/>
+			
+			<mx:List id="selectedStats"
+					 allowMultipleSelection="true"
+					 labelField="name"
+					 dragEnabled="true"
+					 dropEnabled="true"
+					 dragMoveEnabled="true"
+					 width="50%" height="100%" />
+		</s:Group>
+	</s:Group>
+	<s:Group width="100%" height="24">
+		<s:layout>
+			<s:HorizontalLayout/>
+		</s:layout>
+		<s:Label text="Note: last Statistic will be ignored if number of items is not pair." fontStyle="italic" verticalAlign="middle" height="100%" />
+		<s:Button label="Choose" textAlign="left" id="chooseBtn" click="chooseBtn_clickHandler(event)"/>
+	</s:Group>
+</s:Window>

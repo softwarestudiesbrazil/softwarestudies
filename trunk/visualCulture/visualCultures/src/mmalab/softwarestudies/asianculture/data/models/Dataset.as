@@ -3,7 +3,7 @@ package mmalab.softwarestudies.asianculture.data.models
 	[Bindable]
 	public class Dataset
 	{
-		public var values:Array = new Array();
+		public var values:Array;
 		
 		public function Dataset(values:Array) {
 			this.values = values;
