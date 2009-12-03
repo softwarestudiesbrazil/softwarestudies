@@ -21,6 +21,8 @@
 			
 			[Bindable]
 			public var statsList:Array;
+			[Bindable]
+			public var fullStatsList:Array;
 			
 			private function creationCompleteHandler(event: Event): void
 			{
@@ -44,7 +46,6 @@
 				dispatchEvent(changeDatabaseEvent);
 			}
 			
-			
 			private function displayGraphs_clickHandler(event:MouseEvent):void
 			{
 				var chooseStatsEvent:ChooseStatisticsEvent = new ChooseStatisticsEvent(ChooseStatisticsEvent.CHOOSE_RANDOM_STATS_EVENT);
@@ -53,10 +54,10 @@
 				dispatchEvent(chooseStatsEvent);
 			}
 			
-
 			protected function chooseStatsBtn_clickHandler(event:MouseEvent):void
 			{
 				var statChooser:StatChooser = new StatChooser();
+				statChooser.fullStatsList = fullStatsList;
 				statChooser.statsList = statsList;
 				statChooser.open();
 			}
@@ -86,8 +87,8 @@
 			<s:Button label="Choose Stats" id="chooseStatsBtn" click="chooseStatsBtn_clickHandler(event)"/>
 		</s:Group>
 		
-		<s:Scroller width="100%" height="100%">
-			<views:GraphsTile width="100%" height="100%" />
+		<s:Scroller width="100%" height="100%" >
+			<views:GraphsTile />
 		</s:Scroller>
 	</s:Group>
 </s:WindowedApplication>

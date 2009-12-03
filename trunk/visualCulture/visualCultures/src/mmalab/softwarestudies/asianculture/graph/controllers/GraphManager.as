@@ -10,6 +10,9 @@ package mmalab.softwarestudies.asianculture.graph.controllers
 	[Bindable]
 	public class GraphManager
 	{
+		/**
+		 * The graph values selected by the user 
+		 */
 		public var selectedValues : Array;
 
 		public var databasePath:String;
