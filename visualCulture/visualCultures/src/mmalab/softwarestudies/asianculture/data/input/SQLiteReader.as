@@ -64,7 +64,7 @@ package mmalab.softwarestudies.asianculture.data.input
 				//trace("id:", row.id, ", name:", row.name, ", type:", row.type);
 				return result.data;
 			}
-			trace(result.data.length);
+			trace("result length:" + result.data.length);
 			return null;
 		}
 		
@@ -145,7 +145,7 @@ package mmalab.softwarestudies.asianculture.data.input
 				else {
 					// count Last object
 					objectCounter++;
-					trace (objectCounter);
+					trace ("Last obj: " + objectCounter);
 					return new Dataset(dataset);
 				}
 			}
@@ -179,7 +179,7 @@ package mmalab.softwarestudies.asianculture.data.input
 			if (result != null && result.data.length > 0)
 			{
 				//trace("id:", row.id, ", name:", row.name, ", type:", row.type);
-				trace(result.data.length);
+				trace("result length: " + result.data.length);
 				return result.data;
 			}
 			return null;
