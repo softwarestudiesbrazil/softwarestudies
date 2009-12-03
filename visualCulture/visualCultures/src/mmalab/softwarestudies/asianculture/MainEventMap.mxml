@@ -42,7 +42,8 @@
 		</Injectors>
 
 		<Injectors target="{visualCultures}" debug="true">
-			<PropertyInjector targetKey="statsList" source="{GraphManager}" sourceKey="fullStatsList" />
+			<PropertyInjector targetKey="statsList" source="{GraphManager}" sourceKey="statsList" />
+			<PropertyInjector targetKey="fullStatsList" source="{GraphManager}" sourceKey="fullStatsList" />
 		</Injectors>
 
 		<Injectors target="{GraphHisto}" debug="true">
