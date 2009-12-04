@@ -45,15 +45,7 @@
 				
 				dispatchEvent(changeDatabaseEvent);
 			}
-			
-			private function displayGraphs_clickHandler(event:MouseEvent):void
-			{
-				var chooseStatsEvent:ChooseStatisticsEvent = new ChooseStatisticsEvent(ChooseStatisticsEvent.CHOOSE_RANDOM_STATS_EVENT);
-				chooseStatsEvent.numStats = parseInt(numStatsInput.text) * 2;
-				chooseStatsEvent.maxNumObjects = parseInt(maxNumObjectsInput.text);
-				dispatchEvent(chooseStatsEvent);
-			}
-			
+						
 			protected function chooseStatsBtn_clickHandler(event:MouseEvent):void
 			{
 				var statChooser:StatChooser = new StatChooser();
@@ -78,12 +70,7 @@
 				<s:HorizontalLayout/>
 			</s:layout>
 			
-			<s:Label text="Number of graphs: " verticalAlign="middle" height="100%" color="#FFFFFF" fontWeight="normal" fontSize="12"/>
-			<s:TextInput id="numStatsInput" width="24" text="6"/>
-			<s:Label text="Max number of objects (0 for all): " verticalAlign="middle" height="100%" color="#FFFFFF" fontWeight="normal" fontSize="12"/>
-			<s:TextInput id="maxNumObjectsInput" width="24" text="0"/>
 			<s:Button  id="loadDB" label="Select Database" enabled="true" click="loadDB_clickHandler(event)"/>			
-			<s:Button  id="displayGraphs" label="Display random graphs" enabled="true" click="displayGraphs_clickHandler(event)"/>			
 			<s:Button label="Choose Stats" id="chooseStatsBtn" click="chooseStatsBtn_clickHandler(event)"/>
 		</s:Group>
 		

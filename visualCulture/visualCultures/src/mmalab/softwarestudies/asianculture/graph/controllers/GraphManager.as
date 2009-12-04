@@ -53,7 +53,7 @@ package mmalab.softwarestudies.asianculture.graph.controllers
 		 * @param _statsList
 		 * 
 		 */
-		public function setSelectedStatSet(_statsList:Array):void {
+		public function setSelectedStatSet(_statsList:Array, maxNumObjects:int):void {
 			if (dbReader == null) {
 				dbReader = new SQLiteReader(this.databasePath);
 				dbReader.connect();
@@ -62,7 +62,7 @@ package mmalab.softwarestudies.asianculture.graph.controllers
 			this.statsList = _statsList;
 			
 			// retrieve dataset of specified statistics
-			this.data = dbReader.getStatObjects(statsList, 0);
+			this.data = dbReader.getStatObjects(statsList, maxNumObjects);
 			
 			// Using ObjectProxy instead of plain Object prevents to have the warning:
 			// unable to bind to property ‘XXX’ on class ‘Object’ (class is not an IEventDispatcher)
@@ -88,7 +88,7 @@ package mmalab.softwarestudies.asianculture.graph.controllers
 		 * @param databasePath path to the database
 		 * 
 		 */
-		public function setRandomSet(numStats:int, maxNumObjects:int):void {
+		public function setRandomSet(numStats:int):void {
 
 			if (dbReader == null) {
 				dbReader = new SQLiteReader(this.databasePath);
@@ -111,7 +111,7 @@ package mmalab.softwarestudies.asianculture.graph.controllers
 				statItem = new Statistic(fullStatsList[randomStat].id, fullStatsList[randomStat].name);
 				statsList.push(statItem);
 			}
-
+/*
 			// retrieve dataset of specified statistics
 			this.data = dbReader.getStatObjects(statsList, maxNumObjects);
 			
@@ -126,7 +126,7 @@ package mmalab.softwarestudies.asianculture.graph.controllers
 				graphs.addItem(graph);
 				graph = null;
 			}
-		}
+*/		}
 				
 		/////////////////////
 		// private method

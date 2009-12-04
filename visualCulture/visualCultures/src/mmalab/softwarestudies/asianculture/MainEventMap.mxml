@@ -24,11 +24,11 @@
 		</EventHandlers>
 		
 		<EventHandlers type="{ChooseStatisticsEvent.CHOOSE_STATS_EVENT}" debug="true" >
-			<MethodInvoker generator="{GraphManager}" method="setSelectedStatSet" arguments="{event.statsList}" />
+			<MethodInvoker generator="{GraphManager}" method="setSelectedStatSet" arguments="{[event.statsList, event.maxNumObjects]}" />
 		</EventHandlers>
 
 		<EventHandlers type="{ChooseStatisticsEvent.CHOOSE_RANDOM_STATS_EVENT}" debug="true" >
-			<MethodInvoker generator="{GraphManager}" method="setRandomSet" arguments="{[event.numStats, event.maxNumObjects]}" />
+			<MethodInvoker generator="{GraphManager}" method="setRandomSet" arguments="{event.numStats}" />
 		</EventHandlers>
 
 		<EventHandlers type="{ChangeDatabaseEvent.CHANGE_DB_EVENT}" debug="true" >
@@ -41,7 +41,7 @@
 			<PropertyInjector targetKey="chartsArray" source="{GraphManager}" sourceKey="graphs" />
 		</Injectors>
 
-		<Injectors target="{visualCultures}" debug="true">
+		<Injectors target="{StatChooser}" debug="true">
 			<PropertyInjector targetKey="statsList" source="{GraphManager}" sourceKey="statsList" />
 			<PropertyInjector targetKey="fullStatsList" source="{GraphManager}" sourceKey="fullStatsList" />
 		</Injectors>
