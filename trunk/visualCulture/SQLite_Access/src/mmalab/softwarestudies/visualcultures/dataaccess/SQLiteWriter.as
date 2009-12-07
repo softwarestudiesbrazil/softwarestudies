@@ -35,9 +35,9 @@ package mmalab.softwarestudies.visualcultures.dataaccess
 			var line1:Object = data.shift();
 			
 			// add Statistic descriptions
-			for (var i:String in line1)
+			for (var statName:String in line1)
 			{
-				addStat(i, line1[i], null);
+				addStat(statName, line1[statName], null);
 			}
 
 			var line:Object;
