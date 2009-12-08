@@ -4,7 +4,7 @@
 		  xmlns:mx="library://ns.adobe.com/flex/halo"
 		  xmlns:mate="http://mate.asfusion.com/"
 		  initialize="onInitialize()"
-		  width="450" height="300">
+		  width="600" height="600">
 	<fx:Script>
 		<![CDATA[
 			import com.asfusion.mate.ioc.InjectorRegistry;
@@ -22,13 +22,27 @@
 			[Bindable]
 			public var fullStatsList:Array;
 			
-			/**
-			 * Necessary hack to be able to inject data in view inside a window
-			 * http://mate.asfusion.com/forums/topic.php?id=274
-			 */
+			// Currently we work only with dimension 2 graphs
+			private const dim:int = 2;
+			
+			private const altColors:Array = new Array();
+
 			private function onInitialize() : void
 			{
+				//------------------------------------------------------------------
+				// Necessary hack to be able to inject data in view inside a window
+				// http://mate.asfusion.com/forums/topic.php?id=274
+				//------------------------------------------------------------------
 				InjectorRegistry.register(this);
+				
+				for (var i:int=0; i<dim; i++)
+					altColors.push(0xFFFFFF);
+				for (i=0; i<dim; i++)
+					altColors.push(0xCEDBEF);
+			}
+			
+			public function numStatListener(event:ChooseStatisticsEvent):void {
+				numSelected.text="Selected: " + statsList.length;
 			}
 			
 			protected function stats_dragDropHandler(event:DragEvent):void
@@ -37,31 +51,30 @@
 				event.preventDefault();
 			}
 			
-			protected function updateBtn_clickHandler(event:MouseEvent):void
+			private function updateBtn_clickHandler(event:MouseEvent):void
 			{
 				var chooseStatEvent:ChooseStatisticsEvent = new ChooseStatisticsEvent(ChooseStatisticsEvent.CHOOSE_STATS_EVENT);
 				chooseStatEvent.statsList = (selectedStats.dataProvider as ArrayCollection).toArray();
 				chooseStatEvent.maxNumObjects = parseInt(maxNumObjectsInput.text);
-				//chooseStatEvent.numStats = 0;
 				
 				FlexGlobals.topLevelApplication.dispatchEvent(chooseStatEvent);
 			}
 			
-			protected function leftBtn_clickHandler(event:MouseEvent):void
+			private function leftBtn_clickHandler(event:MouseEvent):void
 			{
 				for each (var itemIdx:int in selectedStats.selectedIndices) {
 					selectedStats.dataProvider.removeItemAt(itemIdx);
 				}
 			}
-
-			protected function rightBtn_clickHandler(event:MouseEvent):void
+			
+			private function rightBtn_clickHandler(event:MouseEvent):void
 			{
 				for each (var item:Object in availableStats.selectedItems) {
 					// var temp:Object = ObjectUtil.copy(item);
-
+					
 					var copy:Object = new Object();
 					for( var key:Object in item ) {
-						// avoid copying the mx_interval_uid so it won't mess the list's dataProvider
+						// avoid copying the mx_interval_uid so it won't mess up the list's dataProvider
 						if (  ( 'mx_internal_uid' != key ) ) {
 							copy[ key ] = item[ key ];
 						}
@@ -69,10 +82,38 @@
 					selectedStats.dataProvider.addItem(copy);
 				}
 			}
-			private function displayGraphs_clickHandler(event:MouseEvent):void
+			
+			private function randomGraphs_clickHandler(event:MouseEvent):void
 			{
 				var chooseStatsEvent:ChooseStatisticsEvent = new ChooseStatisticsEvent(ChooseStatisticsEvent.CHOOSE_RANDOM_STATS_EVENT);
-				chooseStatsEvent.numStats = parseInt(numStatsInput.text) * 2;
+				chooseStatsEvent.numStats = parseInt(numStatsInput.text) * dim;
+				
+				FlexGlobals.topLevelApplication.dispatchEvent(chooseStatsEvent);
+			}
+			
+			
+			protected function sequenceGraph_clickHandler(event:MouseEvent):void
+			{
+				var chooseStatsEvent:ChooseStatisticsEvent = new ChooseStatisticsEvent(ChooseStatisticsEvent.CHOOSE_SEQUENCE_STATS_EVENT);
+				chooseStatsEvent.page = parseInt(pageNum.text);
+				chooseStatsEvent.numStats = parseInt(numStatsInput.text);
+				//chooseStatsEvent.maxNumObjects = parseInt(maxNumObjectsInput.text);
+				
+				FlexGlobals.topLevelApplication.dispatchEvent(chooseStatsEvent);
+			}
+			
+
+			protected function previousNextPage(next:Boolean):void
+			{
+				if (next)
+					pageNum.text = (parseInt(pageNum.text) + 1).toString();
+				else
+					pageNum.text = (parseInt(pageNum.text) - 1).toString();
+				var chooseStatsEvent:ChooseStatisticsEvent = new ChooseStatisticsEvent(ChooseStatisticsEvent.CHOOSE_SEQUENCE_STATS_EVENT);
+				chooseStatsEvent.page = parseInt(pageNum.text);
+				chooseStatsEvent.numStats = parseInt(numStatsInput.text);
+				//chooseStatsEvent.maxNumObjects = parseInt(maxNumObjectsInput.text);
+				
 				FlexGlobals.topLevelApplication.dispatchEvent(chooseStatsEvent);
 			}
 
@@ -84,7 +125,7 @@
 		
 		<!-- necessary to bubble up events -->
 		<mate:LocalEventMap dispatcher="{this}" />
-
+		
 	</fx:Declarations>
 	
 	<s:layout>
@@ -109,7 +150,7 @@
 					 dropEnabled="true"
 					 alternatingItemColors="[0xFFFFFF, 0xEEEEFF]"
 					 width="100%" height="100%" dragDrop="stats_dragDropHandler(event)"/>
-			<s:Label text="Number of stats available: {fullStatsList.length}" />
+			<s:Label text="Number of stats available: {fullStatsList.length}"  textAlign="right"/>
 		</s:Group>
 		<s:Group >
 			<s:layout>
@@ -122,7 +163,7 @@
 			<s:layout>
 				<s:VerticalLayout/>
 			</s:layout>
-			<s:Label text="Statistics to display (by pairs of 2)" verticalAlign="middle" width="100%" height="24" fontWeight="bold"/>
+			<s:Label text="Statistics to display (by tuples of {dim})" verticalAlign="middle" width="100%" height="24" fontWeight="bold"/>
 			<!-- dragNdrop not yet available in spark lists of Flex 4 beta 2 -->
 			<mx:List id="selectedStats"
 					 dataProvider="{statsList}"
@@ -132,9 +173,30 @@
 					 dropEnabled="true"
 					 dragMoveEnabled="true"
 					 width="100%" height="100%"
-					 alternatingItemColors="[0xFFFFFF, 0xFFFFFF, 0xCEDBEF, 0xCEDBEF]"/>
-			<s:Label text="Selected: {statsList.length}" />
+					 alternatingItemColors="{altColors}"/>
+			<s:Label id="numSelected" text="Selected: {selectedStats.dataProvider.length}"  textAlign="right"/>
 		</s:Group>
+	</s:Group>
+	<s:Group width="100%" height="24">
+		<s:layout>
+			<s:HorizontalLayout/>
+		</s:layout>
+		<s:Label text="Number of graphs: " verticalAlign="middle" height="100%" fontWeight="normal" fontSize="12"/>
+		<s:TextInput id="numStatsInput" width="24" text="6"/>
+		<s:Label text="Max number of objects*: " verticalAlign="middle" height="100%" fontWeight="normal" fontSize="12"/>
+		<s:TextInput id="maxNumObjectsInput" width="24" text="0" />
+		<s:Button  id="randomGraphs" label="Random graphs" enabled="true" click="randomGraphs_clickHandler(event)"/>					
+	</s:Group>
+	<s:Group width="100%" height="24">
+		<s:layout>
+			<s:HorizontalLayout/>
+		</s:layout>
+		<s:Button  id="previous" label="&lt;&lt;" enabled="true" click="previousNextPage(false)" width="35"/>			
+		<s:Label text="Page number*: " verticalAlign="middle" height="100%" fontWeight="normal" fontSize="12"/>
+		<s:TextInput id="pageNum" width="24" text="0" />
+		<s:Button  id="sequenceGraph" label="Seq. graphs" enabled="true" click="sequenceGraph_clickHandler(event)"/>			
+		<s:Button  id="next" label=">>" enabled="true" click="previousNextPage(true)" width="35"/>			
+		<s:Label text="* put 0 for all" verticalAlign="middle" height="100%" fontStyle="italic" fontSize="12"/>
 	</s:Group>
 	<s:Group width="100%" height="24">
 		<s:layout>
@@ -144,16 +206,5 @@
 		<mx:Spacer width="100%" />
 		<s:Button label="Update" id="updateBtn" click="updateBtn_clickHandler(event)" width="60" />
 		<s:Button label="Close" id="closeBtn" click="this.close()" width="55" />
-	</s:Group>
-	<s:Group width="100%" height="24">
-		<s:layout>
-			<s:HorizontalLayout/>
-		</s:layout>
-		<s:Label text="Number of graphs: " verticalAlign="middle" height="100%" fontWeight="normal" fontSize="12"/>
-		<s:TextInput id="numStatsInput" width="24" text="6"/>
-		<s:Label text="Max number of objects (0 for all): " verticalAlign="middle" height="100%" fontWeight="normal" fontSize="12"/>
-		<s:TextInput id="maxNumObjectsInput" width="24" text="0"/>
-		<s:Button  id="displayGraphs" label="Random graphs" enabled="true" click="displayGraphs_clickHandler(event)"/>			
-
 	</s:Group>
 </s:Window>

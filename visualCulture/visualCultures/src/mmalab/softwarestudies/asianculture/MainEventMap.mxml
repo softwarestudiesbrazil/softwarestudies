@@ -4,6 +4,8 @@
 	
 	<fx:Script>
 		<![CDATA[
+			import com.asfusion.mate.utils.debug.Debugger;
+			
 			import mmalab.softwarestudies.asianculture.data.component.StatChooser;
 			import mmalab.softwarestudies.asianculture.data.event.ChangeDatabaseEvent;
 			import mmalab.softwarestudies.asianculture.data.event.ChooseStatisticsEvent;
@@ -17,8 +19,13 @@
 	
 	<fx:Declarations>
 		
-		<Debugger level="{Debugger.ALL}" />
+		<Debugger level="{Debugger.FATAL}" />
 		
+		<!--
+		-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+		-=-=-               EVENT HANDLERS              -=-=-
+		-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- -->
+
 		<EventHandlers type="{SelectValueEvent.VALUE_SELECTED}" debug="true" >
 			<MethodInvoker generator="{GraphManager}" method="setSelectedValue" arguments="{event.selectedValues}" />
 		</EventHandlers>
@@ -31,17 +38,31 @@
 			<MethodInvoker generator="{GraphManager}" method="setRandomSet" arguments="{event.numStats}" />
 		</EventHandlers>
 
+		<EventHandlers type="{ChooseStatisticsEvent.CHOOSE_SEQUENCE_STATS_EVENT}" debug="true" >
+			<MethodInvoker generator="{GraphManager}" method="setSequentialSet" arguments="{[event.numStats, event.page]}" />
+		</EventHandlers>
+
 		<EventHandlers type="{ChangeDatabaseEvent.CHANGE_DB_EVENT}" debug="true" >
 			<MethodInvoker generator="{GraphManager}" method="setDatabase" arguments="{event.dbPath}" />
 		</EventHandlers>
 
-		<!-- -=-=-=-=-=-=-=-=-=-=-=-=-=- -->
+		<!--
+		-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+		-=-=-               VIEW INJECTORS              -=-=-
+		-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- -->
 		
 		<Injectors target="{GraphsTile}" debug="true">
 			<PropertyInjector targetKey="chartsArray" source="{GraphManager}" sourceKey="graphs" />
 		</Injectors>
 
 		<Injectors target="{StatChooser}" debug="true">
+			<ListenerInjector eventType="{ChooseStatisticsEvent.CHOOSE_RANDOM_STATS_EVENT}" method="numStatListener" />
+			<PropertyInjector targetKey="statsList" source="{GraphManager}" sourceKey="statsList" />
+			<PropertyInjector targetKey="fullStatsList" source="{GraphManager}" sourceKey="fullStatsList" />
+		</Injectors>
+
+		<Injectors target="{StatChooser}" debug="true">
+			<ListenerInjector eventType="{ChooseStatisticsEvent.CHOOSE_SEQUENCE_STATS_EVENT}" method="numStatListener" />
 			<PropertyInjector targetKey="statsList" source="{GraphManager}" sourceKey="statsList" />
 			<PropertyInjector targetKey="fullStatsList" source="{GraphManager}" sourceKey="fullStatsList" />
 		</Injectors>

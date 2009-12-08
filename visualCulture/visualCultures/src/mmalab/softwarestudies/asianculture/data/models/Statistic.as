@@ -5,11 +5,13 @@ package mmalab.softwarestudies.asianculture.data.models
 		
 		private var _id:int;
 		private var _name:String;
+		private var _type:String;
 
-		public function Statistic(id:int, name:String)
+		public function Statistic(id:int, name:String, type:String)
 		{
 			this._id = id;
 			this._name = name;
+			this._type = type;
 		}
 
 		public function get name():String
@@ -31,6 +33,17 @@ package mmalab.softwarestudies.asianculture.data.models
 		{
 			_id = value;
 		}
+
+		public function get type():String
+		{
+			return _type;
+		}
+
+		public function set type(value:String):void
+		{
+			_type = value;
+		}
+
 
 	}
 }
