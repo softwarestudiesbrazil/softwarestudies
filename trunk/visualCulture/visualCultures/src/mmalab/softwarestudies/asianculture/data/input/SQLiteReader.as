@@ -5,8 +5,10 @@ package mmalab.softwarestudies.asianculture.data.input
 	import flash.data.SQLStatement;
 	import flash.events.SQLErrorEvent;
 	import flash.filesystem.File;
+	import flash.utils.Dictionary;
 	
 	import mmalab.softwarestudies.asianculture.data.models.Dataset;
+	import mmalab.softwarestudies.asianculture.data.models.Statistic;
 	
 	public class SQLiteReader
 	{
@@ -74,7 +76,6 @@ package mmalab.softwarestudies.asianculture.data.input
 		 * @param size the max number of objects wanted in the Dataset (0 for all objects)
 		 * @param batchSize controls the number of objects to be treated for each query (default 100, must be <= size)
 		 * @return Dataset
-		 * 
 		 */
 		public function getStatObjects(colnames:Array, size:int = 0, batchSize:int = 100):Dataset {
 			var sql:SQLStatement = new SQLStatement();
@@ -90,24 +91,64 @@ package mmalab.softwarestudies.asianculture.data.input
 			if (batchSize < 0)
 				batchSize = 100;
 
-			var limit		:int = batchSize * colnames.length;
-			var offset		:int = 0;
-			var objectCounter:int = 0;
-			
-			var whereClause	:String = "";
-			for (var i:int=0; colnames != null && i<colnames.length; i++) {
-				whereClause += "s.id = "+colnames[i].id+" OR ";
+			// filter colnames array to remove duplicates
+			var tempCols:Dictionary = new Dictionary();
+			for each (var obj:Object in colnames) {
+				tempCols[obj.id] = obj;
 			}
 			
+			// using dictionary or associative array prevents from having dupplicates
+			var whereClauseINT	:String = "";
+			var whereClauseREAL	:String = "";
+			var whereClauseTEXT	:String = "";
+			var temp:String;
+			var nbCols:int = 0;
+			for each (var stat:Statistic in tempCols) {
+				nbCols++;
+				temp = stat.id + ",";
+					switch (stat.type) {
+						case 'int':
+							whereClauseINT += temp;
+							break;
+						case 'float':
+							whereClauseREAL += temp;
+							break;
+						case 'text':
+							whereClauseTEXT += temp;
+							break;
+						default:
+							whereClauseINT += temp;
+				}
+			}
+
+			var limit		:int = batchSize * nbCols;
+			var offset		:int = 0;
+			var objectCounter:int = 0;
+
 			var dataset:Array = new Array();
-			while (true) {
-				sql.text = "select o.name as 'obj_name', s.name as 'stat', r.val from stat_real r " +
+			temp = "";
+			if (whereClauseINT.length>0)
+				temp += "select o.name as 'obj_name', s.name as 'stat', i.val from stat_int i " +
+					"join object_ o on i.obj_id = o.id " +
+					"join statistic s on i.stat_id = s.id " +
+					"where s.id IN (" +  whereClauseINT.substr(0, whereClauseINT.length-1) + ") UNION "
+			if (whereClauseREAL.length>0)
+				temp += "select o.name as 'obj_name', s.name as 'stat', r.val from stat_real r " +
 					"join object_ o on r.obj_id = o.id " +
 					"join statistic s on r.stat_id = s.id " +
-					"where " + whereClause.slice(0, whereClause.lastIndexOf("OR")) +
-					" order by o.name, s.name " +
-					"limit :limit offset :offset";
-				sql.parameters[":limit"] = size>0 ? Math.min(limit, (size - objectCounter-1)*colnames.length) : limit;
+					"where s.id IN (" + whereClauseREAL.substr(0, whereClauseREAL.length-1) + ") UNION "
+			if (whereClauseTEXT.length>0)
+				temp += "select o.name as 'obj_name', s.name as 'stat', t.val from stat_text t " +
+					"join object_ o on t.obj_id = o.id " +
+					"join statistic s on t.stat_id = s.id " +
+					"where s.id IN (" + whereClauseTEXT.substr(0, whereClauseTEXT.length-1) + ") UNION "
+			
+			sql.text = temp.slice(0, temp.lastIndexOf("UNION")) +
+				"order by o.name, s.name " +
+				"limit :limit offset :offset";
+
+			while (true) {
+				sql.parameters[":limit"] = size>0 ? Math.min(limit, (size - objectCounter)*nbCols) : limit;
 				sql.parameters[":offset"] = offset;
 				sql.execute();
 				
@@ -139,13 +180,13 @@ package mmalab.softwarestudies.asianculture.data.input
 					
 					// push last object of the resultSet
 					dataset.push(statObject);
+					objectCounter++;
 					offset += limit;
 					
 				}
 				else {
 					// count Last object
-					objectCounter++;
-					trace ("Last obj: " + objectCounter);
+					trace ("Last obj: " + objectCounter + ", max size: " + size);
 					return new Dataset(dataset);
 				}
 			}
@@ -171,7 +212,9 @@ package mmalab.softwarestudies.asianculture.data.input
 			for (var i:int=0; colnames != null && i<colnames.length; i++) {
 				whereString += "s.name = '" + colnames[i] + "' OR ";
 			}
-			sql.text = "select s.id as id, s.name as name from statistic s " + whereString.slice(0, whereString.lastIndexOf("OR")) + " order by s.name";
+			sql.text = "select s.id as id, s.name as name, s.type as type from statistic s "+
+				whereString.slice(0, whereString.lastIndexOf("OR")) +
+				" order by s.name";
 			
 			sql.execute();
 			

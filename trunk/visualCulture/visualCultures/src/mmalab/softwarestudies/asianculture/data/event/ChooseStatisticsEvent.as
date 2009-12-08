@@ -6,7 +6,9 @@ package mmalab.softwarestudies.asianculture.data.event
 	{
 		public static const CHOOSE_STATS_EVENT: String = "chooseStatsEvent";
 		public static const CHOOSE_RANDOM_STATS_EVENT: String = "chooseRandomStatsEvent";
+		public static const CHOOSE_SEQUENCE_STATS_EVENT: String = "chooseSequentialStatsEvent";
 		
+		public var page:int;
 		public var numStats:int;
 		public var maxNumObjects:int;
 

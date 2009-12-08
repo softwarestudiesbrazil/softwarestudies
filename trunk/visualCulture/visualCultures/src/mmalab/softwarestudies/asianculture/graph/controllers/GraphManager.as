@@ -108,30 +108,62 @@ package mmalab.softwarestudies.asianculture.graph.controllers
 			statsList = new Array();
 			for (i=0; i<numStats; i++) {
 				randomStat = Math.floor( Math.random() * fullStatsList.length);
-				statItem = new Statistic(fullStatsList[randomStat].id, fullStatsList[randomStat].name);
+				statItem = new Statistic(fullStatsList[randomStat].id, fullStatsList[randomStat].name, fullStatsList[i].type);
 				statsList.push(statItem);
 			}
-/*
-			// retrieve dataset of specified statistics
-			this.data = dbReader.getStatObjects(statsList, maxNumObjects);
-			
-			// Using ObjectProxy instead of plain Object prevents to have the warning:
-			// unable to bind to property ‘XXX’ on class ‘Object’ (class is not an IEventDispatcher)
-			var graph:ObjectProxy;
-			graphs = new ArrayCollection();
-			for (i=0; i<statsList.length; i += 2) {
-				graph = new ObjectProxy();
-				graph.statIdx = (statsList[i] as Statistic).name;
-				graph.statIdy = (statsList[i+1] as Statistic).name;
-				graphs.addItem(graph);
-				graph = null;
-			}
-*/		}
+		}
 				
+		/**
+		 * Connect to the specified database and creates a Dataset of all statistics chosen sequentially.
+		 * @param numStats number of Statistics to choose
+		 * @param databasePath path to the database
+		 * 
+		 */
+		public function setSequentialSet(numGraphs:int, page:int):void {
+			
+			if (dbReader == null) {
+				dbReader = new SQLiteReader(this.databasePath);
+				dbReader.connect();
+			}
+			
+			var randomStat:int;
+			
+			// clear previous statistic list
+			var statItem:Statistic;
+			for (var i:int=0; statsList != null && i<statsList.length; i++) {
+				statsList[i] = null;
+				delete statsList[i]
+			}
+			
+			//calculate number of Arrangements A(n,2) = n! / (n-2)!2! = n(n-1)/2
+			var Anp:int = fullStatsList.length * (fullStatsList.length-2) / 2;
+			
+			var graphCounter:int = 0;
+			var pageCounter:int = 0;
+			
+			// create random statistics list of length numStats
+			statsList = new Array();
+			for (i=0; i<fullStatsList.length - 1; i++) {
+				for (var j:int=i+1; j<fullStatsList.length; j++) {
+					if ((graphCounter < numGraphs && pageCounter == page-1) || page == 0) {
+						statItem = new Statistic(fullStatsList[i].id, fullStatsList[i].name, fullStatsList[i].type);
+						statsList.push(statItem);
+						statItem = new Statistic(fullStatsList[j].id, fullStatsList[j].name, fullStatsList[i].type);
+						statsList.push(statItem);
+					}
+					graphCounter++;
+					if (graphCounter == numGraphs) {
+						pageCounter++;
+						graphCounter = 0;
+					}
+				}
+			}
+		}
+		
 		/////////////////////
 		// private method
 		/////////////////////
-		private function mixArray(array:Array):Array {
+/*		private function mixArray(array:Array):Array {
 			var _length:Number = array.length, mixed:Array = array.slice(), rn:Number, it:Number, el:Object;
 			for (it=0; it<_length; it++) {
 				el = mixed[it];
@@ -139,6 +171,6 @@ package mmalab.softwarestudies.asianculture.graph.controllers
 				mixed[rn] = el;
 			}
 			return mixed;
-		}
+		}*/
 	}
 }
