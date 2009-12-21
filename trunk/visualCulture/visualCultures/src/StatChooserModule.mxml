@@ -1,18 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<s:Window xmlns:fx="http://ns.adobe.com/mxml/2009" 
-		  xmlns:s="library://ns.adobe.com/flex/spark" 
-		  xmlns:mx="library://ns.adobe.com/flex/halo"
-		  xmlns:mate="http://mate.asfusion.com/"
-		  initialize="onInitialize()"
-		  width="600" height="600" >
+<mx:Module xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		   xmlns:s="library://ns.adobe.com/flex/spark" 
+		   xmlns:mx="library://ns.adobe.com/flex/halo"
+		   xmlns:mate="http://mate.asfusion.com/"
+		   initialize="onInitialize()" width="100%" height="100%">
 	<fx:Script>
 		<![CDATA[
 			import com.asfusion.mate.ioc.InjectorRegistry;
 			
+			import flash.events.FocusEvent;
 			import flash.events.MouseEvent;
 			
 			import mmalab.softwarestudies.asianculture.data.event.ChooseStatisticsEvent;
-			import mmalab.softwarestudies.asianculture.data.models.Statistic;
 			
 			import mx.collections.ArrayCollection;
 			import mx.core.FlexGlobals;
@@ -25,9 +24,11 @@
 			
 			// Currently we work only with dimension 2 graphs
 			private const dim:int = 2;
-			
 			private const altColors:Array = new Array();
 
+			[Bindable]
+			private var maxPageNum:int;
+			
 			private function onInitialize() : void
 			{
 				//------------------------------------------------------------------
@@ -40,6 +41,19 @@
 					altColors.push(0xFFFFFF);
 				for (i=0; i<dim; i++)
 					altColors.push(0xCEDBEF);
+			}
+			
+			protected function updateMaxPageNum():void
+			{
+				// calculate maximum page number for sequential graphs
+				var graphPerPage:int = parseInt(numStatsInput.text);
+				maxPageNum = 1;				
+				if (graphPerPage != 0 && fullStatsList != null) {
+					for (var i:int=0; i<dim; i++) {
+						maxPageNum *= fullStatsList.length-i;
+					}
+					maxPageNum = maxPageNum / graphPerPage / dim + 1;
+				}
 			}
 			
 			public function numStatListener(event:ChooseStatisticsEvent):void {
@@ -100,10 +114,12 @@
 				chooseStatsEvent.numStats = parseInt(numStatsInput.text);
 				//chooseStatsEvent.maxNumObjects = parseInt(maxNumObjectsInput.text);
 				
+				updateMaxPageNum();
+				
 				FlexGlobals.topLevelApplication.dispatchEvent(chooseStatsEvent);
 			}
 			
-
+			
 			protected function previousNextPage(next:Boolean):void
 			{
 				if (next)
@@ -115,9 +131,11 @@
 				chooseStatsEvent.numStats = parseInt(numStatsInput.text);
 				//chooseStatsEvent.maxNumObjects = parseInt(maxNumObjectsInput.text);
 				
+				updateMaxPageNum();
+				
 				FlexGlobals.topLevelApplication.dispatchEvent(chooseStatsEvent);
 			}
-
+			
 		]]>
 	</fx:Script>
 	
@@ -129,83 +147,87 @@
 		
 	</fx:Declarations>
 	
-	<s:layout>
-		<s:VerticalLayout/>
-	</s:layout>
 	<s:Group width="100%" height="100%">
-		<s:layout>
-			<s:HorizontalLayout verticalAlign="middle" />
-		</s:layout>
 		
+		<s:layout>
+			<s:VerticalLayout/>
+		</s:layout>
 		<s:Group width="100%" height="100%">
 			<s:layout>
-				<s:VerticalLayout/>
+				<s:HorizontalLayout verticalAlign="middle" />
 			</s:layout>
-			<s:Label text="Available Statistics" verticalAlign="middle" width="100%" height="24" fontWeight="bold"/>
-			<!-- dragNdrop not yet available in spark lists of Flex 4 beta 2 -->
-			<mx:List id="availableStats"
-					 dataProvider="{fullStatsList}"
-					 allowMultipleSelection="true"
-					 labelField="name"
-					 dragEnabled="true"
-					 dropEnabled="true"
-					 alternatingItemColors="[0xFFFFFF, 0xEEEEFF]"
-					 width="100%" height="100%" dragDrop="stats_dragDropHandler(event)"/>
-			<s:Label text="Number of stats available: {fullStatsList.length}"  textAlign="right"/>
+			
+			<s:Group width="100%" height="100%">
+				<s:layout>
+					<s:VerticalLayout/>
+				</s:layout>
+				<s:Label text="Available Statistics" verticalAlign="middle" width="100%" height="24" fontWeight="bold"/>
+				<!-- dragNdrop not yet available in spark lists of Flex 4 beta 2 -->
+				<mx:List id="availableStats"
+						 dataProvider="{fullStatsList}"
+						 allowMultipleSelection="true"
+						 labelField="name"
+						 dragEnabled="true"
+						 dropEnabled="true"
+						 alternatingItemColors="[0xFFFFFF, 0xEEEEFF]"
+						 width="100%" height="100%" dragDrop="stats_dragDropHandler(event)"/>
+				<s:Label text="Number of stats available: {fullStatsList.length}"  textAlign="right"/>
+			</s:Group>
+			<s:Group >
+				<s:layout>
+					<s:VerticalLayout/>
+				</s:layout>
+				<mx:Image id="leftBtn" source="@Embed('images/arrowSmall.jpg')" rotation="90" click="leftBtn_clickHandler(event)" />
+				<mx:Image id="rightBtn" source="@Embed('images/arrowSmall.jpg')" rotation="-90" click="rightBtn_clickHandler(event)" />
+			</s:Group>
+			<s:Group width="100%" height="100%">
+				<s:layout>
+					<s:VerticalLayout/>
+				</s:layout>
+				<s:Label text="Statistics to display (by tuples of {dim})" verticalAlign="middle" width="100%" height="24" fontWeight="bold"/>
+				<!-- dragNdrop not yet available in spark lists of Flex 4 beta 2 -->
+				<mx:List id="selectedStats"
+						 dataProvider="{statsList}"
+						 allowMultipleSelection="true"
+						 labelField="name"
+						 dragEnabled="true"
+						 dropEnabled="true"
+						 dragMoveEnabled="true"
+						 width="100%" height="100%"
+						 alternatingItemColors="{altColors}"/>
+				<s:Label id="numSelected" text="Selected: {selectedStats.dataProvider.length}"  textAlign="right"/>
+			</s:Group>
 		</s:Group>
-		<s:Group >
+		<s:Group width="100%" height="24">
 			<s:layout>
-				<s:VerticalLayout/>
+				<s:HorizontalLayout/>
 			</s:layout>
-			<mx:Image id="leftBtn" source="@Embed('images/arrowSmall.jpg')" rotation="90" click="leftBtn_clickHandler(event)" />
-			<mx:Image id="rightBtn" source="@Embed('images/arrowSmall.jpg')" rotation="-90" click="rightBtn_clickHandler(event)" />
+			<s:Label text="Number of graphs: " verticalAlign="middle" height="100%" fontWeight="normal" fontSize="12"/>
+			<s:TextInput id="numStatsInput" width="24" text="6"/>
+			<s:Label text="Max number of objects*: " verticalAlign="middle" height="100%" fontWeight="normal" fontSize="12"/>
+			<s:TextInput id="maxNumObjectsInput" width="24" text="0" />
+			<s:Button  id="randomGraphs" label="Random graphs" enabled="true" click="randomGraphs_clickHandler(event)"/>					
 		</s:Group>
-		<s:Group width="100%" height="100%">
+		<s:Group width="100%" height="24">
 			<s:layout>
-				<s:VerticalLayout/>
+				<s:HorizontalLayout/>
 			</s:layout>
-			<s:Label text="Statistics to display (by tuples of {dim})" verticalAlign="middle" width="100%" height="24" fontWeight="bold"/>
-			<!-- dragNdrop not yet available in spark lists of Flex 4 beta 2 -->
-			<mx:List id="selectedStats"
-					 dataProvider="{statsList}"
-					 allowMultipleSelection="true"
-					 labelField="name"
-					 dragEnabled="true"
-					 dropEnabled="true"
-					 dragMoveEnabled="true"
-					 width="100%" height="100%"
-					 alternatingItemColors="{altColors}"/>
-			<s:Label id="numSelected" text="Selected: {selectedStats.dataProvider.length}"  textAlign="right"/>
+			<s:Button  id="previous" label="&lt;&lt;" enabled="true" click="previousNextPage(false)" width="35"/>			
+			<s:Label text="Page number*: " verticalAlign="middle" height="100%" fontWeight="normal" fontSize="12"/>
+			<s:TextInput id="pageNum" width="24" text="0" />
+			<s:Label text=" / {maxPageNum}" verticalAlign="middle" height="100%" fontWeight="normal" fontSize="12"/>
+			<s:Button  id="sequenceGraph" label="Seq. graphs" enabled="true" click="sequenceGraph_clickHandler(event)"/>			
+			<s:Button  id="next" label=">>" enabled="true" click="previousNextPage(true)" width="35"/>			
+			<s:Label text="* put 0 for all" verticalAlign="middle" height="100%" fontStyle="italic" fontSize="12"/>
+		</s:Group>
+		<s:Group width="100%" height="24">
+			<s:layout>
+				<s:HorizontalLayout/>
+			</s:layout>
+			<s:Label text="Note: last Stat(s) will be ignored if number of items is not a multiple of {dim}." fontStyle="italic" verticalAlign="middle" height="100%" />
+			<mx:Spacer width="100%" />
+			<s:Button label="Update" id="updateBtn" click="updateBtn_clickHandler(event)" width="60" />
+			<!--s:Button label="Close" id="closeBtn" click="this.close()" width="55" /-->
 		</s:Group>
 	</s:Group>
-	<s:Group width="100%" height="24">
-		<s:layout>
-			<s:HorizontalLayout/>
-		</s:layout>
-		<s:Label text="Number of graphs: " verticalAlign="middle" height="100%" fontWeight="normal" fontSize="12"/>
-		<s:TextInput id="numStatsInput" width="24" text="6"/>
-		<s:Label text="Max number of objects*: " verticalAlign="middle" height="100%" fontWeight="normal" fontSize="12"/>
-		<s:TextInput id="maxNumObjectsInput" width="24" text="0" />
-		<s:Button  id="randomGraphs" label="Random graphs" enabled="true" click="randomGraphs_clickHandler(event)"/>					
-	</s:Group>
-	<s:Group width="100%" height="24">
-		<s:layout>
-			<s:HorizontalLayout/>
-		</s:layout>
-		<s:Button  id="previous" label="&lt;&lt;" enabled="true" click="previousNextPage(false)" width="35"/>			
-		<s:Label text="Page number*: " verticalAlign="middle" height="100%" fontWeight="normal" fontSize="12"/>
-		<s:TextInput id="pageNum" width="24" text="0" />
-		<s:Button  id="sequenceGraph" label="Seq. graphs" enabled="true" click="sequenceGraph_clickHandler(event)"/>			
-		<s:Button  id="next" label=">>" enabled="true" click="previousNextPage(true)" width="35"/>			
-		<s:Label text="* put 0 for all" verticalAlign="middle" height="100%" fontStyle="italic" fontSize="12"/>
-	</s:Group>
-	<s:Group width="100%" height="24">
-		<s:layout>
-			<s:HorizontalLayout/>
-		</s:layout>
-		<s:Label text="Note: last Stat will be ignored if number of items is not pair." fontStyle="italic" verticalAlign="middle" height="100%" />
-		<mx:Spacer width="100%" />
-		<s:Button label="Update" id="updateBtn" click="updateBtn_clickHandler(event)" width="60" />
-		<s:Button label="Close" id="closeBtn" click="this.close()" width="55" />
-	</s:Group>
-</s:Window>
+</mx:Module>

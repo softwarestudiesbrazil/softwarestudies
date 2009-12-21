@@ -1,14 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?> 
-<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+<fx:Object xmlns:fx="http://ns.adobe.com/mxml/2009" 
 				xmlns:mx="library://ns.adobe.com/flex/halo" 
 				xmlns:s="library://ns.adobe.com/flex/spark"
-				focusEnabled="false"> 
+				> 
 	<fx:Script>
 		<![CDATA[
-			import mx.graphics.IFill;
+
 		]]>
 	</fx:Script>
+	<fx:Style>
+		@namespace s "library://ns.adobe.com/flex/spark";
+		@namespace mx "library://ns.adobe.com/flex/halo";
+		
+		.itemrendererstyle {
+			radius: 3;
+			color: "0x999999";
+			base-color: "0x000099";
+			item-roll-over-color: "0xFFFF00";
+			item-disabled-color: "0x00FF00";
+			item-selection-color: "0x0000FF";
+		}
+		
+	</fx:Style>
 	
+	<fx:Declarations>
+		<mx:TriangleItemRenderer id="renderer1" />
+	</fx:Declarations>
 	<s:states>
 		<s:State name="normal"/>
 		<s:State name="hovered"/>
@@ -17,15 +34,4 @@
 		<s:State name="default"/>
 		<s:State name="showdesc"/>
 	</s:states>     
-
-	<s:Ellipse width="4" height="4" >
-		<s:fill>
-			<s:SolidColor color.normal="red"
-						  color.hovered="yellow"
-						  color.selected="green"
-						  color.default="black"
-						  color.showdesc="blue"/>
-		</s:fill>
-	</s:Ellipse>
-	
-</s:ItemRenderer>
+</fx:Object>
