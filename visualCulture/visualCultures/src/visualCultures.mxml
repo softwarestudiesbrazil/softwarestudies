@@ -7,7 +7,8 @@
 					   xmlns:local="*"
 					   xmlns:mate="http://mate.asfusion.com/"
 					   width="1000" height="800" backgroundColor="0x222222"
-					   creationComplete="creationCompleteHandler(event)" >
+					   creationComplete="creationCompleteHandler(event)"
+					   close="windowedapplication1_closeHandler(event)" >
 	<fx:Script>
 		<![CDATA[
 			import flash.events.Event;
@@ -15,10 +16,17 @@
 			
 			import mmalab.softwarestudies.asianculture.data.component.StatChooser;
 			import mmalab.softwarestudies.asianculture.data.event.ChangeDatabaseEvent;
-			import mmalab.softwarestudies.asianculture.data.event.ChooseStatisticsEvent;
+			
+			import mx.core.FlexGlobals;
+			import mx.modules.IModuleInfo;
+			
+			import spark.components.Window;
 			
 			private var file:File;
+			//private var win:Window;
 			
+			protected var _moduleInfo:IModuleInfo;
+
 			[Bindable]
 			public var statsList:Array;
 			[Bindable]
@@ -28,6 +36,8 @@
 			{
 				nativeWindow.x = (Capabilities.screenResolutionX - nativeWindow.width) / 2;
 				nativeWindow.y = (Capabilities.screenResolutionY - nativeWindow.height) / 2;
+				
+				win.open();
 			}
 			
 			private function loadDB_clickHandler(event:MouseEvent):void
@@ -46,12 +56,15 @@
 				dispatchEvent(changeDatabaseEvent);
 			}
 						
-			protected function chooseStatsBtn_clickHandler(event:MouseEvent):void
+			protected function win_closingHandler(event:Event):void
 			{
-				var statChooser:StatChooser = new StatChooser();
-				statChooser.fullStatsList = fullStatsList;
-				statChooser.statsList = statsList;
-				statChooser.open();
+				event.preventDefault();
+				win.visible = false;
+			}
+
+			protected function windowedapplication1_closeHandler(event:Event):void
+			{
+				nativeApplication.exit();
 			}
 
 		]]>
@@ -59,9 +72,12 @@
 	
 	<fx:Declarations>
 		<eventMaps:MainEventMap />
+		<s:Window id="win" width="600" height="650" closing="win_closingHandler(event)" visible="false"  >
+			<local:StatChooserModule fullStatsList="{fullStatsList}" statsList="{statsList}" />
+		</s:Window>
 	</fx:Declarations>
 	
-	<s:Group width="100%" height="100%">
+	<s:Group width="100%" height="100%" id="groupX">
 		<s:layout>
 			<s:VerticalLayout/>
 		</s:layout>
@@ -70,8 +86,8 @@
 				<s:HorizontalLayout/>
 			</s:layout>
 			
-			<s:Button  id="loadDB" label="Select Database" enabled="true" click="loadDB_clickHandler(event)"/>			
-			<s:Button label="Choose Stats" id="chooseStatsBtn" click="chooseStatsBtn_clickHandler(event)"/>
+			<s:Button  id="loadDB" label="Select Database" enabled="true" click="loadDB_clickHandler(event)"/>
+			<s:Button label="Choose Stats" id="launchModule" click="win.visible=true" />
 		</s:Group>
 		
 		<s:Scroller width="100%" height="100%" >

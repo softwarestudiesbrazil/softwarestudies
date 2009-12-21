@@ -6,7 +6,6 @@
 		<![CDATA[
 			import com.asfusion.mate.utils.debug.Debugger;
 			
-			import mmalab.softwarestudies.asianculture.data.component.StatChooser;
 			import mmalab.softwarestudies.asianculture.data.event.ChangeDatabaseEvent;
 			import mmalab.softwarestudies.asianculture.data.event.ChooseStatisticsEvent;
 			import mmalab.softwarestudies.asianculture.graph.controllers.GraphManager;
@@ -19,7 +18,7 @@
 	
 	<fx:Declarations>
 		
-		<Debugger level="{Debugger.FATAL}" />
+		<Debugger level="{Debugger.ERROR}" />
 		
 		<!--
 		-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
@@ -55,13 +54,8 @@
 			<PropertyInjector targetKey="chartsArray" source="{GraphManager}" sourceKey="graphs" />
 		</Injectors>
 
-		<Injectors target="{StatChooser}" debug="true">
+		<Injectors target="{StatChooserModule}" debug="true">
 			<ListenerInjector eventType="{ChooseStatisticsEvent.CHOOSE_RANDOM_STATS_EVENT}" method="numStatListener" />
-			<PropertyInjector targetKey="statsList" source="{GraphManager}" sourceKey="statsList" />
-			<PropertyInjector targetKey="fullStatsList" source="{GraphManager}" sourceKey="fullStatsList" />
-		</Injectors>
-
-		<Injectors target="{StatChooser}" debug="true">
 			<ListenerInjector eventType="{ChooseStatisticsEvent.CHOOSE_SEQUENCE_STATS_EVENT}" method="numStatListener" />
 			<PropertyInjector targetKey="statsList" source="{GraphManager}" sourceKey="statsList" />
 			<PropertyInjector targetKey="fullStatsList" source="{GraphManager}" sourceKey="fullStatsList" />

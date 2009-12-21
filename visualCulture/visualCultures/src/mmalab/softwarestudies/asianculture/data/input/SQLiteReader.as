@@ -8,7 +8,6 @@ package mmalab.softwarestudies.asianculture.data.input
 	import flash.utils.Dictionary;
 	
 	import mmalab.softwarestudies.asianculture.data.models.Dataset;
-	import mmalab.softwarestudies.asianculture.data.models.Statistic;
 	
 	public class SQLiteReader
 	{
@@ -103,7 +102,7 @@ package mmalab.softwarestudies.asianculture.data.input
 			var whereClauseTEXT	:String = "";
 			var temp:String;
 			var nbCols:int = 0;
-			for each (var stat:Statistic in tempCols) {
+			for each (var stat:Object in tempCols) {
 				nbCols++;
 				temp = stat.id + ",";
 					switch (stat.type) {

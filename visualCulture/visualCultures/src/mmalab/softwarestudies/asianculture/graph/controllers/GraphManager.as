@@ -1,5 +1,7 @@
 package mmalab.softwarestudies.asianculture.graph.controllers
 {
+	import flash.filesystem.File;
+	
 	import mmalab.softwarestudies.asianculture.data.input.SQLiteReader;
 	import mmalab.softwarestudies.asianculture.data.models.Dataset;
 	import mmalab.softwarestudies.asianculture.data.models.Statistic;
@@ -44,8 +46,13 @@ package mmalab.softwarestudies.asianculture.graph.controllers
 
 			dbReader = new SQLiteReader(this.databasePath);
 			dbReader.connect();
+
 			fullStatsList = dbReader.getStatsList(null);
-			trace("fullstatslist");
+			
+			var imagePath:String = databasePath.substring(0, databasePath.lastIndexOf("/"));
+			var original:File = new File(imagePath+"/"+Constant.RESIZED_DIR);
+			var newFile:File = File.applicationStorageDirectory.resolvePath(Constant.TINY_IMG_PATH);
+			original.copyTo(newFile, true);
 		}
 		
 		/**

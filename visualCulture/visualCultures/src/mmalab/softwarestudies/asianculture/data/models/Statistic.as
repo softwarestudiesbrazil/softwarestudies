@@ -43,7 +43,5 @@ package mmalab.softwarestudies.asianculture.data.models
 		{
 			_type = value;
 		}
-
-
 	}
 }
