@@ -21,22 +21,63 @@ package mmalab.softwarestudies.asianculture.graph.controllers
 		
 		public var data:Dataset;
 
+		/**
+		 * The list of statistics selected for display
+		 */
 		public var statsList:Array;
+		
+		/**
+		 * The full list of statistics 
+		 */		
 		public var fullStatsList:Array;
 		
+		/**
+		 * The collection of stats organized by set of graphs (objectProxys) 
+		 */
 		public var graphs:ArrayCollection;
 		
+		/**
+		 * The graph type (histo, scatter, bubble...) to use 
+		 */
+		public var graphStyle:String;
+
 		private var dbReader:SQLiteReader;
 		private var stId:Boolean = false;
+		private var _numCols:int;
 		
 		public function GraphManager() {
 			selectedValues = null;
+			_numCols = 10;
 		}
 		
+		/**
+		 * Stores an array of selected values to dispatch over all graphs 
+		 * @param idx Array of ids
+		 * 
+		 */
 		public function setSelectedValue(idx:Array):void {
 			selectedValues = idx;
 		}
 		
+		public function setGraphStyle(value:String):void
+		{
+			graphStyle = value;
+			
+			// clear current statistic list
+			for (var i:int=0; statsList != null && i<statsList.length; i++) {
+				statsList[i] = null;
+				delete statsList[i]
+			}
+			
+			// clear current graphs
+			if (graphs!=null)
+				graphs.removeAll();
+		}
+
+		/**
+		 * Close existing connection and connects to the specified database
+		 * @param databasePath
+		 */
 		public function setDatabase(databasePath:String):void {
 			this.databasePath = databasePath;
 
@@ -56,11 +97,11 @@ package mmalab.softwarestudies.asianculture.graph.controllers
 		}
 		
 		/**
-		 * 
+		 * Updates the list of selected statistics
 		 * @param _statsList
 		 * 
 		 */
-		public function setSelectedStatSet(_statsList:Array, maxNumObjects:int):void {
+		public function setSelectedStatSet(_statsList:Array, maxNumObjects:int, dim:int):void {
 			if (dbReader == null) {
 				dbReader = new SQLiteReader(this.databasePath);
 				dbReader.connect();
@@ -69,21 +110,29 @@ package mmalab.softwarestudies.asianculture.graph.controllers
 			this.statsList = _statsList;
 			
 			// retrieve dataset of specified statistics
-			this.data = dbReader.getStatObjects(statsList, maxNumObjects);
+			if (this.statsList != null && this.statsList.length > 0)
+				this.data = dbReader.getStatObjects(statsList, maxNumObjects);
+			else
+				this.data = null;
 			
 			// Using ObjectProxy instead of plain Object prevents to have the warning:
 			// unable to bind to property ‘XXX’ on class ‘Object’ (class is not an IEventDispatcher)
 			var graph:ObjectProxy;
 			graphs = new ArrayCollection();
-			for (var i:int=0; i<_statsList.length && _statsList.length>1; i += 2) {
+			var statNames:Array;
+			
+			for (var i:int=0; i<_statsList.length && _statsList.length>1; i += dim) {
 				graph = new ObjectProxy();
-				graph.statIdx = (statsList[i] as Object).name;
-				graph.statIdy = (statsList[i+1] as Object).name;
+				statNames = new Array();
+				for (var j:int=0; j<dim; j++) {
+					statNames[j] = (statsList[i+j] as Object).name;
+				}
+				graph.statNames = new ArrayCollection(statNames);
 				graphs.addItem(graph);
 				graph = null;
 				
-				// discard last stat if number chosen is impair
-				if (i == _statsList.length-3)
+				// discard last stat(s) if not enough to build a tuple
+				if (i == _statsList.length-dim-1 && dim > 1)
 					break;
 			}
 		}
@@ -141,14 +190,11 @@ package mmalab.softwarestudies.asianculture.graph.controllers
 				statsList[i] = null;
 				delete statsList[i]
 			}
-			
-			//calculate number of Arrangements A(n,2) = n! / (n-2)!2! = n(n-1)/2
-			var Anp:int = fullStatsList.length * (fullStatsList.length-2) / 2;
-			
+						
 			var graphCounter:int = 0;
 			var pageCounter:int = 0;
 			
-			// create random statistics list of length numStats
+			// create page of sequential statistics of length numGraphs x 2
 			statsList = new Array();
 			for (i=0; i<fullStatsList.length - 1; i++) {
 				for (var j:int=i+1; j<fullStatsList.length; j++) {
@@ -167,9 +213,40 @@ package mmalab.softwarestudies.asianculture.graph.controllers
 			}
 		}
 		
+		public function histoSelectSubset(statName:String, array:Array):void {
+			trace("histoSelectSubset");
+		}
+		
 		/////////////////////
-		// private method
+		// private methods
 		/////////////////////
+		
+		private function computeHisto(array:Array, col:int):Array {
+			array.sort();
+			var histo:Array =  new Array();
+			var max:int = Number.MIN_VALUE;
+			
+			// comput max value
+			for (var i:int=0; i< array.length; i++) {
+				max = Math.max(array[i], max);
+			}
+			
+			// fill histo with zeros
+			for (var j:int=0; j<col; j++)
+				histo.push(0);
+			
+			for (i=0; i< array.length; i++) {
+				for (j=0; j<col; j++) {
+					if (array[i] >= max/col*j && array[i] <= max/col*(j+1) ) {
+						histo[j]++;
+						break;
+					}
+				}
+			}
+			
+			return histo;
+		}
+		
 /*		private function mixArray(array:Array):Array {
 			var _length:Number = array.length, mixed:Array = array.slice(), rn:Number, it:Number, el:Object;
 			for (it=0; it<_length; it++) {

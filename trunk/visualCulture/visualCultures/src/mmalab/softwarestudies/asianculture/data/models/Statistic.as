@@ -1,6 +1,6 @@
 package mmalab.softwarestudies.asianculture.data.models
 {
-	public class Statistic
+	public class Statistic extends Object
 	{
 		
 		private var _id:int;

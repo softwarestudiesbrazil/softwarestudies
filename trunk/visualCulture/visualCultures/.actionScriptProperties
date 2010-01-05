@@ -14,8 +14,6 @@
       <airExcludes/>
     </application>
   </applications>
-  <modules>
-    <module application="src/visualCultures.mxml" destPath="mmalab/softwarestudies/asianculture/data/component/StatChooserModule.swf" optimize="true" sourcePath="src/mmalab/softwarestudies/asianculture/data/component/StatChooserModule.mxml"/>
-  </modules>
+  <modules/>
   <buildCSSFiles/>
 </actionScriptProperties>

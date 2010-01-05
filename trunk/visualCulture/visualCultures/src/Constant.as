@@ -14,6 +14,9 @@ package
 		public static const TINY_IMG_PATH:String = IMAGE_DIR + TINY_IMG_DIR;
 		public static const THUMBS_PATH:String = IMAGE_DIR + THUMBS_DIR;
 		
+		public static const HISTOGRAM:String = "Histo";
+		public static const SCATTER:String = "Scatter";
+		
 		public function Constant()
 		{
 		}
