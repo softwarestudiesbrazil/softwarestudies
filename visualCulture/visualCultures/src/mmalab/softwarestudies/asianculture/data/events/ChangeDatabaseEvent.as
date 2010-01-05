@@ -1,4 +1,4 @@
-package mmalab.softwarestudies.asianculture.data.event
+package mmalab.softwarestudies.asianculture.data.events
 {
 	import flash.events.Event;
 	

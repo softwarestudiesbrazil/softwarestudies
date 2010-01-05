@@ -2,34 +2,149 @@
 <s:Group xmlns:fx="http://ns.adobe.com/mxml/2009"
 		 xmlns:s="library://ns.adobe.com/flex/spark"
 		 xmlns:mx="library://ns.adobe.com/flex/halo"
-		 width="400" height="300">
+		 creationComplete="group1_initializeHandler(event)">
+
+	<fx:Style>
+		@namespace s "library://ns.adobe.com/flex/spark";
+		@namespace mx "library://ns.adobe.com/flex/halo";
+		
+		.itemrendererstyle {
+			radius: 10;
+			color: "0x999999";
+			base-color: "0x000099";
+			item-roll-over-color: "0xFFFF00";
+			item-disabled-color: "0x00FF00";
+			item-selection-color: "0x0000FF";
+		}
+		
+	</fx:Style>
 	<fx:Script>
 		<![CDATA[
-			import mmalab.softwarestudies.asianculture.graph.events.SelectValueEvent;
 			import mmalab.softwarestudies.asianculture.data.models.Dataset;
+			import mmalab.softwarestudies.asianculture.graph.events.HistoSelectionEvent;
+			
+			import mx.charts.HitData;
+			import mx.charts.series.items.ColumnSeriesItem;
+			import mx.effects.easing.Quintic;
+			import mx.events.FlexEvent;
+			import mx.formatters.NumberFormatter;
+			
 			[Bindable]
 			public var dataset:Dataset;
 			[Bindable]
 			public var selectedIdx:Array;
 			[Bindable]
-			public var statIdx:String;
+			public var statIdy:String;
+			
+			[Bindable]
+			public var numCols:int;
+			
+			private var histoArray:Array;
+			private var min:Number;
+			private var max:Number;
+			private var range:Number;
 			
 			protected function barseries1_clickHandler(event:MouseEvent):void
 			{
-				var selectValueEvent:SelectValueEvent = new SelectValueEvent(SelectValueEvent.VALUE_SELECTED);
-				selectValueEvent.selectedValues = barseries1.selectedIndices;
+				/*var selectValueEvent:SelectValueEvent = new SelectValueEvent(SelectValueEvent.VALUE_SELECTED);
+				selectValueEvent.selectedValues = colseries1.selectedIndices;
 				dispatchEvent(selectValueEvent);
+				*/
+				var histoSelectionEvent:HistoSelectionEvent = new HistoSelectionEvent(HistoSelectionEvent.HISTO_SELECTION_EVENT);
+				var selectedRanges:Array = new Array();
+								
+				for each (var idx:int in colseries1.selectedIndices) {
+					var rangeObj:Object = new Object();
+					rangeObj.min = min+idx*range;
+					rangeObj.max = min+(idx+1)*range;
+					selectedRanges.push(rangeObj);
+				}
+				histoSelectionEvent.selectedRanges = selectedRanges;
+				histoSelectionEvent.statName = statIdy;
+				dispatchEvent(histoSelectionEvent);
+			}
+			
+			private function chart_dataTipFunction(item:HitData):String {
+				var chartItem:ColumnSeriesItem = item.chartItem as ColumnSeriesItem;
+				var tip:String = "<b>" + statIdy + ":</b> " + chartItem.item.value + "<br/>"
+					+chartItem.item.label;
+				return tip;
+			}
+			
+
+			protected function group1_initializeHandler(event:FlexEvent):void
+			{
+				if (dataset != null) {
+					histoArray = computeHisto(dataset.values, numCols);
+					barchart1.dataProvider = histoArray;
+				}
+			}
+			
+			private function computeHisto(array:Array, col:int):Array {
+				array.sort();
+				var histo:Array =  new Array();
+				min = Number.MAX_VALUE;
+				max = -Number.MIN_VALUE;
+				
+				// compute max value
+				for (var i:int=0; i< array.length; i++) {
+					if (array[i][statIdy] != null) {
+						min = Math.min(array[i][statIdy], min);
+						max = Math.max(array[i][statIdy], max);
+					}
+				}
+				
+				range = (max-min)/col;
+				
+				// fill histo with empty values
+				for (var j:int=0; j<col; j++) {
+					var column:Object = new Object();
+					column.value = 0;
+					column.label = "["+numberFormatter.format(min+j*range)+" "+numberFormatter.format(min+(j+1)*range)+"]";
+					histo.push(column);
+				}
+				
+				for (i=0; i< array.length; i++) {
+					for (j=0; j<col; j++) {
+						if (array[i][statIdy] >= min+range*j && array[i][statIdy] <= min+(j+1)*range) {
+							histo[j].value++;
+							break;
+						}
+					}
+				}
+				
+				return histo;
 			}
 			
 		]]>
 	</fx:Script>
-	<mx:BarChart x="0" y="0" id="barchart1" width="100%" height="100%" selectionMode="multiple" 
-				 
-				 showDataTips="true" mouseUp="barseries1_clickHandler(event)" dataProvider="{dataset.values}">
+	<fx:Declarations>
+		<mx:NumberFormatter id="numberFormatter" precision="2" 
+							useThousandsSeparator="true" useNegativeSign="true" />
+		<mx:SeriesSlide id="slideEffect" direction="up" duration="2000" easingFunction="{Quintic.easeInOut}" />
+	</fx:Declarations>
+	<mx:ColumnChart x="0" y="0" id="barchart1" width="100%" height="100%" selectionMode="multiple" 
+				 dataTipFunction="chart_dataTipFunction" styleName="itemrendererstyle"
+				 showDataTips="true" mouseUp="barseries1_clickHandler(event)" type="clustered">
+		<mx:verticalAxis>
+			<mx:LinearAxis id="linY" title="number of items" autoAdjust="true" baseAtZero="true" />
+		</mx:verticalAxis>
+		<mx:horizontalAxis>
+			<mx:CategoryAxis categoryField="label" title="{statIdy}" />
+		</mx:horizontalAxis>
 		<mx:series>
-			<mx:BarSeries id="barseries1" displayName="values" selectable="true" selectedIndices="{selectedIdx}" xField="{statIdx}" />
+			<mx:ColumnSeries id="colseries1" displayName="values" selectable="true" selectedIndices="{selectedIdx}" yField="value" sortOnXField="true" showDataEffect="{slideEffect}" >
+				<mx:fill>
+					<mx:LinearGradient>
+						<mx:entries>
+							<mx:GradientEntry color="0x00FF00" ratio="0.00" alpha="0.5"/>
+							<mx:GradientEntry color="0x0000FF" ratio="0.66" alpha="0.5"/>
+						</mx:entries>
+					</mx:LinearGradient>
+				</mx:fill>
+			</mx:ColumnSeries>
 		</mx:series>
-	</mx:BarChart>
+	</mx:ColumnChart>
 	<s:layout>
 		<s:BasicLayout/>
 	</s:layout>

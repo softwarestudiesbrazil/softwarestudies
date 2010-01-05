@@ -8,24 +8,30 @@
 		<![CDATA[
 			import com.asfusion.mate.ioc.InjectorRegistry;
 			
-			import flash.events.FocusEvent;
-			import flash.events.MouseEvent;
+			import flash.events.Event;
 			
-			import mmalab.softwarestudies.asianculture.data.event.ChooseStatisticsEvent;
+			import mmalab.softwarestudies.asianculture.data.events.ChooseStatisticsEvent;
+			import mmalab.softwarestudies.asianculture.graph.events.ChangeGraphStyleEvent;
+			import mmalab.softwarestudies.asianculture.graph.events.ChangePlotItemsEvent;
 			
 			import mx.collections.ArrayCollection;
 			import mx.core.FlexGlobals;
 			import mx.events.DragEvent;
+			import mx.events.ListEvent;
 			
 			[Bindable]
 			public var statsList:Array;
 			[Bindable]
 			public var fullStatsList:Array;
+			[Bindable]
+			public var graphStyle:String;
 			
-			// Currently we work only with dimension 2 graphs
-			private const dim:int = 2;
-			private const altColors:Array = new Array();
-
+			[Bindable]
+			public var dim:int = 2;
+			
+			[Bindable]
+			private var altColors:Array = new Array();
+			
 			[Bindable]
 			private var maxPageNum:int;
 			
@@ -37,10 +43,7 @@
 				//------------------------------------------------------------------
 				InjectorRegistry.register(this);
 				
-				for (var i:int=0; i<dim; i++)
-					altColors.push(0xFFFFFF);
-				for (i=0; i<dim; i++)
-					altColors.push(0xCEDBEF);
+				updateAltColorsByDim();
 			}
 			
 			protected function updateMaxPageNum():void
@@ -56,6 +59,14 @@
 				}
 			}
 			
+			protected function updateAltColorsByDim():void {
+				altColors = new Array();
+				for (var i:int=0; i<dim; i++)
+					altColors.push(0xFFFFFF);
+				for (i=0; i<dim; i++)
+					altColors.push(0xCEDBEF);
+			}
+						
 			public function numStatListener(event:ChooseStatisticsEvent):void {
 				numSelected.text="Selected: " + statsList.length;
 			}
@@ -71,6 +82,8 @@
 				var chooseStatEvent:ChooseStatisticsEvent = new ChooseStatisticsEvent(ChooseStatisticsEvent.CHOOSE_STATS_EVENT);
 				chooseStatEvent.statsList = (selectedStats.dataProvider as ArrayCollection).toArray();
 				chooseStatEvent.maxNumObjects = parseInt(maxNumObjectsInput.text);
+				chooseStatEvent.dim = dim;
+				chooseStatEvent.graphStyle = graphTypeCombo.selectedLabel;
 				
 				FlexGlobals.topLevelApplication.dispatchEvent(chooseStatEvent);
 			}
@@ -112,7 +125,7 @@
 				var chooseStatsEvent:ChooseStatisticsEvent = new ChooseStatisticsEvent(ChooseStatisticsEvent.CHOOSE_SEQUENCE_STATS_EVENT);
 				chooseStatsEvent.page = parseInt(pageNum.text);
 				chooseStatsEvent.numStats = parseInt(numStatsInput.text);
-				//chooseStatsEvent.maxNumObjects = parseInt(maxNumObjectsInput.text);
+				chooseStatsEvent.graphStyle = graphTypeCombo.selectedLabel;
 				
 				updateMaxPageNum();
 				
@@ -129,13 +142,36 @@
 				var chooseStatsEvent:ChooseStatisticsEvent = new ChooseStatisticsEvent(ChooseStatisticsEvent.CHOOSE_SEQUENCE_STATS_EVENT);
 				chooseStatsEvent.page = parseInt(pageNum.text);
 				chooseStatsEvent.numStats = parseInt(numStatsInput.text);
-				//chooseStatsEvent.maxNumObjects = parseInt(maxNumObjectsInput.text);
+				chooseStatsEvent.graphStyle = graphTypeCombo.selectedLabel;
 				
 				updateMaxPageNum();
 				
 				FlexGlobals.topLevelApplication.dispatchEvent(chooseStatsEvent);
 			}
 			
+
+			protected function combobox1_changeHandler(event:ListEvent):void
+			{
+				if (event.currentTarget.selectedLabel == Constant.HISTOGRAM)
+					dim = 1;
+				else if (event.currentTarget.selectedLabel == Constant.SCATTER)
+					dim = 2;
+				else
+					dim = 3;
+				updateAltColorsByDim();
+				var changeGraphStyleEvent:ChangeGraphStyleEvent = new ChangeGraphStyleEvent(ChangeGraphStyleEvent.CHANGE_GRAPH_STYLE_EVENT);
+				changeGraphStyleEvent.graphStyle = event.currentTarget.selectedLabel as String;
+				FlexGlobals.topLevelApplication.dispatchEvent(changeGraphStyleEvent);
+			}
+
+
+			protected function checkbox1_changeHandler(event:Event):void
+			{
+				var changePlotItemsEvent:ChangePlotItemsEvent = new ChangePlotItemsEvent(ChangePlotItemsEvent.CHANGE_PLOT_ITEMS_EVENT);
+				changePlotItemsEvent.renderer = imgPoint.selected?"images":"points";
+				FlexGlobals.topLevelApplication.dispatchEvent(changePlotItemsEvent);
+			}
+
 		]]>
 	</fx:Script>
 	
@@ -184,6 +220,15 @@
 				<s:layout>
 					<s:VerticalLayout/>
 				</s:layout>
+				<mx:ComboBox id="graphTypeCombo" change="combobox1_changeHandler(event)">
+					<mx:dataProvider>
+						<!-- labels must correspond to GraphTile states in the same order -->
+						<fx:String>{Constant.SCATTER}</fx:String>
+						<fx:String>{Constant.HISTOGRAM}</fx:String>
+						<fx:String>Bubble</fx:String>
+					</mx:dataProvider>
+				</mx:ComboBox>
+				<s:CheckBox id="imgPoint" label="images" change="checkbox1_changeHandler(event)" />
 				<s:Label text="Statistics to display (by tuples of {dim})" verticalAlign="middle" width="100%" height="24" fontWeight="bold"/>
 				<!-- dragNdrop not yet available in spark lists of Flex 4 beta 2 -->
 				<mx:List id="selectedStats"
@@ -194,8 +239,41 @@
 						 dropEnabled="true"
 						 dragMoveEnabled="true"
 						 width="100%" height="100%"
-						 alternatingItemColors="{altColors}"/>
-				<s:Label id="numSelected" text="Selected: {selectedStats.dataProvider.length}"  textAlign="right"/>
+						 alternatingItemColors="{altColors}">
+						 <!--itemRenderer="SelectedLineItemRenderer"-->
+					<mx:itemRenderer>
+						<fx:Component>
+							<mx:Label text="{dimArray.getItemAt(counter%outerDocument.dim)}: {data.name}">
+								<fx:Script>
+									<![CDATA[
+										import mx.collections.ArrayCollection;
+										import mx.controls.List;
+										
+										// limited to max 6 dimensions
+										[Bindable]
+										private var dimArray:ArrayCollection = new ArrayCollection(['x', 'y', 't', 'a', 'b', 'c']);
+										
+										[Bindable]
+										private var counter:int=0;
+										
+										override protected function updateDisplayList(unscaledWidth:Number,                     
+																					  unscaledHeight:Number):void
+										{
+											super.updateDisplayList(unscaledWidth, unscaledHeight);
+											
+											var ow:List = owner as List;
+											var dataIndex:int = ow.itemRendererToIndex(this);
+											if (dataIndex>=0)
+												counter = dataIndex;
+										}
+
+									]]>
+								</fx:Script>
+							</mx:Label>
+						</fx:Component>
+					</mx:itemRenderer>
+				</mx:List>
+				<s:Label id="numSelected" text="Selected: {selectedStats.dataProvider.length}"  textAlign="right" />
 			</s:Group>
 		</s:Group>
 		<s:Group width="100%" height="24">

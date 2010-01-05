@@ -3,19 +3,20 @@
 		 xmlns:s="library://ns.adobe.com/flex/spark"
 		 xmlns:mx="library://ns.adobe.com/flex/halo"
 		 xmlns:utils="mmalab.softwarestudies.asianculture.graph.utils.*"
-		  initialize="group1_initializeHandler(event)"
-		  >
+		 initialize="group1_initializeHandler(event)"
+		 >
 	<fx:Style>
 		@namespace s "library://ns.adobe.com/flex/spark";
 		@namespace mx "library://ns.adobe.com/flex/halo";
 		
 		.itemrendererstyle {
-			radius: 4;
+			radius: 1;
 			color: "0x999999";
 			base-color: "0x000099";
 			item-roll-over-color: "0xFFFF00";
 			item-disabled-color: "0x00FF00";
 			item-selection-color: "0x0000FF";
+			
 		}
 		
 	</fx:Style>
@@ -30,7 +31,7 @@
 			import mx.charts.HitData;
 			import mx.charts.LinearAxis;
 			import mx.charts.renderers.CircleItemRenderer;
-			import mx.charts.series.items.PlotSeriesItem;
+			import mx.charts.series.items.BubbleSeriesItem;
 			import mx.events.FlexEvent;
 			
 			[Bindable]
@@ -41,6 +42,8 @@
 			public var statIdx:String;
 			[Bindable]
 			public var statIdy:String;
+			[Bindable]
+			public var statIdz:String;
 			
 			private function series1_clickHandler(event:MouseEvent):void
 			{
@@ -50,11 +53,12 @@
 			}
 			
 			private function chart_dataTipFunction(item:HitData):String {
-				var chartItem:PlotSeriesItem = item.chartItem as PlotSeriesItem;
+				var chartItem:BubbleSeriesItem = item.chartItem as BubbleSeriesItem;
 				var str:String = "";//chartItem.item.name as String;
 				var tip:String = "<b>" + str.slice(0, str.lastIndexOf(".")) + "</b><br/>"
 					+ "<b>" + statIdx + ":</b> " + chartItem.item[statIdx] + "<br/>"
-					+ "<b>" + statIdy + ":</b> " + chartItem.item[statIdy];
+					+ "<b>" + statIdy + ":</b> " + chartItem.item[statIdy]
+					+ "<b>" + statIdz + ":</b> " + chartItem.item[statIdz];
 				return tip;
 			}
 			
@@ -79,7 +83,7 @@
 			public function changePlotItemRenderer(event:ChangePlotItemsEvent):void {
 				this.currentState=event.renderer;
 			}
-
+			
 			protected function group1_initializeHandler(event:FlexEvent):void
 			{
 				trace ("initialize: " + event.target);
@@ -104,8 +108,6 @@
 		<mx:LogAxis id="logY" title="{statIdy}" autoAdjust="true" baseAtZero="false" />
 	</fx:Declarations>
 	<s:states>
-		<s:State name="points" />
-		<s:State name="images" />
 		<s:State name="linear" />
 		<s:State name="logarithmic" />
 	</s:states>
@@ -113,22 +115,21 @@
 	<s:layout>
 		<s:VerticalLayout />
 	</s:layout>
-	<mx:PlotChart id="chart1" selectionMode="multiple" width="100%" height="100%"
+	<mx:BubbleChart id="chart1" selectionMode="multiple" width="100%" height="100%"
 				  showDataTips="true" dataTipRenderer="{MyDataTip}" dataTipFunction="chart_dataTipFunction" dataTipMode="single"
 				  mouseUp="series1_clickHandler(event)" styleName="itemrendererstyle"
 				  verticalAxis="{linY}" horizontalAxis="{linX}"
 				  verticalAxis.logarithmic="{logY}" horizontalAxis.logarithmic="{logX}">
 		<!--mx:verticalAxis>
-			{linY}
+		{linY}
 		</mx:verticalAxis>
 		<mx:horizontalAxis>
-			{linX}
+		{linX}
 		</mx:horizontalAxis-->
 		<mx:series>
-			<mx:PlotSeries id="series1" selectable="true" selectedIndices="{selectedIdx}" xField="{statIdx}" yField="{statIdy}"
+			<mx:BubbleSeries id="series1" selectable="true" selectedIndices="{selectedIdx}" xField="{statIdx}" yField="{statIdy}" radiusField="{statIdz}"
 						   dataProvider="{dataset.values}"  displayName="{statIdy}"
-						   itemRenderer.points="mx.charts.renderers.CircleItemRenderer"
-						   itemRenderer.images="mmalab.softwarestudies.asianculture.graph.components.imgRenderer"
+						   itemRenderer="mx.charts.renderers.CircleItemRenderer"
 						   fill="{sc1}" stroke="{s1}" showDataEffect="zoomInEffect" />
 		</mx:series>
 		<mx:backgroundElements>
@@ -140,5 +141,5 @@
 				</mx:verticalStroke>
 			</mx:GridLines>
 		</mx:backgroundElements>
-	</mx:PlotChart>
+	</mx:BubbleChart>
 </s:Group>

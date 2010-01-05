@@ -3,29 +3,68 @@
 		 xmlns:s="library://ns.adobe.com/flex/spark" 
 		 xmlns:mx="library://ns.adobe.com/flex/halo"
 		 xmlns:views="mmalab.softwarestudies.asianculture.graph.views.*"
-		 width="100%" height="100%" >
+		 width="100%" height="100%" currentState="{graphStyle}" >
 	<fx:Declarations>
 		<!-- Place non-visual elements (e.g., services, value objects) here -->
 	</fx:Declarations>
 	<fx:Script>
 		<![CDATA[
-			import flash.events.MouseEvent;
+			import mmalab.softwarestudies.asianculture.graph.events.ChangePlotItemsEvent;
+			import mmalab.softwarestudies.asianculture.graph.events.ChangeGraphStyleEvent;
+			
 			import mx.collections.ArrayCollection;
 			
 			[Bindable]
 			public var chartsArray:ArrayCollection;
 			
+			[Bindable]
+			public var graphStyle:String;
+			
+			public function changeGraphStyle(event:ChangeGraphStyleEvent):void {
+				this.currentState = event.graphStyle;
+			}
+						
 		]]>
 	</fx:Script>
-	
-	<s:DataGroup dataProvider="{chartsArray}" width="100%" height="100%">
+	<s:states>
+		<s:State name="Scatter" />
+		<s:State name="Histo" />
+		<s:State name="Bubble" />
+	</s:states>
+	<s:DataGroup dataProvider="{chartsArray}" width="100%" height="100%" includeIn="Scatter" >
 		<s:layout>
 			<s:TileLayout clipAndEnableScrolling="true" orientation="rows" useVirtualLayout="true" />
 		</s:layout>
 		<s:itemRenderer>
 			<fx:Component>
 				<s:ItemRenderer>
-					<views:GraphScatter statIdx="{data.statIdx}" statIdy="{data.statIdy}" />
+					<views:GraphScatter id="scatPlot" statIdx="{data.statNames.getItemAt(0)}" statIdy="{data.statNames.getItemAt(1)}"
+										width="300" height="300" currentState="images" />
+				</s:ItemRenderer>
+			</fx:Component>
+		</s:itemRenderer>
+	</s:DataGroup>
+	<s:DataGroup dataProvider="{chartsArray}" width="100%" height="100%" includeIn="Bubble" >
+		<s:layout>
+			<s:TileLayout clipAndEnableScrolling="true" orientation="rows" useVirtualLayout="true" />
+		</s:layout>
+		<s:itemRenderer>
+			<fx:Component>
+				<s:ItemRenderer>
+					<views:GraphBubble id="bubblePlot" statIdx="{data.statNames.getItemAt(0)}" statIdy="{data.statNames.getItemAt(1)}" statIdz="{data.statNames.getItemAt(2)}"
+										width="300" height="300" />
+				</s:ItemRenderer>
+			</fx:Component>
+		</s:itemRenderer>
+	</s:DataGroup>
+	<s:DataGroup dataProvider="{chartsArray}" width="100%" height="100%" includeIn="Histo" >
+		<s:layout>
+			<s:TileLayout clipAndEnableScrolling="true" orientation="rows" useVirtualLayout="true" />
+		</s:layout>
+		<s:itemRenderer>
+			<fx:Component>
+				<s:ItemRenderer>
+					<views:GraphHisto id="histoPlot" statIdy="{data.statNames.getItemAt(0)}" numCols="12" width="400" height="300" />
 				</s:ItemRenderer>
 			</fx:Component>
 		</s:itemRenderer>

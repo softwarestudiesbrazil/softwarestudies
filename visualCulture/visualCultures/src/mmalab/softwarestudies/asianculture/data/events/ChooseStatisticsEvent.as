@@ -1,4 +1,4 @@
-package mmalab.softwarestudies.asianculture.data.event
+package mmalab.softwarestudies.asianculture.data.events
 {
 	import flash.events.Event;
 	
@@ -8,9 +8,11 @@ package mmalab.softwarestudies.asianculture.data.event
 		public static const CHOOSE_RANDOM_STATS_EVENT: String = "chooseRandomStatsEvent";
 		public static const CHOOSE_SEQUENCE_STATS_EVENT: String = "chooseSequentialStatsEvent";
 		
+		public var dim:int;
 		public var page:int;
 		public var numStats:int;
 		public var maxNumObjects:int;
+		public var graphStyle:String;
 
 		public var statsList:Array;
 

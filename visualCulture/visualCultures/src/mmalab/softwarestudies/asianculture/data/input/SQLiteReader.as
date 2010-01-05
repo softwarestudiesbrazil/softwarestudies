@@ -180,7 +180,7 @@ package mmalab.softwarestudies.asianculture.data.input
 					// push last object of the resultSet
 					dataset.push(statObject);
 					objectCounter++;
-					offset += limit;
+					offset += limit-nbCols;
 					
 				}
 				else {

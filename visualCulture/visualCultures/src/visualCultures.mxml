@@ -12,12 +12,11 @@
 	<fx:Script>
 		<![CDATA[
 			import flash.events.Event;
-			import flash.events.MouseEvent;
 			
-			import mmalab.softwarestudies.asianculture.data.component.StatChooser;
-			import mmalab.softwarestudies.asianculture.data.event.ChangeDatabaseEvent;
+			import mmalab.softwarestudies.asianculture.data.events.ChangeDatabaseEvent;
 			
-			import mx.core.FlexGlobals;
+			import mx.controls.Alert;
+			import mx.events.MenuEvent;
 			import mx.modules.IModuleInfo;
 			
 			import spark.components.Window;
@@ -26,12 +25,7 @@
 			//private var win:Window;
 			
 			protected var _moduleInfo:IModuleInfo;
-
-			[Bindable]
-			public var statsList:Array;
-			[Bindable]
-			public var fullStatsList:Array;
-			
+						
 			private function creationCompleteHandler(event: Event): void
 			{
 				nativeWindow.x = (Capabilities.screenResolutionX - nativeWindow.width) / 2;
@@ -40,7 +34,7 @@
 				win.open();
 			}
 			
-			private function loadDB_clickHandler(event:MouseEvent):void
+			private function loadDB_clickHandler():void
 			{
 				file = new File();
 				file.addEventListener(Event.SELECT, file_select);
@@ -67,13 +61,24 @@
 				nativeApplication.exit();
 			}
 
+
+			protected function menubar1_itemClickHandler(event:MenuEvent):void
+			{
+				if (event.item.@data == "openDB")
+					loadDB_clickHandler();
+				else if (event.item.@data == "chooseStat")
+					win.visible = true;
+				else if (event.item.@data == "about")
+					Alert.show('About Visual Cultures');
+			}
+
 		]]>
 	</fx:Script>
 	
 	<fx:Declarations>
 		<eventMaps:MainEventMap />
 		<s:Window id="win" width="600" height="650" closing="win_closingHandler(event)" visible="false"  >
-			<local:StatChooserModule fullStatsList="{fullStatsList}" statsList="{statsList}" />
+			<local:StatChooserModule />
 		</s:Window>
 	</fx:Declarations>
 	
@@ -81,17 +86,25 @@
 		<s:layout>
 			<s:VerticalLayout/>
 		</s:layout>
+		<mx:MenuBar labelField="@label" itemClick="menubar1_itemClickHandler(event)">
+			<fx:XMLList>
+				<menuitem label="File" data="top">
+					<menuitem label="Select Database ..." data="openDB" />
+					<menuitem label="Choose Statistics ..." data="chooseStat" />
+				</menuitem>
+				<menuitem label="About" data="topAbout">
+					<menuitem label="About" data="about" />
+				</menuitem>
+			</fx:XMLList>
+		</mx:MenuBar>
 		<s:Group>
 			<s:layout>
 				<s:HorizontalLayout/>
 			</s:layout>
-			
-			<s:Button  id="loadDB" label="Select Database" enabled="true" click="loadDB_clickHandler(event)"/>
-			<s:Button label="Choose Stats" id="launchModule" click="win.visible=true" />
 		</s:Group>
 		
 		<s:Scroller width="100%" height="100%" >
-			<views:GraphsTile />
+			<views:GraphsTile width="100%" height="100%" />
 		</s:Scroller>
 	</s:Group>
 </s:WindowedApplication>
