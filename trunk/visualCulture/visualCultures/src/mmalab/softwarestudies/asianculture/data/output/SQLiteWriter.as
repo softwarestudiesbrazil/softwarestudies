@@ -1,5 +1,7 @@
 package mmalab.softwarestudies.asianculture.data.output
-{
+{	
+	import com.asfusion.mate.core.GlobalDispatcher;
+	
 	import flash.data.SQLConnection;
 	import flash.data.SQLResult;
 	import flash.data.SQLStatement;
@@ -7,56 +9,86 @@ package mmalab.softwarestudies.asianculture.data.output
 	import flash.events.SQLErrorEvent;
 	import flash.events.SQLEvent;
 	import flash.filesystem.File;
+	
+	import mmalab.softwarestudies.asianculture.data.events.SQLiteFillDataEvent;
+	import mmalab.softwarestudies.asianculture.data.events.WriteDBEvent;
 
-	public class SQLiteWriter
+	[Bindable]
+	public class SQLiteWriter// extends EventDispatcher
 	{
-		private var sqlFilePath:String;
 		private var conn:SQLConnection = new SQLConnection();
 		
-
 		private var data:Array;
+		private var statTypes:Object;
+		private var dataLength:int;
 		
-		public function SQLiteWriter(file:String) {
-			this.sqlFilePath = file;
-			
-//			connect();
+		public var dispatcher:GlobalDispatcher;
+		
+		public var percentFinished:int;
+		
+		public function SQLiteWriter() {
 		}
 		
-		public function connect(data:Array):void {
+		public function connect(filePath:String, data:Array):void {
 			this.data = data;
 			//add an event handeler for the open event
 			conn.addEventListener(SQLEvent.OPEN, fillData);
 			//create the database if it doesn't exist, otherwise just opens it
-			var dbFile:File = File.applicationStorageDirectory.resolvePath (this.sqlFilePath);
+			var dbFile:File = new File(filePath); // File.applicationStorageDirectory.resolvePath (filePath);
 			conn.open(dbFile); // using synchronous connection
+			trace(dbFile.nativePath);
 		}
 		
 		private function fillData(event:SQLEvent):void {
-			var line1:Object = data.shift();
+			conn.removeEventListener(SQLEvent.OPEN, fillData);
+			statTypes = data.shift();
 			
 			// add Statistic descriptions
-			for (var statName:String in line1)
+			for (var statName:String in statTypes)
 			{
-				addStat(statName, line1[statName], null);
+				addStat(statName, statTypes[statName], null);
 			}
 
-			var line:Object;
-			var fileID:int;
+			dataLength = data.length;
 
 			// fill the data and objects
-			while (data.length > 0) {
-				line = data.shift();
-				
+			processLine();
+		}
+		
+		public function processLine():void {
+			for (var i:int=0; i<1 && data!=null && data.length > 0; i++) {
+				var currentLine:Object = data.shift();
 				// add objects
-				addObject(line.filename, "", "jpg", 0, 0, "");
-				fileID = getObjId(line.filename, "");
+				addObject(currentLine.filename, "", (currentLine.filename as String).substr((currentLine.filename as String).lastIndexOf(".")), 0, 0, "");
+				fileID = getObjId(currentLine.filename, "");
 				
-				// add stat values for each object
-				for (var j:String in line)
+				var fileID:int;
+				var statValuesArray:Array;
+				
+				statValuesArray = new Array();
+				for (var j:String in currentLine)
 				{
 					if (j != "filename") 
-						addValue(getStatId(j, line1[j]), fileID, line1[j], line[j]);
+						statValuesArray.push(new SQLiteStatValue(getStatId(j, statTypes[j]), fileID, statTypes[j], currentLine[j]));
 				}
+				
+				addValue(statValuesArray);
+				
+				percentFinished = (dataLength-data.length) / dataLength * 100;
+			}
+			
+			if (data!=null && data.length>=0) {
+				var fillDataEvent:SQLiteFillDataEvent = new SQLiteFillDataEvent(SQLiteFillDataEvent.SQLITE_FILLDATA_EVENT);
+				fillDataEvent.percentFinished = percentFinished;
+				dispatcher.dispatchEvent(fillDataEvent);
+			}
+			
+			// stop criteria
+			if (data!=null && data.length<1) {
+				conn.close();
+				data = null;
+				var writeCompleteEvent:WriteDBEvent = new WriteDBEvent(WriteDBEvent.WRITE_DB_COMPLETE_EVENT);
+				dispatcher.dispatchEvent(writeCompleteEvent);
 			}
 		}
 				
@@ -118,31 +150,37 @@ package mmalab.softwarestudies.asianculture.data.output
 		 * @param value the value of the statistic
 		 * 
 		 */
-		private function addValue(statId:int, objId:int, type:String, value):void {
+		private function addValue(statValues:Array):void {
 			var sql:SQLStatement = new SQLStatement();
 			//set the statement to connect to our database
 			
 			sql.sqlConnection = conn;
 			conn.addEventListener(SQLErrorEvent.ERROR, errorHandler);
+			conn.begin();
 			
-			//parse the sql command that creates the IMAGE table if it doesn't exist
-			sql.text = "﻿INSERT INTO stat_int VALUES (:stat_id, :obj_id, :value, :update_date)";
-			switch (type) {
-				case "int": // nothing to do...
-					break;
-				case "float":
-					sql.text = sql.text.replace("stat_int", "stat_real");
-					break;
-				case "string":
-					sql.text = sql.text.replace("stat_int", "stat_string");
-					break;
-			}
-			sql.parameters[":stat_id"] = statId;
-			sql.parameters[":obj_id"] = objId;
-			sql.parameters[":value"] = value;
-			sql.parameters[":update_date"] = new Date();
 			try {
-				sql.execute();
+				for each (var statValue:SQLiteStatValue in statValues) {
+					//parse the sql command that creates the IMAGE table if it doesn't exist
+					sql.text = "﻿INSERT INTO stat_int VALUES (:stat_id, :obj_id, :value, :update_date)";
+					switch (statValue.type) {
+						case "int": // nothing to do...
+							break;
+						case "float":
+							sql.text = sql.text.replace("stat_int", "stat_real");
+							break;
+						case "string":
+							sql.text = sql.text.replace("stat_int", "stat_text");
+							break;
+					}
+					sql.parameters[":stat_id"] = statValue.statId;
+					sql.parameters[":obj_id"] = statValue.objId;
+					sql.parameters[":value"] = statValue.value;
+					sql.parameters[":update_date"] = new Date();
+					statValue = null;
+					
+					sql.execute();
+				}
+				conn.commit();
 			}
 			catch (err:SQLError) {
 				if (err.errorID != 3131) // ignore error due to constraint violation

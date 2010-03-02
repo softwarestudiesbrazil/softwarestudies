@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/halo"
+		 xmlns:mate="http://mate.asfusion.com/"
+		 initialize="initializeHandler(event)"
+		 updateComplete="itemrenderer1_updateCompleteHandler(event)">
+	<fx:Script>
+		<![CDATA[
+			import com.asfusion.mate.ioc.InjectorRegistry;
+			
+			import mx.events.FlexEvent;
+			import mx.events.ListEvent;
+			
+			[Bindable]
+			public var fullStatsList:Array;
+			
+			[Bindable]
+			protected var axisName:String;
+			
+			protected function initializeHandler(event:FlexEvent):void
+			{
+				InjectorRegistry.register(this);
+			}
+
+			protected function statCombo_changeHandler(event:ListEvent):void
+			{
+				trace (data.listData);
+				data.statName = copySelectedObject(event.currentTarget);
+			}
+
+			protected function itemrenderer1_updateCompleteHandler(event:FlexEvent):void
+			{
+				this.axisName = data.axisName;
+
+				data.statName = copySelectedObject(statCombo);
+			}
+
+			private function copySelectedObject(component:Object):Object {
+				var copy:Object = new Object();
+				for( var key:Object in component.selectedItem ) {
+					// avoid copying the mx_interval_uid so it won't mess up the list's dataProvider
+					if (  ( 'mx_internal_uid' != key ) ) {
+						copy[ key ] = component.selectedItem[ key ];
+					}
+				}
+				return copy;
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+		<!-- necessary to bubble up events -->
+		<mate:LocalEventMap dispatcher="{this}" />
+	</fx:Declarations>
+	<s:Group>
+		<s:layout>
+			<s:HorizontalLayout verticalAlign="middle" />
+		</s:layout>
+		<s:Label  text="{axisName}" height="16" verticalAlign="middle" />
+		<mx:ComboBox id="statCombo" dataProvider="{fullStatsList}" selectedIndex="0" labelField="name"
+					 change="statCombo_changeHandler(event)" rowCount="12" />
+		<s:Label  text="range" height="20" verticalAlign="middle" enabled="false" />
+		<mx:HSlider  height="16" thumbCount="2" enabled="false" />
+	</s:Group>
+	
+</s:ItemRenderer>

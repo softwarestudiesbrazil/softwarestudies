@@ -3,7 +3,7 @@
 		 xmlns:s="library://ns.adobe.com/flex/spark"
 		 xmlns:mx="library://ns.adobe.com/flex/halo"
 		 xmlns:utils="mmalab.softwarestudies.asianculture.graph.utils.*"
-		 initialize="group1_initializeHandler(event)"
+		 width="100%"
 		 >
 	<fx:Style>
 		@namespace s "library://ns.adobe.com/flex/spark";
@@ -16,7 +16,8 @@
 			item-roll-over-color: "0xFFFF00";
 			item-disabled-color: "0x00FF00";
 			item-selection-color: "0x0000FF";
-			
+			max-radius: 10;
+			min-radius: 1;
 		}
 		
 	</fx:Style>
@@ -30,7 +31,6 @@
 			
 			import mx.charts.HitData;
 			import mx.charts.LinearAxis;
-			import mx.charts.renderers.CircleItemRenderer;
 			import mx.charts.series.items.BubbleSeriesItem;
 			import mx.events.FlexEvent;
 			
@@ -43,7 +43,11 @@
 			[Bindable]
 			public var statIdy:String;
 			[Bindable]
-			public var statIdz:String;
+			public var statRadius:String;
+			[Bindable]
+			public var showDataTips:Boolean;
+			[Bindable]
+			public var imgZoom:Number;
 			
 			private function series1_clickHandler(event:MouseEvent):void
 			{
@@ -55,10 +59,10 @@
 			private function chart_dataTipFunction(item:HitData):String {
 				var chartItem:BubbleSeriesItem = item.chartItem as BubbleSeriesItem;
 				var str:String = "";//chartItem.item.name as String;
-				var tip:String = "<b>" + str.slice(0, str.lastIndexOf(".")) + "</b><br/>"
+				var tip:String = "<font color='#CECFD1' size='14'><b>" + str.slice(0, str.lastIndexOf(".")) + "</b><br/>"
 					+ "<b>" + statIdx + ":</b> " + chartItem.item[statIdx] + "<br/>"
-					+ "<b>" + statIdy + ":</b> " + chartItem.item[statIdy]
-					+ "<b>" + statIdz + ":</b> " + chartItem.item[statIdz];
+					+ "<b>" + statIdy + ":</b> " + chartItem.item[statIdy] + "<br/>"
+					+ "<b>" + statRadius + ":</b> " + chartItem.item[statRadius] + "</font>";
 				return tip;
 			}
 			
@@ -86,7 +90,7 @@
 			
 			protected function group1_initializeHandler(event:FlexEvent):void
 			{
-				trace ("initialize: " + event.target);
+//				trace ("initialize: " + event.target);
 			}
 			
 		]]>
@@ -94,11 +98,11 @@
 	
 	<fx:Declarations>
 		<!-- Define custom colors for use as plot point fills. -->
-		<mx:SolidColor id="sc1" color="0x005500" alpha="1"/>
+		<mx:SolidColor id="sc1" color="0xCECFD1" alpha=".5"/>
 		
 		<!-- Define custom Strokes. -->
-		<mx:Stroke id="s1" color="green" weight="1"/>
-		<mx:Stroke id="s2" color="blue" alpha=".4"/>
+		<mx:Stroke id="s1" color="0x212121" weight=".5" />
+		<mx:Stroke id="s2" color="0x646467" alpha="1"/>
 		
 		<mx:SeriesZoom id="zoomInEffect" duration="1000" />  
 		
@@ -108,33 +112,49 @@
 		<mx:LogAxis id="logY" title="{statIdy}" autoAdjust="true" baseAtZero="false" />
 	</fx:Declarations>
 	<s:states>
+		<s:State name="points" />
+		<s:State name="images" />
 		<s:State name="linear" />
 		<s:State name="logarithmic" />
 	</s:states>
-	
-	<s:layout>
-		<s:VerticalLayout />
-	</s:layout>
+
+	<s:Rect width="100%" height="100%">
+		<s:fill><s:SolidColor color="0x212121" /></s:fill>
+	</s:Rect>
 	<mx:BubbleChart id="chart1" selectionMode="multiple" width="100%" height="100%"
-				  showDataTips="true" dataTipRenderer="{MyDataTip}" dataTipFunction="chart_dataTipFunction" dataTipMode="single"
-				  mouseUp="series1_clickHandler(event)" styleName="itemrendererstyle"
-				  verticalAxis="{linY}" horizontalAxis="{linX}"
-				  verticalAxis.logarithmic="{logY}" horizontalAxis.logarithmic="{logX}">
-		<!--mx:verticalAxis>
-		{linY}
+					showDataTips="{showDataTips}" dataTipRenderer="{ImageDataTip}"
+					dataTipFunction="chart_dataTipFunction" dataTipMode="single"
+					mouseUp="series1_clickHandler(event)" >
+					<!--verticalAxis="{linY}" horizontalAxis="{linX}"
+					verticalAxis.logarithmic="{logY}" horizontalAxis.logarithmic="{logX}"-->
+		<mx:verticalAxis>
+			{linY}
 		</mx:verticalAxis>
 		<mx:horizontalAxis>
-		{linX}
-		</mx:horizontalAxis-->
+			{linX}
+		</mx:horizontalAxis>
+		<mx:verticalAxisRenderers>
+			<mx:AxisRenderer axis="{linY}" showLine="false" tickLength="10" width="2" />
+		</mx:verticalAxisRenderers>
+		<mx:horizontalAxisRenderers>
+			<mx:AxisRenderer axis="{linX}" showLine="false" tickLength="10" height="2" />
+		</mx:horizontalAxisRenderers>
+
 		<mx:series>
-			<mx:BubbleSeries id="series1" selectable="true" selectedIndices="{selectedIdx}" xField="{statIdx}" yField="{statIdy}" radiusField="{statIdz}"
-						   dataProvider="{dataset.values}"  displayName="{statIdy}"
-						   itemRenderer="mx.charts.renderers.CircleItemRenderer"
-						   fill="{sc1}" stroke="{s1}" showDataEffect="zoomInEffect" />
+			<mx:BubbleSeries id="series1" selectable="true" selectedIndices="{selectedIdx}" xField="{statIdx}" yField="{statIdy}" radiusField="{statRadius}"
+							 dataProvider="{dataset.values}"  displayName="{statIdy}"
+							 itemRenderer.points="mx.charts.renderers.CircleItemRenderer" styleName="circleitemrendererstyle"
+							 itemRenderer.images="mmalab.softwarestudies.asianculture.graph.renderers.imgRenderer"
+							 fill="{sc1}" stroke="{s1}" />
+<!--
+			itemRenderer="mmalab.softwarestudies.asianculture.graph.components.BubbleItemRenderer"
+			itemRenderer="mx.charts.renderers.CircleItemRenderer"
+-->
 		</mx:series>
 		<mx:backgroundElements>
 			<!--utils:PanAndZoom /-->
 			<!--utils:RangeSelector id="range" /-->
+			
 			<mx:GridLines id="gridLines" gridDirection="both" horizontalStroke="{s2}" >
 				<mx:verticalStroke>
 					{s2}

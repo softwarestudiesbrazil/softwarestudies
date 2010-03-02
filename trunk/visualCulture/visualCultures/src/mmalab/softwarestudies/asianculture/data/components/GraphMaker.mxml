@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/halo" width="100%" height="100%"
+		 xmlns:mate="http://mate.asfusion.com/"
+		 initialize="group1_initializeHandler(event)"
+		 xmlns:layout="mmalab.flexext.layout.*" xmlns:components="mmalab.softwarestudies.asianculture.data.components.*">
+	<fx:Script>
+		<![CDATA[
+			import com.asfusion.mate.ioc.InjectorRegistry;
+			
+			import flash.events.Event;
+			
+			import mmalab.softwarestudies.asianculture.data.events.SelectFileEvent;
+			import mmalab.softwarestudies.asianculture.graph.events.AddGraphsEvent;
+			
+			import mx.collections.ArrayCollection;
+			import mx.core.FlexGlobals;
+			import mx.events.FlexEvent;
+			
+			[Bindable]
+			protected var graphsList:ArrayCollection;
+			
+			[Bindable]
+			public var dbPath:String;
+			[Bindable]
+			public var imgPath:String;
+			
+			[Bindable]
+			public var dataSize:int;
+			[Bindable]
+			public var numStats:int;
+			
+			private var file:File;
+			
+			protected function group1_initializeHandler(event:FlexEvent):void
+			{
+				//------------------------------------------------------------------
+				// Necessary hack to be able to inject data in view inside a window
+				// http://mate.asfusion.com/forums/topic.php?id=274
+				//------------------------------------------------------------------
+				InjectorRegistry.register(this);
+				
+				graphsList = new ArrayCollection();
+			}
+			
+			private function loadDB_clickHandler():void
+			{
+				file = new File();
+				file.addEventListener(Event.SELECT, dbSelect);
+				file.browseForOpen("Select database file", [
+					new FileFilter("SQLite file", "*.db;*.db3"),
+					new FileFilter("CSV file", "*.csv")
+				]);
+			}
+			
+			private function selectImgPath_clickHandler():void
+			{
+				file = new File();
+				file.addEventListener(Event.SELECT, imgDirSelect);
+				file.browseForDirectory("Select image path");
+			}
+			
+			private function imgDirSelect(event:Event):void {
+				file.removeEventListener(Event.SELECT, imgDirSelect);
+				var changeImgFolder:SelectFileEvent = new SelectFileEvent(SelectFileEvent.IMAGE_FOLDER);
+				changeImgFolder.path = file.nativePath;
+				changeImgFolder.nativePath = true;
+				FlexGlobals.topLevelApplication.dispatchEvent(changeImgFolder);
+			}
+			
+			private function dbSelect(event:Event):void {
+				file.removeEventListener(Event.SELECT, dbSelect);
+				if (file.name.substr(file.name.lastIndexOf(".")).toUpperCase() == ".CSV") {
+					progrBar.filePath = file.nativePath;
+					progrBar.open();
+				}
+				else {
+					var changeDatabaseEvent:SelectFileEvent = new SelectFileEvent(SelectFileEvent.DATABASE_FILE);
+					changeDatabaseEvent.path = file.nativePath;
+					changeDatabaseEvent.nativePath = true;
+					FlexGlobals.topLevelApplication.dispatchEvent(changeDatabaseEvent);
+					
+					var changeImgFolder:SelectFileEvent = new SelectFileEvent(SelectFileEvent.IMAGE_FOLDER);
+					changeImgFolder.path = file.nativePath.substr(0, file.nativePath.lastIndexOf("/")) + "/resized";
+					changeImgFolder.nativePath = true;
+					FlexGlobals.topLevelApplication.dispatchEvent(changeImgFolder);
+				}
+			}
+			
+			protected function drawGraphsBtn_clickHandler(event:MouseEvent):void
+			{
+				var addGraphsEvent:AddGraphsEvent = new AddGraphsEvent(AddGraphsEvent.ADD_GRAPHS_EVENT);
+				addGraphsEvent.graphList = graphsList.toArray();
+				FlexGlobals.topLevelApplication.dispatchEvent(addGraphsEvent);
+				
+			}
+			protected function addButton_clickHandler(event:MouseEvent):void
+			{
+				graphsList.addItem(new Object());
+			}
+			
+			protected function remButton_clickHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+		<!--layout:FreeLayout id="freeLayout" /-->
+		<components:ProgressBar id="progrBar" />
+		
+		<!-- necessary to bubble up events -->
+		<mate:LocalEventMap dispatcher="{this}" />
+	</fx:Declarations>
+	<s:layout>
+		<s:VerticalLayout />
+	</s:layout>
+	<s:Border width="100%" >
+		<s:layout>
+			<s:VerticalLayout />
+		</s:layout>
+		<s:Group>
+			<s:layout><s:HorizontalLayout /></s:layout>
+			<s:Button id="loadGraphSetBtn" label="Select GraphSet" click="" enabled="false" />
+			<s:Button id="saveGraphSetBtn" label="Save GraphSet" click="" enabled="false" />
+		</s:Group>
+		<s:Group>
+			<mx:Grid>
+				<mx:GridRow>
+					<mx:GridItem><s:Label id="currentDBLabel" text="Current Database"  height="20" verticalAlign="middle"/></mx:GridItem>
+					<mx:GridItem><s:TextInput text="{dbPath}" toolTip="{dbPath}" enabled="false" width="300"/></mx:GridItem>
+					<mx:GridItem><s:Button id="changeDBBtn" label="..." click="loadDB_clickHandler()" width="31"/></mx:GridItem>
+				</mx:GridRow>
+				<mx:GridRow>
+					<mx:GridItem><s:Label id="imageDir" text="Image directory"  verticalAlign="middle" height="20"/></mx:GridItem>
+					<mx:GridItem><s:TextInput text="{imgPath}" enabled="false" width="300"/></mx:GridItem>
+					<mx:GridItem><s:Button id="changeImgDirBtn" label="..." click="selectImgPath_clickHandler()" width="31"/></mx:GridItem>
+				</mx:GridRow>
+			</mx:Grid>
+		</s:Group>
+		<s:Group>
+			<s:layout><s:HorizontalLayout /></s:layout>
+			<s:Label text="Selected objects:" verticalAlign="middle" height="20" />
+			<s:Label id="selectedObjLabel" text="All ({dataSize})" verticalAlign="middle" height="20" />
+			<s:Button id="selectObjBtn" label="..." click="" toolTip="Select Objects" enabled="false"  width="31"/>
+			<mx:Spacer height="20" width="20"/>
+			<s:Label text="Selected features:" verticalAlign="middle" height="20" />
+			<s:Label id="selectedFeaturesLabel" text="All ({numStats})" verticalAlign="middle" height="20" />
+			<s:Button id="selectFeaturesBtn" label="..." click="" toolTip="Select features" enabled="false"  width="31"/>
+		</s:Group>
+		<s:Group>
+			<s:layout><s:HorizontalLayout /></s:layout>
+			<s:Button id="changeColorsBtn" label="Change graph colors" click="" toolTip="Click here to change the colors of all graphs"
+					  enabled="false" />
+			<mx:Spacer height="20" width="20"/>
+			<s:CheckBox id="axisOnOffCheckbox" label="Display axes and Labels in graphs"  enabled="false"/>
+		</s:Group>
+	</s:Border>
+	<s:Group>
+		<s:layout><s:HorizontalLayout /></s:layout>
+		<s:Button id="addButton" label="Add Graph" click="addButton_clickHandler(event)" />
+	</s:Group>
+	<!-- itemRenderer="mmalab.softwarestudies.asianculture.data.components.GraphMakerItem" -->
+	
+	<s:Scroller width="100%" height="100%">
+		
+		<s:DataGroup id="graphsListGroup" dataProvider="{graphsList}"
+					 itemRenderer="mmalab.softwarestudies.asianculture.data.components.GraphMakerItem"
+					 >
+			<s:layout>
+				<s:VerticalLayout />
+			</s:layout>
+		</s:DataGroup>
+	</s:Scroller>
+	
+	<s:Button id="drawGraphsBtn" label="Update" click="drawGraphsBtn_clickHandler(event)" />
+</s:Group>

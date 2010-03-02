@@ -1,0 +1,63 @@
+/* CSS file */
+@namespace s "library://ns.adobe.com/flex/spark";
+@namespace mx "library://ns.adobe.com/flex/halo";
+
+
+mx|PieChart
+{
+	color: "0xCECFD1";
+	base-color: "CCCCCC";
+	font-size:14;
+	font-anti-alias-type:normal;
+	
+	item-roll-over-color: "0x646467";
+	/*item-disabled-color: "0x00FF00";*/
+	/*item-selection-color: "0x0000FF";*/
+}
+
+mx|ColumnChart
+{
+	color: "0xCECFD1"; /* font color for labels and label titles */
+	item-roll-over-color: "0xFFFF00";
+	font-size:14;
+	font-anti-alias-type:normal;
+	column-width-ratio:.9;
+	item-roll-over-color:"0x646467";
+	/*			item-disabled-color: "0x00FF00";*/
+	item-selection-color: "0xF09700";
+}
+
+mx|PlotChart
+{
+	
+	font-size:14;
+	font-anti-alias-type:normal;
+	color: "0xCECFD1"; /* font color for labels and label titles */
+	base-color: "0x000099";
+	radius:10;
+	item-roll-over-color: "0x646467";
+	item-disabled-color: "0xCECFD1";
+	item-selection-color: "0xF09700";
+}
+
+mx|PlotSeries {
+	
+}
+
+.circleitemrendererstyle {
+	radius: 3;
+	adjusted-radius: 0;
+}
+
+mx|BubbleChart
+{
+	font-size:14;
+	font-anti-alias-type:normal;
+	color: "0xCECFD1"; /* font color for labels and label titles */
+	base-color: "0x000099";
+	item-roll-over-color: "0x646467";
+	item-disabled-color: "0xCECFD1";
+	item-selection-color: "0xF09700";
+	max-radius: 10;
+	min-radius: 1;
+}

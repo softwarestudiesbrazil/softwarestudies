@@ -1,7 +1,12 @@
 package mmalab.softwarestudies.asianculture.graph.controllers
 {
+	import com.asfusion.mate.core.GlobalDispatcher;
+	
 	import flash.filesystem.File;
 	
+	import mmalab.softwarestudies.asianculture.Constants;
+	import mmalab.softwarestudies.asianculture.data.events.WriteDBEvent;
+	import mmalab.softwarestudies.asianculture.data.input.CsvReader;
 	import mmalab.softwarestudies.asianculture.data.input.SQLiteReader;
 	import mmalab.softwarestudies.asianculture.data.models.Dataset;
 	import mmalab.softwarestudies.asianculture.data.models.Statistic;
@@ -18,9 +23,12 @@ package mmalab.softwarestudies.asianculture.graph.controllers
 		public var selectedValues : Array;
 
 		public var databasePath:String;
+		public var imagesPath:String;
+		public var dataSize:int = 0;
+		public var numStats:int = 0;
 		
 		public var data:Dataset;
-
+		
 		/**
 		 * The list of statistics selected for display
 		 */
@@ -37,13 +45,19 @@ package mmalab.softwarestudies.asianculture.graph.controllers
 		public var graphs:ArrayCollection;
 		
 		/**
-		 * The graph type (histo, scatter, bubble...) to use 
+		 * The graph type (histo, scatter, bubble...) to use with the graphChooser
 		 */
-		public var graphStyle:String;
+		public var graphType:String;
 
+		public var dispatcher:GlobalDispatcher;
+		
 		private var dbReader:SQLiteReader;
 		private var stId:Boolean = false;
 		private var _numCols:int;
+		private var selectedRanges:Array;
+		private var nativePath:Boolean;
+		private var graph:ObjectProxy;
+
 		
 		public function GraphManager() {
 			selectedValues = null;
@@ -59,9 +73,14 @@ package mmalab.softwarestudies.asianculture.graph.controllers
 			selectedValues = idx;
 		}
 		
+		public function setImagesPath(path:String):void {
+			imagesPath = path;
+			Constants.imagesPath = path;
+		}
+		
 		public function setGraphStyle(value:String):void
 		{
-			graphStyle = value;
+			graphType = value;
 			
 			// clear current statistic list
 			for (var i:int=0; statsList != null && i<statsList.length; i++) {
@@ -75,49 +94,85 @@ package mmalab.softwarestudies.asianculture.graph.controllers
 		}
 
 		/**
-		 * Close existing connection and connects to the specified database
+		 * Close existing connection and connects to the specified database.
+		 * Copy files in the 'resized' directory to the application storage directory
 		 * @param databasePath
 		 */
-		public function setDatabase(databasePath:String):void {
-			this.databasePath = databasePath;
+		public function setDatabase(databasePath:String, nativePath:Boolean):void {
+			if (databasePath !=null && databasePath.substr(databasePath.lastIndexOf(".")).toUpperCase() != ".CSV") {
+				this.databasePath = databasePath;
+				this.nativePath = nativePath;
+				readData();
+			}
+			else {
+				var csvReader:CsvReader = new CsvReader();
+				var array:Array = csvReader.csvLoadAsArray(databasePath);
+				
+				var original:File = File.applicationDirectory.resolvePath(Constants.EMPTY_DB_NAME);
+				var newFile:File = new File(databasePath+"_.db");
+				original.copyTo(newFile, true);
+
+				this.databasePath = databasePath+"_.db";
+				
+				var writeDBEvent:WriteDBEvent = new WriteDBEvent(WriteDBEvent.WRITE_DB_EVENT);
+				writeDBEvent.filePath = newFile.nativePath;
+				writeDBEvent.data = array;
+				dispatcher.dispatchEvent(writeDBEvent);
+			}
+		}
+		
+		public function readData():void {
 
 			// Close previous connection
 			if (dbReader != null)
 				dbReader.closeConnection();
 
+			trace(this.databasePath);
 			dbReader = new SQLiteReader(this.databasePath);
-			dbReader.connect();
+			dbReader.connect(this.nativePath);
 
 			fullStatsList = dbReader.getStatsList(null);
+			numStats = fullStatsList.length;
 			
-			var imagePath:String = databasePath.substring(0, databasePath.lastIndexOf("/"));
-			var original:File = new File(imagePath+"/"+Constant.RESIZED_DIR);
-			var newFile:File = File.applicationStorageDirectory.resolvePath(Constant.TINY_IMG_PATH);
-			original.copyTo(newFile, true);
+			if (false && nativePath) {
+				// copy image files in the 'resized' directory to the application storage directory
+				var imagePath:String = databasePath.substring(0, databasePath.lastIndexOf("/"));
+				var original:File = new File(imagePath+"/"+Constants.RESIZED_DIR);
+				var newFile:File = File.applicationStorageDirectory.resolvePath(Constants.TINY_IMG_PATH);
+				original.copyTo(newFile, true);
+			}
 		}
 		
 		/**
-		 * Updates the list of selected statistics
+		 * Updates the list of selected statistics 
 		 * @param _statsList
+		 * @param maxNumObjects
+		 * @param dim
 		 * 
 		 */
 		public function setSelectedStatSet(_statsList:Array, maxNumObjects:int, dim:int):void {
 			if (dbReader == null) {
 				dbReader = new SQLiteReader(this.databasePath);
-				dbReader.connect();
+				dbReader.connect(this.nativePath);
 			}
 			
 			this.statsList = _statsList;
 			
 			// retrieve dataset of specified statistics
-			if (this.statsList != null && this.statsList.length > 0)
+			if (this.statsList != null && this.statsList.length > 0) {
 				this.data = dbReader.getStatObjects(statsList, maxNumObjects);
-			else
+				dataSize = data.number;
+			}
+			else {
 				this.data = null;
+				dataSize = 0;
+			}
+			
+			// Erase current graphs
+			graphs.removeAll();
 			
 			// Using ObjectProxy instead of plain Object prevents to have the warning:
 			// unable to bind to property ‘XXX’ on class ‘Object’ (class is not an IEventDispatcher)
-			var graph:ObjectProxy;
 			graphs = new ArrayCollection();
 			var statNames:Array;
 			
@@ -127,6 +182,7 @@ package mmalab.softwarestudies.asianculture.graph.controllers
 				for (var j:int=0; j<dim; j++) {
 					statNames[j] = (statsList[i+j] as Object).name;
 				}
+				graph.graphType = graphType;
 				graph.statNames = new ArrayCollection(statNames);
 				graphs.addItem(graph);
 				graph = null;
@@ -134,6 +190,89 @@ package mmalab.softwarestudies.asianculture.graph.controllers
 				// discard last stat(s) if not enough to build a tuple
 				if (i == _statsList.length-dim-1 && dim > 1)
 					break;
+			}
+		}
+				
+		/**
+		 * Creates and displays a list of graphs of different types
+		 * @param graphList
+		 * 
+		 */
+		public function addGraphs(graphList:Array):void {
+			if (dbReader == null) {
+				dbReader = new SQLiteReader(this.databasePath);
+				dbReader.connect(this.nativePath);
+			}
+			
+			var _statsList:Array = new Array();
+			var tempName:Object;
+			for (var i:int=0; i< graphList.length; i++) {
+				for (var j:int=0; j<graphList[i].statNames.length; j++) {
+					tempName = graphList[i].statNames[j].statName;
+					_statsList[tempName.name] = tempName;
+				}
+			}
+			
+			if (statsList)
+				this.statsList.splice();
+			this.statsList = new Array();
+
+			for each (var statName:Object in _statsList) {
+				this.statsList.push(statName);
+			}
+			_statsList.splice();
+			
+			var statNames:Array;
+			var displayImages:Boolean = false;
+			var graphStatNamesDirty:Boolean = false;
+			graphs = new ArrayCollection();
+			for each(var graphItem:Object in graphList) {
+				if (graphItem.graphType && graphItem.active) {
+					graph = new ObjectProxy();
+					statNames = new Array();
+					for (j=0; j<graphItem.statNames.length; j++) {
+						statNames[j] = (graphItem.statNames[j] as Object).statName.name;
+						// if statName not found => next
+						if (!statNames[j]) {
+							statNames = null;
+							graph = null;
+							graphStatNamesDirty = true;
+							break;
+						}
+					}
+					// go to next graph if this one is corrupted
+					if (graphStatNamesDirty)
+						continue;
+					graph.graphType = graphItem.graphType.name;
+					graph.dims = graphItem.dims;
+					graph.displayAxes = graphItem.displayAxes;
+					graph.displayImages = graphItem.displayImages; // for scatter & bubble
+					graph.displayXLabels = graphItem.xLabels; // for histo and barchart plots
+					graph.showDataTips = graphItem.dataTips;
+					graph.zoomFactor = graphItem.zoomFactor; // for scatter
+					if (!displayImages && graphItem.displayImages)
+						displayImages = true;
+					graph.numBins = graphItem.numBins; // for histo
+					graph.statNames = new ArrayCollection(statNames);
+					graphs.addItem(graph);
+					graph = null;
+					statNames = null;
+				}
+			}
+			
+			var numObjLimit:int = 0;
+			
+			if (displayImages)
+				numObjLimit = 500;
+			
+			// retrieve dataset of specified statistics
+			if (this.statsList != null && this.statsList.length > 0) {
+				this.data = dbReader.getStatObjects(statsList, numObjLimit, 1000);
+				dataSize = data?data.number:0;
+			}
+			else {
+				this.data = null;
+				dataSize = 0;
 			}
 		}
 		
@@ -148,7 +287,7 @@ package mmalab.softwarestudies.asianculture.graph.controllers
 
 			if (dbReader == null) {
 				dbReader = new SQLiteReader(this.databasePath);
-				dbReader.connect();
+				dbReader.connect(this.nativePath);
 			}
 			
 			var randomStat:int;
@@ -179,7 +318,7 @@ package mmalab.softwarestudies.asianculture.graph.controllers
 			
 			if (dbReader == null) {
 				dbReader = new SQLiteReader(this.databasePath);
-				dbReader.connect();
+				dbReader.connect(this.nativePath);
 			}
 			
 			var randomStat:int;
@@ -213,39 +352,32 @@ package mmalab.softwarestudies.asianculture.graph.controllers
 			}
 		}
 		
+		/**
+		 * Update the selected range(s) for a specific Stat 
+		 * @param statName
+		 * @param array
+		 * 
+		 */
 		public function histoSelectSubset(statName:String, array:Array):void {
-			trace("histoSelectSubset");
+			if (selectedRanges == null)
+				selectedRanges = new Array();
+			var stat:Object = new Object();
+			stat.name = statName;
+			stat.arr = array;
+			selectedRanges[statName] = stat;
 		}
 		
-		/////////////////////
+		public function histoFilter():void {
+			if (dbReader == null) {
+				dbReader = new SQLiteReader(this.databasePath);
+				dbReader.connect(this.nativePath);
+			}
+			trace(dbReader.createFilter(selectedRanges));
+		}
+		
+		/////////////////////////////////////////
 		// private methods
-		/////////////////////
-		
-		private function computeHisto(array:Array, col:int):Array {
-			array.sort();
-			var histo:Array =  new Array();
-			var max:int = Number.MIN_VALUE;
-			
-			// comput max value
-			for (var i:int=0; i< array.length; i++) {
-				max = Math.max(array[i], max);
-			}
-			
-			// fill histo with zeros
-			for (var j:int=0; j<col; j++)
-				histo.push(0);
-			
-			for (i=0; i< array.length; i++) {
-				for (j=0; j<col; j++) {
-					if (array[i] >= max/col*j && array[i] <= max/col*(j+1) ) {
-						histo[j]++;
-						break;
-					}
-				}
-			}
-			
-			return histo;
-		}
+		/////////////////////////////////////////
 		
 /*		private function mixArray(array:Array):Array {
 			var _length:Number = array.length, mixed:Array = array.slice(), rn:Number, it:Number, el:Object;

@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<EventMap xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark" xmlns:mx="library://ns.adobe.com/flex/halo"
+		  xmlns="http://mate.asfusion.com/">
+	
+	<fx:Script>
+		<![CDATA[
+			import com.asfusion.mate.utils.debug.Debugger;
+			
+			import mmalab.softwarestudies.asianculture.data.components.GraphMaker;
+			import mmalab.softwarestudies.asianculture.data.components.ProgressBar;
+			import mmalab.softwarestudies.asianculture.data.components.StatChooser;
+			import mmalab.softwarestudies.asianculture.data.components.StatCombo;
+			import mmalab.softwarestudies.asianculture.data.events.ChooseStatisticsEvent;
+			import mmalab.softwarestudies.asianculture.data.events.NextIterationEvent;
+			import mmalab.softwarestudies.asianculture.data.events.SQLiteFillDataEvent;
+			import mmalab.softwarestudies.asianculture.data.events.SelectFileEvent;
+			import mmalab.softwarestudies.asianculture.data.events.WriteDBEvent;
+			import mmalab.softwarestudies.asianculture.data.output.SQLiteWriter;
+			import mmalab.softwarestudies.asianculture.graph.controllers.GraphManager;
+			import mmalab.softwarestudies.asianculture.graph.events.ChangeGraphStyleEvent;
+			
+		]]>
+		
+	</fx:Script>
+	
+	<fx:Declarations>
+		
+		<Debugger level="{Debugger.ERROR}" />
+		
+		<!--
+		-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+		-=-=-               EVENT HANDLERS              -=-=-
+		-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- -->
+
+		
+		<EventHandlers type="{ChooseStatisticsEvent.CHOOSE_STATS_EVENT}" debug="true" >
+			<MethodInvoker generator="{GraphManager}" method="setSelectedStatSet" arguments="{[event.statsList, event.maxNumObjects, event.dim]}" />
+		</EventHandlers>
+
+		<EventHandlers type="{ChooseStatisticsEvent.CHOOSE_RANDOM_STATS_EVENT}" debug="true" >
+			<MethodInvoker generator="{GraphManager}" method="setRandomSet" arguments="{event.numStats}" />
+		</EventHandlers>
+
+		<EventHandlers type="{ChooseStatisticsEvent.CHOOSE_SEQUENCE_STATS_EVENT}" debug="true" >
+			<MethodInvoker generator="{GraphManager}" method="setSequentialSet" arguments="{[event.numStats, event.page]}" />
+		</EventHandlers>
+
+		<EventHandlers type="{ChangeGraphStyleEvent.CHANGE_GRAPH_STYLE_EVENT}" debug="true" >
+			<MethodInvoker generator="{GraphManager}" method="setGraphStyle" arguments="{event.graphStyle}" />
+		</EventHandlers>
+
+		<EventHandlers type="{SelectFileEvent.DATABASE_FILE}" debug="true" >
+			<MethodInvoker generator="{GraphManager}" method="setDatabase" arguments="{[event.path, event.nativePath]}">
+				<Properties dispatcher="{scope.dispatcher}"/>
+			</MethodInvoker>
+		</EventHandlers>
+
+		<EventHandlers type="{SelectFileEvent.IMAGE_FOLDER}" debug="true" >
+			<MethodInvoker generator="{GraphManager}" method="setImagesPath" arguments="{event.path}" />
+		</EventHandlers>
+
+		<EventHandlers type="{WriteDBEvent.WRITE_DB_EVENT}" debug="true" >
+			<MethodInvoker generator="{SQLiteWriter}" method="connect" arguments="{[event.filePath, event.data]}" >
+				<Properties dispatcher="{scope.dispatcher}"/>
+			</MethodInvoker>
+		</EventHandlers>
+				
+		<EventHandlers type="{NextIterationEvent.NEXT_ITERATION_EVENT}" debug="true" >
+			<MethodInvoker generator="{SQLiteWriter}" method="processLine" />
+		</EventHandlers>
+
+		<EventHandlers type="{WriteDBEvent.WRITE_DB_COMPLETE_EVENT}" debug="true" >
+			<MethodInvoker generator="{GraphManager}" method="readData" />
+		</EventHandlers>
+
+		<!--
+		-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+		-=-=-               VIEW INJECTORS              -=-=-
+		-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- -->
+		
+		<Injectors target="{GraphMaker}" debug="true">
+			<PropertyInjector targetKey="dbPath" source="{GraphManager}" sourceKey="databasePath" />
+			<PropertyInjector targetKey="imgPath" source="{GraphManager}" sourceKey="imagesPath" />
+			<PropertyInjector targetKey="dataSize" source="{GraphManager}" sourceKey="dataSize" />
+			<PropertyInjector targetKey="numStats" source="{GraphManager}" sourceKey="numStats" />
+		</Injectors>
+
+		<Injectors target="{StatChooser}" debug="true">
+			<ListenerInjector eventType="{ChooseStatisticsEvent.CHOOSE_RANDOM_STATS_EVENT}" method="numStatListener" />
+			<ListenerInjector eventType="{ChooseStatisticsEvent.CHOOSE_SEQUENCE_STATS_EVENT}" method="numStatListener" />
+			<PropertyInjector targetKey="statsList" source="{GraphManager}" sourceKey="statsList" />
+			<PropertyInjector targetKey="fullStatsList" source="{GraphManager}" sourceKey="fullStatsList" />
+		</Injectors>
+
+		<Injectors target="{StatCombo}" debug="true">
+			<PropertyInjector targetKey="fullStatsList" source="{GraphManager}" sourceKey="fullStatsList" />
+		</Injectors>
+
+		<Injectors target="{ProgressBar}" debug="true">
+			<ListenerInjector eventType="{SQLiteFillDataEvent.SQLITE_FILLDATA_EVENT}" method="setPercentFinished" />
+		</Injectors>    
+	</fx:Declarations>
+	
+</EventMap>

@@ -4,81 +4,185 @@
 					   xmlns:mx="library://ns.adobe.com/flex/halo"
 					   xmlns:eventMaps="mmalab.softwarestudies.asianculture.*"
 					   xmlns:views="mmalab.softwarestudies.asianculture.graph.views.*"
-					   xmlns:local="*"
 					   xmlns:mate="http://mate.asfusion.com/"
-					   width="1000" height="800" backgroundColor="0x222222"
+					   width="1000" height="800"
+					   backgroundColor="black"
 					   creationComplete="creationCompleteHandler(event)"
-					   close="windowedapplication1_closeHandler(event)" >
+					   closing="win_closingHandler(event)"
+					   close="windowedapplication1_closeHandler(event)"
+					   
+					   xmlns:components="mmalab.softwarestudies.asianculture.data.components.*"
+					   xmlns:eventmaps="mmalab.softwarestudies.asianculture.eventmaps.*"
+					   xmlns:layout="mmalab.flexext.layout.*">
+	<fx:Style source="chartStyles.css" />
 	<fx:Script>
 		<![CDATA[
+			import flash.display.NativeMenu;
+			import flash.display.NativeMenuItem;
 			import flash.events.Event;
+			import flash.net.FileFilter;
+			import flash.ui.Keyboard;
 			
-			import mmalab.softwarestudies.asianculture.data.events.ChangeDatabaseEvent;
+			import mmalab.softwarestudies.asianculture.data.events.SelectFileEvent;
 			
 			import mx.controls.Alert;
-			import mx.events.MenuEvent;
-			import mx.modules.IModuleInfo;
-			
-			import spark.components.Window;
+			import mx.graphics.ImageSnapshot;
+			import mx.graphics.codec.PNGEncoder;
 			
 			private var file:File;
 			//private var win:Window;
-			
-			protected var _moduleInfo:IModuleInfo;
-						
+									
 			private function creationCompleteHandler(event: Event): void
 			{
 				nativeWindow.x = (Capabilities.screenResolutionX - nativeWindow.width) / 2;
 				nativeWindow.y = (Capabilities.screenResolutionY - nativeWindow.height) / 2;
+				createMenus();
+			}
+			
+			private function createMenus():void {
+				var fileMenuItem:NativeMenuItem = NativeApplication.nativeApplication.menu.getItemAt(1);
+
+				var openDBCommand:NativeMenuItem = new NativeMenuItem("Open Database file ...");
+				fileMenuItem.submenu.addItemAt(openDBCommand, 0);
+				openDBCommand.addEventListener(Event.SELECT, onOpenDBCommand);
 				
-				win.open();
+				var takeSnapshot:NativeMenuItem = new NativeMenuItem("Save snapshot ...");
+				fileMenuItem.submenu.addItemAt(takeSnapshot, 1);
+				takeSnapshot.addEventListener(Event.SELECT, onTakeSnapshot);
+				
+				var quitMenu:NativeMenuItem = new NativeMenuItem("Exit");
+				fileMenuItem.submenu.addItem(quitMenu);
+				fileMenuItem.keyEquivalent = "q";
+				fileMenuItem.keyEquivalentModifiers = [Keyboard.COMMAND];
+				quitMenu.addEventListener(Event.SELECT, function onQuit():void {nativeApplication.exit()});
+				
+				var analyseMenu:NativeMenu = new NativeMenu();
+				NativeApplication.nativeApplication.menu.addSubmenuAt(analyseMenu, 3, "Analyse");
+				var chooseStat:NativeMenuItem = new NativeMenuItem("Choose Stat ...");
+				analyseMenu.addItem(chooseStat);
+				chooseStat.addEventListener(Event.SELECT, onChooseStat);
+				var makeGraphs:NativeMenuItem = new NativeMenuItem("Graph Maker ...");
+				analyseMenu.addItem(makeGraphs);
+				makeGraphs.addEventListener(Event.SELECT, onMakeGraphs);
+				
+				var aboutMenu:NativeMenu = new NativeMenu();
+				NativeApplication.nativeApplication.menu.addSubmenu(aboutMenu, "About");
+				var about:NativeMenuItem = new NativeMenuItem("About Visual Cultures ...");
+				aboutMenu.addItem(about);
+				about.addEventListener(Event.SELECT, function onAbout():void {Alert.show('About Visual Cultures')});
+				
+				onMakeGraphs(new Event("event"));
 			}
 			
 			private function loadDB_clickHandler():void
 			{
 				file = new File();
 				file.addEventListener(Event.SELECT, file_select);
-				var dbFilter:FileFilter = new FileFilter("database", "*.db;*.db3");
-				file.browseForOpen("Select database file", [dbFilter]);
+				file.browseForOpen("Select database file", [
+					new FileFilter("SQLite file", "*.db;*.db3"),
+					new FileFilter("CSV file", "*.csv")
+				]);
 			}
 			
 			private function file_select(event:Event):void {
-				
-				var changeDatabaseEvent:ChangeDatabaseEvent = new ChangeDatabaseEvent(ChangeDatabaseEvent.CHANGE_DB_EVENT);
-				changeDatabaseEvent.dbPath = file.nativePath;
-				
-				dispatchEvent(changeDatabaseEvent);
+				file.removeEventListener(Event.SELECT, file_select);
+				if (file.name.substr(file.name.lastIndexOf(".")).toUpperCase() == ".CSV") {
+					progrBar.filePath = file.nativePath;
+					progrBar.open();
+				}
+				else {
+					var changeDatabaseEvent:SelectFileEvent = new SelectFileEvent(SelectFileEvent.DATABASE_FILE);
+					changeDatabaseEvent.path = file.nativePath;
+					changeDatabaseEvent.nativePath = true;
+					dispatchEvent(changeDatabaseEvent);
+
+					var changeImgFolder:SelectFileEvent = new SelectFileEvent(SelectFileEvent.IMAGE_FOLDER);
+					changeImgFolder.path = file.nativePath.substr(0, file.nativePath.lastIndexOf("/")) + "/resized";
+					changeImgFolder.nativePath = true;
+					dispatchEvent(changeImgFolder);
+				}
 			}
 						
 			protected function win_closingHandler(event:Event):void
 			{
-				event.preventDefault();
-				win.visible = false;
+				if (!win.visible && !graphMakerWindow.visible)
+					nativeApplication.exit();
+				else {
+					if (event.currentTarget === win) {
+						trace("stat chooser closing");
+						event.preventDefault();
+						win.visible = false;
+						this.setFocus();
+					}
+					if (event.currentTarget === graphMakerWindow) {
+						trace("graphMaker closing");
+						event.preventDefault();
+						graphMakerWindow.visible = false;
+						this.setFocus();
+					}
+				}
 			}
 
 			protected function windowedapplication1_closeHandler(event:Event):void
 			{
+				trace("close");
 				nativeApplication.exit();
 			}
 
-
-			protected function menubar1_itemClickHandler(event:MenuEvent):void
-			{
-				if (event.item.@data == "openDB")
-					loadDB_clickHandler();
-				else if (event.item.@data == "chooseStat")
-					win.visible = true;
-				else if (event.item.@data == "about")
-					Alert.show('About Visual Cultures');
+			protected function onOpenDBCommand(event:Event):void {
+				loadDB_clickHandler();
 			}
+			
+			protected function onTakeSnapshot(event:Event):void {
+				var image:ImageSnapshot = ImageSnapshot.captureImage(graphsTile, 300, new PNGEncoder(), false);
+				var file:FileReference = new FileReference();
+				file.save(image.data, "chart.png");
+			}
+
+			protected function onChooseStat(event:Event):void {
+				win.visible = true;
+				win.open();
+			}
+			
+			protected function onMakeGraphs(event:Event):void {
+				graphMakerWindow.visible = true;
+				graphMakerWindow.open();
+			}
+			
+/*			protected function menubar1_itemClickHandler(event:MenuEvent):void
+			{
+				if (event.item.@data == 'openDB')
+					loadDB_clickHandler();
+				else if (event.item.@data == 'chooseStat') {
+					win.visible = true;
+					win.open();
+				}
+				else if (event.item.@data == 'makeGraphs') {
+					graphMakerWindow.visible = true;
+					graphMakerWindow.open();
+				}
+				else if (event.item.@data == 'about')
+					Alert.show('About Visual Cultures');
+				else if (event.item.@data == 'snapshot') {
+					var image:ImageSnapshot = ImageSnapshot.captureImage(graphsTile, 300, new PNGEncoder(), false);
+					var file:FileReference = new FileReference();
+					file.save(image.data, "chart.png");
+				}
+			}*/
 
 		]]>
 	</fx:Script>
 	
 	<fx:Declarations>
-		<eventMaps:MainEventMap />
-		<s:Window id="win" width="600" height="650" closing="win_closingHandler(event)" visible="false"  >
-			<local:StatChooserModule />
+		<eventmaps:MainEventMap />
+		<eventmaps:GraphsEventMap />
+
+		<s:Window id="win" width="600" height="650" closing="win_closingHandler(event)" visible="false" >
+			<components:StatChooser />
+		</s:Window>
+		<components:ProgressBar id="progrBar" />
+		<s:Window id="graphMakerWindow" width="640" height="650" closing="win_closingHandler(event)" visible="false" >
+			<components:GraphMaker />
 		</s:Window>
 	</fx:Declarations>
 	
@@ -86,25 +190,29 @@
 		<s:layout>
 			<s:VerticalLayout/>
 		</s:layout>
-		<mx:MenuBar labelField="@label" itemClick="menubar1_itemClickHandler(event)">
+		<!--mx:MenuBar labelField="@label" itemClick="menubar1_itemClickHandler(event)">
 			<fx:XMLList>
 				<menuitem label="File" data="top">
 					<menuitem label="Select Database ..." data="openDB" />
+					<menuitem label="Save snapshot ..." data="snapshot" />
+				</menuitem>
+				<menuitem label="Analyse" data="Analyse">
 					<menuitem label="Choose Statistics ..." data="chooseStat" />
+					<menuitem label="Graph Maker ..." data="makeGraphs" />
 				</menuitem>
 				<menuitem label="About" data="topAbout">
 					<menuitem label="About" data="about" />
 				</menuitem>
 			</fx:XMLList>
-		</mx:MenuBar>
-		<s:Group>
+		</mx:MenuBar-->
+<!--		<s:Group>
 			<s:layout>
 				<s:HorizontalLayout/>
 			</s:layout>
 		</s:Group>
-		
-		<s:Scroller width="100%" height="100%" >
-			<views:GraphsTile width="100%" height="100%" />
+-->		<!--components:ProgressBar id="progrBar" /-->
+		<s:Scroller width="100%" height="100%"  >
+			<views:GraphsTile id="graphsTile" width="100%" height="100%" />
 		</s:Scroller>
 	</s:Group>
 </s:WindowedApplication>

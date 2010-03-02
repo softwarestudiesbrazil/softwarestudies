@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/halo"
+				initialize="itemrenderer1_creationCompleteHandler(event)">
+	<fx:Script>
+		<![CDATA[
+			import mx.binding.utils.ChangeWatcher;
+			import mx.charts.series.PlotSeries;
+			import mx.events.FlexEvent;
+
+			private var dataWatcher:ChangeWatcher;
+			
+			[Bindable]
+			public var imgPath:String;
+
+			[Bindable]
+			private var objName:String;
+			
+			[Bindable]
+			private var scaleFactor:Number;
+									
+			private function dataChangeHandler(event:Event=null):void {
+				this.objName = (data.item as Object).name;
+//				scaleFactor = data.zValue*scaleFactor; // only for bubble
+				scaleFactor = scaleFactor; // otherwise
+//				trace (data.zValue);
+			}
+
+			override protected function updateDisplayList(unscaledWidth:Number,                     
+														  unscaledHeight:Number):void
+			{
+				super.updateDisplayList(unscaledWidth, unscaledHeight);
+				
+				// match 'Selected' or 'selected'
+				if (data.currentState.indexOf("elected") > -1) {
+					this.currentState = "selected";
+				}
+				else
+					this.currentState = "normal";
+				
+				// disabled state is the 'unselected items'
+				if (data.currentState == "disabled")
+					this.currentState = "disabled"
+			}
+
+			protected function itemrenderer1_creationCompleteHandler(event:FlexEvent):void
+			{
+				this.dataWatcher = ChangeWatcher.watch(this, 'data', dataChangeHandler, true, true);
+				scaleFactor = (owner as PlotSeries).document.imgZoom;
+			}
+
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+		<!-- necessary to bubble up events -->
+		<!--mate:LocalEventMap dispatcher="{this}" /-->
+	</fx:Declarations>
+	<s:states>
+		<s:State name="normal"/>
+		<s:State name="selected"/>
+		<s:State name="hovered"/>
+		<s:State name="disabled"/>
+	</s:states>
+	
+	<s:Group>
+		<!-- file:///AsianCult/SWS02/projects/jeremy/Time/resized/{objName} -->
+		<!-- app-storage:/{Constants.TINY_IMG_PATH + objName} -->
+		<!-- 				  width.normal="10%" width.selected="15%" width.disabled="7%"
+				  height.normal="10%" height.selected="15%" height.disabled="7%"
+		alpha.normal="1" alpha.hovered="1" alpha.disabled="0.5" alpha.selected="1"
+		-->
+		<mx:Image id="itemImg" source="file://{imgPath}/{objName}"
+				  scaleX="{scaleFactor}" scaleY="{scaleFactor}"
+				  mouseOver.normal="currentState='hovered'" mouseOut.normal="currentState='normal'"
+				  cacheAsBitmap="true" cachePolicy="on" />
+		
+		<s:Border x="{itemImg.x-2}" y="{itemImg.y-2}"
+			width="{itemImg.width*scaleFactor+4}" height="{itemImg.height*scaleFactor+4}" includeIn="selected"
+				   borderColor="red"  borderWeight="2" cornerRadius="0">
+			<!-- s:stroke>
+				<s:SolidColorStroke color="0xFFFF00" weight="2"/>
+			</s:stroke-->
+		</s:Border>
+	</s:Group>
+</s:ItemRenderer>

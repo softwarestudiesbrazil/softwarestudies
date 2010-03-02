@@ -1,0 +1,262 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/halo"
+				xmlns:components="mmalab.softwarestudies.asianculture.data.components.*"
+				xmlns:layout="mmalab.flexext.layout.*"
+				width="100%"
+				creationComplete="itemrenderer1_creationCompleteHandler(event)"
+				>
+	
+	<fx:Script>
+		<![CDATA[
+			import flash.events.Event;
+			
+			import mmalab.softwarestudies.asianculture.Constants;
+			import mmalab.softwarestudies.asianculture.graph.models.GraphType;
+			
+			import mx.collections.ArrayCollection;
+			import mx.events.FlexEvent;
+			import mx.events.ListEvent;
+			import mx.utils.ObjectUtil;
+			
+			import spark.events.TextOperationEvent;
+			
+			[Bindable]
+			public var bckgColor:String = "0xFFFFFF";
+			
+			[Bindable]
+			protected var axesList:ArrayCollection = new ArrayCollection((Constants.GRAPH_TYPES[0] as GraphType).axisLabels);
+			
+			/*			// Override the itemIndex set function to draw a 
+			// white background behind even number items, 
+			// and a green background behind odd numbered items. 
+			override public function set itemIndex (value:int):void { 
+			if ((value%2) == 1) { 
+			bckgColor= 0xCCFF66; 
+			} 
+			if ((value%2) == 0) { 
+			bckgColor= 0xFFFFFF; 
+			} 
+			} */
+			
+			override protected function getCurrentRendererState():String {
+				return this.currentState;
+			}
+			
+			protected function graphTypeCombo_changeHandler(event:ListEvent):void
+			{
+				var graphType:GraphType = event.currentTarget.selectedItem as GraphType;
+				axesList = new ArrayCollection(ObjectUtil.copy(graphType).axisLabels);
+				data.graphType = ObjectUtil.copy(graphType);
+				data.dims = [parseInt(xCoord.text), parseInt(yCoord.text), parseInt(gWidth.text), parseInt(gHeight.text)];
+				data.displayImages = false;
+				data.dataTips = showDataTipsChbx.selected;
+				
+				switch (graphType.name) {
+					case Constants.GRAPH_BUBBLE.name:
+					case Constants.GRAPH_SCATTER.name:
+						this.currentState = "dispImages";
+						data.zoomFactor = parseFloat(imgZoomInput.text);
+						break;
+					case Constants.GRAPH_PIE.name:
+					case Constants.GRAPH_HISTO.name:
+						this.currentState = "numBins";
+						data.numBins = parseInt(numBins.text);
+					case Constants.GRAPH_BAR.name:
+						data.xLabels = true;
+						break;
+					default:
+						this.currentState = "normal";
+						break;
+				}
+			}
+			
+			protected function itemrenderer1_creationCompleteHandler(event:FlexEvent):void
+			{
+				var graphType:Object = this.graphTypeCombo.selectedItem;
+				
+				// need to create a new copy of the list
+				axesList = new ArrayCollection(ObjectUtil.copy(Constants.GRAPH_TYPES[graphTypeCombo.selectedIndex]).axisLabels);
+				
+				data.graphType = graphType;
+				data.dims = [parseInt(xCoord.text), parseInt(yCoord.text), parseInt(gWidth.text), parseInt(gHeight.text)];
+				data.active = dispGraphChbx.selected;
+				data.dataTips = showDataTipsChbx.selected;
+				
+				switch (graphType.name) {
+					case Constants.GRAPH_BUBBLE.name:
+					case Constants.GRAPH_SCATTER.name:
+						this.currentState = "dispImages";
+						data.zoomFactor = parseFloat(imgZoomInput.text);
+						break;
+					case Constants.GRAPH_PIE.name:
+					case Constants.GRAPH_HISTO.name:
+						this.currentState = "numBins";
+						data.numBins = parseInt(numBins.text);
+					case Constants.GRAPH_BAR.name:
+						data.xLabels = true;
+						break;
+					default:
+						this.currentState = "normal";
+						break;
+				}
+			}
+			
+			protected function statsList_valueCommitHandler(event:FlexEvent):void
+			{
+				if (data)
+					data.statNames = axesList;
+			}
+			
+			public function deleteItem():void {
+				var parentDG:DataGroup = owner as DataGroup;
+				// remove the item
+				parentDG.dataProvider.removeItemAt(parentDG.dataProvider.getItemIndex(data))
+			}
+			
+			
+			protected function dispImgCheckBox_changeHandler(event:Event):void
+			{
+				data.displayImages = dispImgCheckBox.selected;
+				imgZoomLbl.enabled = dispImgCheckBox.selected;
+				imgZoomInput.enabled = dispImgCheckBox.selected;
+			}
+			
+			
+			protected function numBins_changeHandler(event:TextOperationEvent):void
+			{
+				data.numBins = parseInt(numBins.text);
+			}
+			
+			
+			protected function coords_changeHandler(event:TextOperationEvent):void
+			{
+				data.dims = [parseInt(xCoord.text), parseInt(yCoord.text), parseInt(gWidth.text), parseInt(gHeight.text)];
+			}
+			
+			
+			protected function dispAxesChbx_changeHandler(event:Event):void
+			{
+				//data.displayAxes = dispAxesChbx.selected;
+			}
+			
+
+			protected function dispGraphChbx_changeHandler(event:Event):void
+			{
+				graphTypeCombo.enabled = dispGraphChbx.selected;
+				removeBtn.enabled = dispGraphChbx.selected;
+				xCoord.enabled = dispGraphChbx.selected;
+				yCoord.enabled = dispGraphChbx.selected;
+				gWidth.enabled = dispGraphChbx.selected;
+				gHeight.enabled = dispGraphChbx.selected;
+				if (numBins)
+					numBins.enabled = dispGraphChbx.selected;
+				if (dispImgCheckBox)
+					dispImgCheckBox.enabled = dispGraphChbx.selected;
+				statsList.enabled = dispGraphChbx.selected;
+				
+				data.active = dispGraphChbx.selected;
+			}
+
+
+			protected function dispXLabelsChbx_changeHandler(event:Event):void
+			{
+				data.xLabels = dispXLabelsChbx.selected;
+			}
+
+
+			protected function showDataTipsChbx_changeHandler(event:Event):void
+			{
+				data.dataTips = showDataTipsChbx.selected;
+			}
+
+
+			protected function imgZoomInput_changeHandler(event:TextOperationEvent):void
+			{
+				data.zoomFactor = parseFloat(imgZoomInput.text);
+			}
+
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+		<layout:FreeLayout id="freeLayout" />
+	</fx:Declarations>
+	
+	<s:states>
+		<s:State name="normal" />
+		<s:State name="dispImages" />
+		<s:State name="numBins" />
+	</s:states>
+	
+	<!--s:Rect width="100%" height="100%">
+	<s:fill><s:SolidColor color="{bckgColor}" /></s:fill>
+	</s:Rect-->
+	
+	<s:Border width="100%" height="120" top="3" left="3" right="3" bottom="3" >
+		<s:layout>
+			<s:HorizontalLayout verticalAlign="top" />
+		</s:layout>
+		<s:Group height="120" top="5" left="10" right="5" bottom="5" >
+			<s:layout>
+				<s:VerticalLayout/>
+			</s:layout>
+			<s:Group height="32">
+				<s:layout>
+					<s:HorizontalLayout verticalAlign="middle"/>
+				</s:layout>
+				<mx:Spacer/>
+				<s:CheckBox id="dispGraphChbx" label="Active" enabled="true" selected="true" change="dispGraphChbx_changeHandler(event)" />
+				<mx:ComboBox id="graphTypeCombo" dataProvider="{Constants.GRAPH_TYPES}" alternatingItemColors="[0xFFFFFF, 0xDDEEFF]" 
+							 labelField="name" selectedIndex="0" change="graphTypeCombo_changeHandler(event)" />
+				<!--s:CheckBox id="dispAxesChbx" label="Display axes" enabled="false" change="dispAxesChbx_changeHandler(event)" /-->
+				<s:CheckBox id="showDataTipsChbx" label="Show datatips" selected="true" change="showDataTipsChbx_changeHandler(event)" />
+			</s:Group>
+			<s:Group height="32">
+				<s:layout>
+					<s:HorizontalLayout />
+				</s:layout>
+				<s:Button label="Update"  enabled="false"/>
+				<s:Button label="Save image"  enabled="false"/>
+				<s:Button label="Delete" id="removeBtn" click="deleteItem()"/>
+			</s:Group>
+			<s:Group>		
+				<s:layout>
+					<s:HorizontalLayout />
+				</s:layout>
+				<s:Label text="x" verticalAlign="middle" height="20" />
+				<s:TextInput id="xCoord" text="0" change="coords_changeHandler(event)" width="33" height="20" />
+				<s:Label text="y" verticalAlign="middle" height="20" />
+				<s:TextInput id="yCoord" text="0" change="coords_changeHandler(event)" width="33" height="20" />
+				<s:Label text="width" verticalAlign="middle" height="20" />
+				<s:TextInput id="gWidth" text="400" change="coords_changeHandler(event)" width="33" height="20" />
+				<s:Label text="height" verticalAlign="middle" height="20" />
+				<s:TextInput id="gHeight" text="300" change="coords_changeHandler(event)" width="33" height="20" />
+				
+			</s:Group>
+			<s:Group>		
+				<s:layout>
+					<s:HorizontalLayout />
+				</s:layout>
+				<!-- for Scatterplot only -->
+				<s:CheckBox includeIn="dispImages" label="display Images (max. 500)" id="dispImgCheckBox" change="dispImgCheckBox_changeHandler(event)" />
+				<s:Label includeIn="dispImages" id="imgZoomLbl" text="zoom factor: "  verticalAlign="middle" height="20" enabled="false" />
+				<s:TextInput includeIn="dispImages" id="imgZoomInput" text=".16" change="imgZoomInput_changeHandler(event)" width="33" height="20" enabled="false" />
+				
+				<!-- for Histo and barCharts only -->
+				<s:Label includeIn="numBins" text="#bins: "  verticalAlign="middle" height="20"/>
+				<s:TextInput includeIn="numBins" id="numBins" text="12" change="numBins_changeHandler(event)"  width="33" height="20"/>
+				<s:CheckBox includeIn="numBins" id="dispXLabelsChbx" label="Display Horiz. labels" enabled="true" selected="true"
+							change="dispXLabelsChbx_changeHandler(event)" />
+			</s:Group>
+		</s:Group>		
+		<s:Group width="80%" height="120" top="5" left="5" right="5" bottom="5" >
+			<s:DataGroup id="statsList" dataProvider="{axesList}" 
+						 itemRenderer="mmalab.softwarestudies.asianculture.data.components.StatCombo"
+						 updateComplete="statsList_valueCommitHandler(event)"  >
+				<s:layout><s:VerticalLayout gap="0" variableRowHeight="true" /></s:layout>
+			</s:DataGroup>
+		</s:Group>
+	</s:Border>
+</s:ItemRenderer>
