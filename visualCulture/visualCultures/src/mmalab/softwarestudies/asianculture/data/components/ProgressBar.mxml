@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Window xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		  xmlns:s="library://ns.adobe.com/flex/spark" 
+		  xmlns:mx="library://ns.adobe.com/flex/halo"
+		  xmlns:mate="http://mate.asfusion.com/"
+		  initialize="onInitialize(event)"
+		  width="300" height="150" >
+	<fx:Script>
+		<![CDATA[
+			import com.asfusion.mate.ioc.InjectorRegistry;
+			
+			import mmalab.softwarestudies.asianculture.data.events.SelectFileEvent;
+			import mmalab.softwarestudies.asianculture.data.events.NextIterationEvent;
+			import mmalab.softwarestudies.asianculture.data.events.SQLiteFillDataEvent;
+			import mmalab.softwarestudies.asianculture.data.events.WriteDBEvent;
+			
+			import mx.core.FlexGlobals;
+			import mx.events.FlexEvent;
+			import mx.skins.spark.ProgressIndeterminateSkin;
+			
+			[Bindable]
+			public var filePath:String;
+						
+			private function onInitialize(event:FlexEvent) : void
+			{
+				//------------------------------------------------------------------
+				// Necessary hack to be able to inject data in view inside a window
+				// http://mate.asfusion.com/forums/topic.php?id=274
+				//------------------------------------------------------------------
+				InjectorRegistry.register(this);
+				startFilling();
+			}
+			
+			
+			public function startFilling():void {
+				var changeDatabaseEvent:SelectFileEvent = new SelectFileEvent(SelectFileEvent.DATABASE_FILE);
+				changeDatabaseEvent.path = filePath;
+				changeDatabaseEvent.nativePath = false;
+				FlexGlobals.topLevelApplication.dispatchEvent(changeDatabaseEvent);
+			}
+			
+			public function setPercentFinished(event:SQLiteFillDataEvent):void {
+				progBar.addEventListener(FlexEvent.UPDATE_COMPLETE, nextIter);
+				progBar.setProgress(event.percentFinished, 100);
+				/*if (event.percentFinished == 100) {
+					var writeCompleteEvent:WriteDBEvent = new WriteDBEvent(WriteDBEvent.WRITE_DB_COMPLETE_EVENT);
+					FlexGlobals.topLevelApplication.dispatchEvent(writeCompleteEvent);
+				}*/
+			}
+			
+			private function nextIter(event:FlexEvent):void {
+				var nextIterationEvent:NextIterationEvent = new NextIterationEvent(NextIterationEvent.NEXT_ITERATION_EVENT);
+				FlexGlobals.topLevelApplication.dispatchEvent(nextIterationEvent);
+			}
+
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<mate:LocalEventMap dispatcher="{this}" />
+	</fx:Declarations>
+
+	<mx:ProgressBar x="50" y="30" id="progBar" mode="manual" minimum="0" maximum="100"
+					barSkin="{ProgressIndeterminateSkin}" labelPlacement="center"
+					width="200" height="30"  baseColor="#537CD9"/>
+	<s:Button label="Close" click="close()"  x="220" y="100"/>
+</s:Window>

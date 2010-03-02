@@ -1,16 +1,24 @@
 package mmalab.softwarestudies.asianculture.data.models
 {
+	
+
 	[Bindable]
 	public class Dataset
 	{
 		public var values:Array;
+		public var number:int;
 		
 		public function Dataset(values:Array) {
+			if (!values)
+				values = new Array();
 			this.values = values;
+			if (values)
+				this.number = values.length;
 		}
 		
 		public function addValue(value:Object):void {
 			this.values.push(value);
+			this.number++;
 		}
 		
 /*		public function Dataset() {

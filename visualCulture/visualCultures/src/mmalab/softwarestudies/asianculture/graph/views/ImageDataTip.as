@@ -6,18 +6,20 @@ package mmalab.softwarestudies.asianculture.graph.views
 	import flash.display.Loader;
 	import flash.display.Sprite;
 	import flash.events.Event;
-	import flash.filesystem.File;
 	import flash.geom.Matrix;
 	import flash.net.URLLoader;
 	import flash.net.URLLoaderDataFormat;
 	import flash.net.URLRequest;
 	
+	import mmalab.softwarestudies.asianculture.Constants;
+	
 	import mx.charts.chartClasses.DataTip;
 	
-	public class MyDataTip extends DataTip
+	public class ImageDataTip extends DataTip
 	{
-
-		public function MyDataTip()
+		private var numLines:int;
+		
+		public function ImageDataTip()
 		{
 			super();
 		}
@@ -25,26 +27,30 @@ package mmalab.softwarestudies.asianculture.graph.views
 		override protected function updateDisplayList(w:Number, h:Number):void {
 			super.updateDisplayList(w, h);
 			this.setStyle("textAlign","left");
-			this.setStyle("color", "0xCCCCCC");
+			this.setStyle("color", "0xCECFD1");0xCCCCCC
 			
 			if (this.numChildren > 1)
 				this.removeChildAt(1);
 
-			var g:Graphics = graphics; 
-			g.clear();  
-			var m:Matrix = new Matrix();
-			m.createGradientBox(w+60,h+100,0,0,0);
-			g.beginGradientFill(GradientType.LINEAR,[0x00FF00,0xFFFFFF],
-				[.1,1],[0,255],m,null,null,0);
-			g.drawRect(-30,0,w+60,h+100);
+			numLines = (data.displayText as String).split("<br").length;
+			
+			var g:Graphics = graphics;
+			g.clear();
+			//var m:Matrix = new Matrix();
+			//m.createGradientBox(w+60,h+numLines*25,0,0,0);
+			g.beginFill(0x212121);
+//			g.beginGradientFill(GradientType.LINEAR,[0x00FF00,0xFFFFFF],
+//				[.1,1],[0,255],m,null,null,0);
+//			g.drawRect(-30,0,w+60,h+numLines*25);
+			g.drawRect(0,0,w,numLines*15+10);
 			g.endFill();
 			
 			// load current image
-			var imageFile:File = File.applicationStorageDirectory.resolvePath(Constant.TINY_IMG_PATH + data.item.name);
+			//var imageFile:File = File.applicationStorageDirectory.resolvePath(Constants.TINY_IMG_PATH + data.item.name);
 			var urlLoader:URLLoader = new URLLoader( );
 			urlLoader.dataFormat = URLLoaderDataFormat.BINARY;
 			urlLoader.addEventListener(Event.COMPLETE, onLoadingComplete );
-			urlLoader.load( new URLRequest(imageFile.url) );
+			urlLoader.load( new URLRequest("file://" + Constants.imagesPath + "/" + data.item.name) );
 		}
 		
 		private function onLoadingComplete( e: Event ):void
@@ -59,7 +65,7 @@ package mmalab.softwarestudies.asianculture.graph.views
 			
 			var container:Sprite = new Sprite();
 			this.addChild(container);
-			container.y = 55;
+			container.y = numLines*15+10; //*15+10
 			
 			var _bitmap:Bitmap = new Bitmap((e.currentTarget.content as Bitmap).bitmapData);
 			container.graphics.beginBitmapFill(_bitmap.bitmapData, null, false, true);

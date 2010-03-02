@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<EventMap xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark" xmlns:mx="library://ns.adobe.com/flex/halo"
+		  xmlns="http://mate.asfusion.com/">
+	<fx:Script>
+		<![CDATA[
+			import mmalab.softwarestudies.asianculture.graph.controllers.GraphManager;
+			import mmalab.softwarestudies.asianculture.graph.events.AddGraphsEvent;
+			import mmalab.softwarestudies.asianculture.graph.events.ChangePlotItemsEvent;
+			import mmalab.softwarestudies.asianculture.graph.events.HistoFilterEvent;
+			import mmalab.softwarestudies.asianculture.graph.events.HistoSelectionEvent;
+			import mmalab.softwarestudies.asianculture.graph.events.SelectValueEvent;
+			import mmalab.softwarestudies.asianculture.graph.renderers.imgRenderer;
+			import mmalab.softwarestudies.asianculture.graph.views.GraphBar;
+			import mmalab.softwarestudies.asianculture.graph.views.GraphBubble;
+			import mmalab.softwarestudies.asianculture.graph.views.GraphHisto;
+			import mmalab.softwarestudies.asianculture.graph.views.GraphPie;
+			import mmalab.softwarestudies.asianculture.graph.views.GraphScatter;
+			import mmalab.softwarestudies.asianculture.graph.views.GraphsTile;
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		
+		<Debugger level="{Debugger.ERROR}" />
+		
+		<!--
+		-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+		-=-=-               EVENT HANDLERS              -=-=-
+		-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- -->
+
+		<EventHandlers type="{SelectValueEvent.VALUE_SELECTED}" debug="true" >
+			<MethodInvoker generator="{GraphManager}" method="setSelectedValue" arguments="{event.selectedValues}" />
+		</EventHandlers>
+
+		<EventHandlers type="{HistoSelectionEvent.HISTO_SELECTION_EVENT}" debug="true" >
+			<MethodInvoker generator="{GraphManager}" method="histoSelectSubset" arguments="{[event.statName, event.selectedRanges]}" />
+		</EventHandlers>
+		
+		<EventHandlers type="{HistoFilterEvent.HISTO_FILTER_EVENT}" debug="true" >
+			<MethodInvoker generator="{GraphManager}" method="histoFilter" />
+		</EventHandlers>
+
+		<EventHandlers type="{AddGraphsEvent.ADD_GRAPHS_EVENT}" debug="true" >
+			<MethodInvoker generator="{GraphManager}" method="addGraphs" arguments="{event.graphList}" />
+		</EventHandlers>
+
+		<!--
+		-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+		-=-=-               VIEW INJECTORS              -=-=-
+		-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- -->
+		
+		<Injectors target="{imgRenderer}" debug="true">
+			<PropertyInjector targetKey="imgPath" source="{GraphManager}" sourceKey="imagesPath" />
+		</Injectors>
+
+		<Injectors target="{GraphsTile}" debug="true">
+			<PropertyInjector targetKey="chartsArray" source="{GraphManager}" sourceKey="graphs" />
+		</Injectors>
+		
+		<Injectors target="{GraphHisto}" debug="true">
+			<PropertyInjector targetKey="dataset" source="{GraphManager}" sourceKey="data" />
+			<PropertyInjector targetKey="selectedIdx" source="{GraphManager}" sourceKey="selectedValues" />
+		</Injectors>
+		
+		<Injectors target="{GraphBar}" debug="true">
+			<PropertyInjector targetKey="dataset" source="{GraphManager}" sourceKey="data" />
+			<PropertyInjector targetKey="selectedIdx" source="{GraphManager}" sourceKey="selectedValues" />
+		</Injectors>
+
+		<Injectors target="{GraphPie}" debug="true">
+			<PropertyInjector targetKey="dataset" source="{GraphManager}" sourceKey="data"  />
+			<PropertyInjector targetKey="selectedIdx" source="{GraphManager}" sourceKey="selectedValues" />
+		</Injectors>    
+		
+		<Injectors target="{GraphScatter}" debug="true">
+			<ListenerInjector eventType="{ChangePlotItemsEvent.CHANGE_PLOT_ITEMS_EVENT}" method="changePlotItemRenderer" />
+			<PropertyInjector targetKey="dataset" source="{GraphManager}" sourceKey="data"  />
+			<PropertyInjector targetKey="selectedIdx" source="{GraphManager}" sourceKey="selectedValues" />
+		</Injectors>    
+		
+		<Injectors target="{GraphBubble}" debug="true">
+			<PropertyInjector targetKey="dataset" source="{GraphManager}" sourceKey="data"  />
+			<PropertyInjector targetKey="selectedIdx" source="{GraphManager}" sourceKey="selectedValues" />
+		</Injectors>    
+		
+	</fx:Declarations>
+</EventMap>

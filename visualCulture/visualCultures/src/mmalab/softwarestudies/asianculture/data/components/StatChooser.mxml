@@ -1,18 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Module xmlns:fx="http://ns.adobe.com/mxml/2009" 
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
 		   xmlns:s="library://ns.adobe.com/flex/spark" 
 		   xmlns:mx="library://ns.adobe.com/flex/halo"
 		   xmlns:mate="http://mate.asfusion.com/"
-		   initialize="onInitialize()" width="100%" height="100%">
+		   initialize="onInitialize()" width="100%" height="100%" xmlns:local="*" xmlns:components="mmalab.softwarestudies.asianculture.data.components.*">
 	<fx:Script>
 		<![CDATA[
 			import com.asfusion.mate.ioc.InjectorRegistry;
 			
 			import flash.events.Event;
 			
+			import mmalab.softwarestudies.asianculture.Constants;
 			import mmalab.softwarestudies.asianculture.data.events.ChooseStatisticsEvent;
 			import mmalab.softwarestudies.asianculture.graph.events.ChangeGraphStyleEvent;
 			import mmalab.softwarestudies.asianculture.graph.events.ChangePlotItemsEvent;
+			import mmalab.softwarestudies.asianculture.graph.models.GraphType;
 			
 			import mx.collections.ArrayCollection;
 			import mx.core.FlexGlobals;
@@ -44,6 +46,10 @@
 				InjectorRegistry.register(this);
 				
 				updateAltColorsByDim();
+				
+				var changeGraphStyleEvent:ChangeGraphStyleEvent = new ChangeGraphStyleEvent(ChangeGraphStyleEvent.CHANGE_GRAPH_STYLE_EVENT);
+				changeGraphStyleEvent.graphStyle = graphTypeCombo.selectedLabel as String;
+				FlexGlobals.topLevelApplication.dispatchEvent(changeGraphStyleEvent);
 			}
 			
 			protected function updateMaxPageNum():void
@@ -150,14 +156,14 @@
 			}
 			
 
-			protected function combobox1_changeHandler(event:ListEvent):void
+			protected function graphTypeCombo_changeHandler(event:ListEvent):void
 			{
-				if (event.currentTarget.selectedLabel == Constant.HISTOGRAM)
-					dim = 1;
-				else if (event.currentTarget.selectedLabel == Constant.SCATTER)
-					dim = 2;
-				else
-					dim = 3;
+				var i:int=0;
+				while (event.currentTarget.selectedLabel != (Constants.GRAPH_TYPES[i] as GraphType).name && i<Constants.GRAPH_TYPES.length) {
+					i++;
+				}
+				dim = (Constants.GRAPH_TYPES[i] as GraphType).dim;
+				
 				updateAltColorsByDim();
 				var changeGraphStyleEvent:ChangeGraphStyleEvent = new ChangeGraphStyleEvent(ChangeGraphStyleEvent.CHANGE_GRAPH_STYLE_EVENT);
 				changeGraphStyleEvent.graphStyle = event.currentTarget.selectedLabel as String;
@@ -168,7 +174,7 @@
 			protected function checkbox1_changeHandler(event:Event):void
 			{
 				var changePlotItemsEvent:ChangePlotItemsEvent = new ChangePlotItemsEvent(ChangePlotItemsEvent.CHANGE_PLOT_ITEMS_EVENT);
-				changePlotItemsEvent.renderer = imgPoint.selected?"images":"points";
+				changePlotItemsEvent.renderer = imgOrPointCheckbox.selected?"images":"points";
 				FlexGlobals.topLevelApplication.dispatchEvent(changePlotItemsEvent);
 			}
 
@@ -182,8 +188,6 @@
 		<mate:LocalEventMap dispatcher="{this}" />
 		
 	</fx:Declarations>
-	
-	<s:Group width="100%" height="100%">
 		
 		<s:layout>
 			<s:VerticalLayout/>
@@ -220,15 +224,8 @@
 				<s:layout>
 					<s:VerticalLayout/>
 				</s:layout>
-				<mx:ComboBox id="graphTypeCombo" change="combobox1_changeHandler(event)">
-					<mx:dataProvider>
-						<!-- labels must correspond to GraphTile states in the same order -->
-						<fx:String>{Constant.SCATTER}</fx:String>
-						<fx:String>{Constant.HISTOGRAM}</fx:String>
-						<fx:String>Bubble</fx:String>
-					</mx:dataProvider>
-				</mx:ComboBox>
-				<s:CheckBox id="imgPoint" label="images" change="checkbox1_changeHandler(event)" />
+				<mx:ComboBox id="graphTypeCombo" dataProvider="{Constants.GRAPH_TYPES}" labelField="name" change="graphTypeCombo_changeHandler(event)" />
+				<s:CheckBox id="imgOrPointCheckbox" label="images" change="checkbox1_changeHandler(event)" />
 				<s:Label text="Statistics to display (by tuples of {dim})" verticalAlign="middle" width="100%" height="24" fontWeight="bold"/>
 				<!-- dragNdrop not yet available in spark lists of Flex 4 beta 2 -->
 				<mx:List id="selectedStats"
@@ -243,18 +240,26 @@
 						 <!--itemRenderer="SelectedLineItemRenderer"-->
 					<mx:itemRenderer>
 						<fx:Component>
-							<mx:Label text="{dimArray.getItemAt(counter%outerDocument.dim)}: {data.name}">
+							<mx:Label text="{dimArray.getItemAt(counter%outerDocument.dim)}: {statName}" creationComplete="label1_creationCompleteHandler(event)">
 								<fx:Script>
 									<![CDATA[
+										import mx.events.FlexEvent;
 										import mx.collections.ArrayCollection;
 										import mx.controls.List;
+										import mx.binding.utils.ChangeWatcher;
+										import mx.events.PropertyChangeEvent;
 										
+										private var dataWatcher:ChangeWatcher;
+
 										// limited to max 6 dimensions
 										[Bindable]
 										private var dimArray:ArrayCollection = new ArrayCollection(['x', 'y', 't', 'a', 'b', 'c']);
 										
 										[Bindable]
 										private var counter:int=0;
+										
+										[Bindable]
+										private var statName:String;
 										
 										override protected function updateDisplayList(unscaledWidth:Number,                     
 																					  unscaledHeight:Number):void
@@ -265,6 +270,17 @@
 											var dataIndex:int = ow.itemRendererToIndex(this);
 											if (dataIndex>=0)
 												counter = dataIndex;
+										}
+
+										private function dataChangeHandler(event:Event=null):void {
+											if (data)
+												this.statName = data.name;
+										}
+										
+										protected function label1_creationCompleteHandler(event:FlexEvent):void
+										{
+											this.dataWatcher = ChangeWatcher.watch(this, 'data', dataChangeHandler);
+											this.dataChangeHandler();
 										}
 
 									]]>
@@ -308,4 +324,3 @@
 			<!--s:Button label="Close" id="closeBtn" click="this.close()" width="55" /-->
 		</s:Group>
 	</s:Group>
-</mx:Module>

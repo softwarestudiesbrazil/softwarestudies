@@ -3,22 +3,9 @@
 		 xmlns:s="library://ns.adobe.com/flex/spark"
 		 xmlns:mx="library://ns.adobe.com/flex/halo"
 		 xmlns:utils="mmalab.softwarestudies.asianculture.graph.utils.*"
-		  initialize="group1_initializeHandler(event)"
-		  >
-	<fx:Style>
-		@namespace s "library://ns.adobe.com/flex/spark";
-		@namespace mx "library://ns.adobe.com/flex/halo";
-		
-		.itemrendererstyle {
-			radius: 4;
-			color: "0x999999";
-			base-color: "0x000099";
-			item-roll-over-color: "0xFFFF00";
-			item-disabled-color: "0x00FF00";
-			item-selection-color: "0x0000FF";
-		}
-		
-	</fx:Style>
+		 
+		 width="100%"  >
+
 	<fx:Script>
 		<![CDATA[
 			import flash.events.MouseEvent;
@@ -41,7 +28,11 @@
 			public var statIdx:String;
 			[Bindable]
 			public var statIdy:String;
-			
+			[Bindable]
+			public var showDataTips:Boolean;
+			[Bindable]
+			public var imgZoom:Number;
+									
 			private function series1_clickHandler(event:MouseEvent):void
 			{
 				var selectValueEvent:SelectValueEvent = new SelectValueEvent(SelectValueEvent.VALUE_SELECTED);
@@ -51,10 +42,10 @@
 			
 			private function chart_dataTipFunction(item:HitData):String {
 				var chartItem:PlotSeriesItem = item.chartItem as PlotSeriesItem;
-				var str:String = "";//chartItem.item.name as String;
-				var tip:String = "<b>" + str.slice(0, str.lastIndexOf(".")) + "</b><br/>"
+				var str:String = chartItem.item.name as String;
+				var tip:String = "<font color='#CECFD1' size='10'><b>" + str.slice(0, str.lastIndexOf(".")) + "</b><br/>"
 					+ "<b>" + statIdx + ":</b> " + chartItem.item[statIdx] + "<br/>"
-					+ "<b>" + statIdy + ":</b> " + chartItem.item[statIdy];
+					+ "<b>" + statIdy + ":</b> " + chartItem.item[statIdy] + "</font>";
 				return tip;
 			}
 			
@@ -76,60 +67,66 @@
 			}
 			}*/
 			
+			/**
+			 * Called by statChooser
+			 */
 			public function changePlotItemRenderer(event:ChangePlotItemsEvent):void {
 				this.currentState=event.renderer;
 			}
 
-			protected function group1_initializeHandler(event:FlexEvent):void
-			{
-				trace ("initialize: " + event.target);
-			}
-			
 		]]>
 	</fx:Script>
 	
 	<fx:Declarations>
 		<!-- Define custom colors for use as plot point fills. -->
-		<mx:SolidColor id="sc1" color="0x005500" alpha="1"/>
+		<mx:SolidColor id="sc1" color="0xCECFD1" alpha="1"/>
 		
 		<!-- Define custom Strokes. -->
-		<mx:Stroke id="s1" color="green" weight="1"/>
-		<mx:Stroke id="s2" color="blue" alpha=".4"/>
+		<mx:Stroke id="s1" color="0x212121" weight="1"/>
+		<mx:Stroke id="s2" color="0x646467" alpha="1"/>
 		
 		<mx:SeriesZoom id="zoomInEffect" duration="1000" />  
 		
-		<mx:LinearAxis id="linY" title="{statIdy}" autoAdjust="true" baseAtZero="false" />
-		<mx:LinearAxis id="linX" title="{statIdx}" autoAdjust="true" baseAtZero="false" />
+		<mx:LinearAxis id="linY" title="{statIdy}" autoAdjust="true" baseAtZero="false" minorInterval="5" />
+		<mx:LinearAxis id="linX" title="{statIdx}" autoAdjust="true" baseAtZero="false" minorInterval="5" />
 		<mx:LogAxis id="logX" title="{statIdx}" autoAdjust="true" baseAtZero="false" />
 		<mx:LogAxis id="logY" title="{statIdy}" autoAdjust="true" baseAtZero="false" />
-	</fx:Declarations>
+		<mx:CategoryAxis id="catX" title="{statIdx}" categoryField="statIdx" />
+
+</fx:Declarations>
 	<s:states>
 		<s:State name="points" />
 		<s:State name="images" />
 		<s:State name="linear" />
 		<s:State name="logarithmic" />
 	</s:states>
-	
-	<s:layout>
-		<s:VerticalLayout />
-	</s:layout>
-	<mx:PlotChart id="chart1" selectionMode="multiple" width="100%" height="100%"
-				  showDataTips="true" dataTipRenderer="{MyDataTip}" dataTipFunction="chart_dataTipFunction" dataTipMode="single"
-				  mouseUp="series1_clickHandler(event)" styleName="itemrendererstyle"
-				  verticalAxis="{linY}" horizontalAxis="{linX}"
-				  verticalAxis.logarithmic="{logY}" horizontalAxis.logarithmic="{logX}">
-		<!--mx:verticalAxis>
-			{linY}
+	<s:Rect width="100%" height="100%">
+		<s:fill><s:SolidColor color="0x212121" /></s:fill>
+	</s:Rect>
+	<mx:PlotChart id="chart1" selectionMode="multiple" width="100%" height="100%" 
+				  showDataTips="{showDataTips}" dataTipRenderer="mmalab.softwarestudies.asianculture.graph.views.ImageDataTip"
+				  dataTipFunction="chart_dataTipFunction" dataTipMode="single"
+				  mouseUp="series1_clickHandler(event)"  >
+				  <!--verticalAxis="{linY}" horizontalAxis="{linX}"
+				  verticalAxis.logarithmic="{logY}" horizontalAxis.logarithmic="{logX}"-->
+		<mx:verticalAxis>
+		{linY}
 		</mx:verticalAxis>
 		<mx:horizontalAxis>
-			{linX}
-		</mx:horizontalAxis-->
+		{linX}
+		</mx:horizontalAxis>
+		<mx:verticalAxisRenderers>
+			<mx:AxisRenderer axis="{linY}" showLine="false" tickLength="10" />
+		</mx:verticalAxisRenderers>
+		<mx:horizontalAxisRenderers>
+			<mx:AxisRenderer axis="{linX}" showLine="false" tickLength="10" />
+		</mx:horizontalAxisRenderers>
 		<mx:series>
 			<mx:PlotSeries id="series1" selectable="true" selectedIndices="{selectedIdx}" xField="{statIdx}" yField="{statIdy}"
-						   dataProvider="{dataset.values}"  displayName="{statIdy}"
-						   itemRenderer.points="mx.charts.renderers.CircleItemRenderer"
-						   itemRenderer.images="mmalab.softwarestudies.asianculture.graph.components.imgRenderer"
-						   fill="{sc1}" stroke="{s1}" showDataEffect="zoomInEffect" />
+						   dataProvider="{dataset.values}" displayName="{statIdy}"
+						   itemRenderer.points="mx.charts.renderers.CircleItemRenderer" styleName="circleitemrendererstyle"
+						   itemRenderer.images="mmalab.softwarestudies.asianculture.graph.renderers.imgRenderer"
+						   fill="{sc1}" stroke="{s1}" />
 		</mx:series>
 		<mx:backgroundElements>
 			<!--utils:PanAndZoom /-->

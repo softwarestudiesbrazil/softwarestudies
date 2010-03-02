@@ -12,22 +12,30 @@ package mmalab.softwarestudies.asianculture.data.input
 	public class SQLiteReader
 	{
 		private var sqlFilePath:String;
-		private var conn:SQLConnection = new SQLConnection();
+		private var conn:SQLConnection;
 		
 		public function SQLiteReader(sqlFilePath:String)
 		{
 			this.sqlFilePath = sqlFilePath;
 		}
 		
-		public function connect():void {
+		public function connect(nativePath:Boolean):void {
 			//add an event handeler for the open event
 			//			conn.addEventListener(SQLEvent.OPEN, fillData);
 			//create the database if it doesn't exist, otherwise just opens it
-			var dbFile:File = File.applicationDirectory.resolvePath (this.sqlFilePath);
+			var dbFile:File;
+			if (nativePath)
+				dbFile = File.applicationDirectory.resolvePath (this.sqlFilePath);
+			else
+				dbFile = File.applicationStorageDirectory.resolvePath (this.sqlFilePath);
+			conn = new SQLConnection();
 			conn.open(dbFile); // using synchronous connection
 		}
 		
 		public function getData(colname:String, min, max):Array {
+			if (!conn)
+				return null;
+			
 			var sql:SQLStatement = new SQLStatement();
 			//set the statement to connect to our database
 			
@@ -77,13 +85,16 @@ package mmalab.softwarestudies.asianculture.data.input
 		 * @return Dataset
 		 */
 		public function getStatObjects(colnames:Array, size:int = 0, batchSize:int = 100):Dataset {
+			if (!conn)
+				return null;
+
 			var sql:SQLStatement = new SQLStatement();
 			//set the statement to connect to our database
 			
 			sql.sqlConnection = conn;
 			conn.addEventListener(SQLErrorEvent.ERROR, errorHandler);
 			
-			if (colnames == null)
+			if (colnames == null || colnames.length < 1)
 				return null;
 			if (size < 0)
 				size = 0;
@@ -112,7 +123,7 @@ package mmalab.softwarestudies.asianculture.data.input
 						case 'float':
 							whereClauseREAL += temp;
 							break;
-						case 'text':
+						case 'string':
 							whereClauseTEXT += temp;
 							break;
 						default:
@@ -124,20 +135,20 @@ package mmalab.softwarestudies.asianculture.data.input
 			var offset		:int = 0;
 			var objectCounter:int = 0;
 
-			var dataset:Array = new Array();
+			var dataset:Dataset = new Dataset(null);
 			temp = "";
 			if (whereClauseINT.length>0)
-				temp += "select o.name as 'obj_name', s.name as 'stat', i.val from stat_int i " +
+				temp += "select o.name as 'obj_name', s.name as 'stat', i.val as 'val' from stat_int i " +
 					"join object_ o on i.obj_id = o.id " +
 					"join statistic s on i.stat_id = s.id " +
 					"where s.id IN (" +  whereClauseINT.substr(0, whereClauseINT.length-1) + ") UNION "
 			if (whereClauseREAL.length>0)
-				temp += "select o.name as 'obj_name', s.name as 'stat', r.val from stat_real r " +
+				temp += "select o.name as 'obj_name', s.name as 'stat', r.val as 'val' from stat_real r " +
 					"join object_ o on r.obj_id = o.id " +
 					"join statistic s on r.stat_id = s.id " +
 					"where s.id IN (" + whereClauseREAL.substr(0, whereClauseREAL.length-1) + ") UNION "
 			if (whereClauseTEXT.length>0)
-				temp += "select o.name as 'obj_name', s.name as 'stat', t.val from stat_text t " +
+				temp += "select o.name as 'obj_name', s.name as 'stat', t.val as 'val' from stat_text t " +
 					"join object_ o on t.obj_id = o.id " +
 					"join statistic s on t.stat_id = s.id " +
 					"where s.id IN (" + whereClauseTEXT.substr(0, whereClauseTEXT.length-1) + ") UNION "
@@ -168,7 +179,7 @@ package mmalab.softwarestudies.asianculture.data.input
 						
 						// detect break in name
 						if (nameCary != null && nameCary != row.obj_name) {
-							dataset.push(statObject);
+							dataset.addValue(statObject);
 							objectCounter++;
 							statObject = new Object();
 							statObject.name = row.obj_name;
@@ -178,7 +189,7 @@ package mmalab.softwarestudies.asianculture.data.input
 					}
 					
 					// push last object of the resultSet
-					dataset.push(statObject);
+					dataset.addValue(statObject);
 					objectCounter++;
 					offset += limit-nbCols;
 					
@@ -186,10 +197,43 @@ package mmalab.softwarestudies.asianculture.data.input
 				else {
 					// count Last object
 					trace ("Last obj: " + objectCounter + ", max size: " + size);
-					return new Dataset(dataset);
+					return dataset;
 				}
 			}
 			return null;
+		}
+		
+		/**
+		 * Create the query filtering the dataset
+		 * @param filterParameter
+		 * @return 
+		 * 
+		 */
+		public function createFilter (filterParameter:Array):String {
+			if (filterParameter==null)
+				return "ERROR: no selection"
+			
+			var statNames :Array = new Array();
+			for each (var stat:Object in filterParameter) {
+				statNames.push(stat.name);
+			}
+			statNames = getStatsList(statNames);
+			
+			var selectStr:String = "SELECT * FROM stat_real WHERE ";
+			var minMaxArray:Array;
+			
+			for each (var statItem:Object in statNames) {
+				minMaxArray = filterParameter[statItem.name].arr;
+				if (minMaxArray.length > 0)
+					selectStr += "(stat_id=" + statItem.id;
+				for (var i:int=0; i<minMaxArray.length; i++) {
+					selectStr += " AND val <=" + minMaxArray[i].max + " AND val >=" + minMaxArray[i].min;
+				}
+				if (minMaxArray.length > 0)
+					selectStr += ") OR ";
+			}
+			
+			return selectStr.substr(0, selectStr.length-4); // discard last OR
 		}
 		
 		/**
@@ -213,7 +257,7 @@ package mmalab.softwarestudies.asianculture.data.input
 			}
 			sql.text = "select s.id as id, s.name as name, s.type as type from statistic s "+
 				whereString.slice(0, whereString.lastIndexOf("OR")) +
-				" order by s.name";
+				" order by s.name COLLATE NOCASE";
 			
 			sql.execute();
 			
@@ -227,14 +271,15 @@ package mmalab.softwarestudies.asianculture.data.input
 			return null;
 		}
 		
-		
-		
 		private function errorHandler(event:SQLErrorEvent):void {
-			trace("An error occured while executing the statement.");
+			conn.removeEventListener(SQLErrorEvent.ERROR, errorHandler);
+			conn.close();
+			trace("An error occured while executing the statement. Connection has been closed");
 		}
 		
 		public function closeConnection():void {
-			conn.close();
+			if (conn)
+				conn.close();
 		}
 	}
 }

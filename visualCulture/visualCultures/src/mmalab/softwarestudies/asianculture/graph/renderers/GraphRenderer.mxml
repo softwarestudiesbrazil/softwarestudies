@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/halo"
+				creationComplete="itemrenderer1_initializeHandler(event)"
+				mouseUp="group1_mouseUpHandler(event)"
+				
+				xmlns:views="mmalab.softwarestudies.asianculture.graph.views.*"
+				x="{graphX}" y="{graphY}"
+				width="{graphWidth}" height="{graphHeight}" currentState="{'normal'+data.graphType}">
+	<fx:Script>
+		<![CDATA[
+			import flash.events.MouseEvent;
+			
+			import mx.events.FlexEvent;
+			
+			import spark.effects.Resize;
+			
+			[Bindable]
+			[Embed(source="images/both.gif")]
+			private var resizeIcon:Class;
+			
+			[Bindable]
+			private var graphX:int;
+			[Bindable]
+			private var graphY:int;
+			[Bindable]
+			private var graphWidth:int;
+			[Bindable]
+			private var graphHeight:int;
+			
+			private var _mouseX:int;
+			private var _mouseY:int;
+			
+			private var minXY:int = 120;
+			
+			private var resizing:Boolean;
+			private var cursorID:int;
+			private var _currentState:String;
+			private var graphType:String;
+			
+			[Bindable]
+			private var imgPointsState:String = "points";
+			
+			/**
+			 *  Returns the name of the state to be applied to the renderer. For example, a
+			 *  very basic List item renderer would return the String "normal", "hovered", 
+			 *  or "selected" to specify the renderer's state. 
+			 * 
+			 *  <p>A subclass of ItemRenderer must override this method to return a value 
+			 *  if the behavior desired differs from the default behavior.</p>
+			 * 
+			 *  @return A String specifying the name of the state to apply to the renderer. 
+			 *  
+			 *  @langversion 3.0
+			 *  @playerversion Flash 10
+			 *  @playerversion AIR 1.5
+			 *  @productversion Flex 4
+			 */
+			override protected function getCurrentRendererState():String
+			{
+				var skinState:String = super.getCurrentRendererState();
+				
+				if (graphType)
+					return skinState += graphType;
+				
+				//If none of the above states are defined in the item renderer,
+				//we return the empty string. This means the user-defined renderer
+				//will display but essentially be non-interactive visually. 
+				return null;
+			}
+			
+			protected function itemrenderer1_initializeHandler(event:FlexEvent):void
+			{
+				trace("initialize");
+				
+				if (data.dims) {
+					this.graphX = data.dims[0] as int;
+					this.graphY = data.dims[1] as int;
+					this.graphWidth = data.dims[2] as int;
+					this.graphHeight = data.dims[3] as int;
+				}
+
+				if (data.graphType) {
+					graphType = data.graphType;
+					this.currentState = 'normal'+graphType;
+				}
+				if (data.displayImages)
+					imgPointsState = "images";
+				else
+					imgPointsState = "points";
+				
+				if (graphType)
+					stage.addEventListener(MouseEvent.MOUSE_MOVE, mouseMoveHandler, false, 0, true);
+				else
+					trace ("graphType = "+graphType);
+			}
+						
+			protected function mouseMoveHandler(event:MouseEvent):void
+			{
+//				trace("mouseMoveHandler");
+				if (resizing && event.buttonDown) {
+					if (width > minXY)
+						width += mouseX - _mouseX;
+					if (height > minXY)
+						height += mouseY - _mouseY;
+					
+					setCurrentState('hovered'+graphType);
+//					setCurrentState('normal');
+				}
+				/*else
+					setCurrentState('normal'+graphType);
+				*/
+				_mouseX = mouseX;
+				_mouseY = mouseY;
+			}
+			
+			protected function group1_mouseUpHandler(event:MouseEvent):void
+			{
+				trace("mouseUpHandler");
+				resizing = false;
+				setCurrentState('normal'+graphType);
+/*				data.dims[0] = this.x;
+				data.dims[1] = this.y;*/
+				data.dims[2] = this.width;
+				data.dims[3] = this.height;
+			}			
+			
+			protected function resizeHandleGroup_mouseDownHandler(event:MouseEvent):void
+			{
+				trace("mouseDownHandler");
+				resizing = true;
+				_mouseX = mouseX;
+				_mouseY = mouseY;
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:states>
+		<s:State name="normal" />
+		<s:State name="hovered" stateGroups="hoveredGroup" />
+		<s:State name="normalBar" stateGroups="Bar" />
+		<s:State name="hoveredBar" stateGroups="hoveredGroup,Bar" />
+		<s:State name="normalBubble" stateGroups="Bubble" />
+		<s:State name="hoveredBubble" stateGroups="hoveredGroup,Bubble" />
+		<s:State name="normalHisto" stateGroups="Histo" />
+		<s:State name="hoveredHisto" stateGroups="hoveredGroup,Histo" />
+		<s:State name="normalScatter" stateGroups="Scatter" />
+		<s:State name="hoveredScatter" stateGroups="hoveredGroup,Scatter" />
+		<s:State name="normalPie" stateGroups="Pie" />
+		<s:State name="hoveredPie" stateGroups="hoveredGroup,Pie" />
+	</s:states>
+	<s:layout>
+		<s:HorizontalLayout gap="0" />
+	</s:layout>
+	<views:GraphHisto id="histoGraph" includeIn="Histo"
+					  statIdy="{data.statNames.getItemAt(0)}"
+					  numCols="{data.numBins}" dispLabels="{data.displayXLabels}" showDataTips="{data.showDataTips}"
+					  width="100%" height="100%" />
+	<views:GraphBar id="barGraph" includeIn="Bar"
+					  statIdx="{data.statNames.getItemAt(0)}"
+					  dispLabels="{data.displayXLabels}" showDataTips="{data.showDataTips}"
+					  width="100%" height="100%" />
+	<views:GraphPie id="pieGraph" includeIn="Pie"
+					  statIdx="{data.statNames.getItemAt(0)}"
+					  numBins="{data.numBins}" showDataTips="{data.showDataTips}"
+					  width="100%" height="100%" />
+	<views:GraphBubble id="bubblePlot" includeIn="Bubble"
+					   statIdx="{data.statNames.getItemAt(0)}"
+					   statIdy="{data.statNames.getItemAt(1)}"
+					   statRadius="{data.statNames.getItemAt(2)}"
+					   imgZoom="{data.zoomFactor}"
+					   showDataTips="{data.showDataTips}"
+					   currentState="{imgPointsState}"
+					   width="100%" height="100%" />
+	<views:GraphScatter id="scatPlot" includeIn="Scatter"
+						statIdx="{data.statNames.getItemAt(0)}"
+						statIdy="{data.statNames.getItemAt(1)}"
+						showDataTips="{data.showDataTips}"
+						imgZoom="{data.zoomFactor}"
+						width="100%" height="100%" currentState="{imgPointsState}" />
+	<s:Group id="resizeHandleGroup" excludeFrom="normal" height="100%" width="4"
+			 mouseDown="resizeHandleGroup_mouseDownHandler(event)">
+		<s:Rect height="100%" width="100%" includeIn="hoveredGroup">
+			<s:fill><s:SolidColor color="0xFFFF00"/></s:fill>
+		</s:Rect>
+	</s:Group>
+</s:ItemRenderer>

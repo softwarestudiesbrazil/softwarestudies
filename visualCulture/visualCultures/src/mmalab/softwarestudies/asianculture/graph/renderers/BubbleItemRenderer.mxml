@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/halo"
+				creationComplete="itemrenderer1_creationCompleteHandler(event)"
+				width="400" height="300">
+	<fx:Script>
+		<![CDATA[
+			import mx.binding.utils.ChangeWatcher;
+			import mx.events.FlexEvent;
+			
+			[Bindable]
+			private var radius:Number;
+			
+			private var dataWatcher:ChangeWatcher;
+
+			protected function itemrenderer1_creationCompleteHandler(event:FlexEvent):void
+			{
+				this.dataWatcher = ChangeWatcher.watch(this, 'data', dataChangeHandler);
+				this.dataChangeHandler();
+			}
+
+			private function dataChangeHandler(event:Event=null):void{
+/*				if (data.zValue >= 0) {
+					this.radius = data.zValue;
+					this.currentState = "positive";
+				}
+				else {
+					this.radius = -data.zValue*10;
+					trace(radius);
+					this.currentState = "negative";
+				}*/
+			}
+			override protected function updateDisplayList(unscaledWidth:Number,                     
+														  unscaledHeight:Number):void
+			{
+				if (data.zValue >= 0) {
+					this.radius = data.zValue*10;
+					this.currentState = "positive";
+				}
+				else {
+					this.radius = -data.zValue*10;
+					trace(radius);
+					this.currentState = "negative";
+				}
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:states>
+		<s:State name="positive" />
+		<s:State name="negative" />
+	</s:states>
+	<s:Group>
+		<s:Ellipse width="{radius}" height="{radius}">
+			<s:fill>
+				<s:SolidColor color.positive="0x00FF00" color.negative="0xFF0000" />
+			</s:fill>
+		</s:Ellipse>
+	</s:Group>
+</s:ItemRenderer>

@@ -4,8 +4,6 @@ package mmalab.softwarestudies.asianculture.data.input
 	import flash.filesystem.FileMode;
 	import flash.filesystem.FileStream;
 	
-	import mmalab.softwarestudies.visualculture.utils.Constants;
-
 	public class CsvReader
 	{
 		private var datasetRoot:String;
@@ -15,30 +13,29 @@ package mmalab.softwarestudies.asianculture.data.input
 		 * @param datasetRoot
 		 * 
 		 */
-		public function CsvReader(datasetRoot:String = Constants.DATASET_ROOT)
+		public function CsvReader()
 		{
-			this.datasetRoot = datasetRoot;
 		}
 		
 		/**
 		 * Reads the CSV file and returns the content as a String
-		 * @param filename
+		 * @param filePath
 		 * @return 
 		 * 
 		 */
-		public function csvLoad(filename:String):String {
-			return loadFromFilesystem(filename);
+		public function csvLoad(filePath:String):String {
+			return loadFromFilesystem(filePath);
 		}
 		
 		/**
 		 * Reads the CSV file and returns the content as an Array
 		 * of Object using the first line as headings.
-		 * @param filename
+		 * @param filePath
 		 * @return 
 		 * 
 		 */
-		public function csvLoadAsArray(filename:String):Array {
-			var contents:String = loadFromFilesystem(filename);
+		public function csvLoadAsArray(filePath:String):Array {
+			var contents:String = loadFromFilesystem(filePath);
 
 			return parseData(contents);
 		}
@@ -52,9 +49,9 @@ package mmalab.softwarestudies.asianculture.data.input
 		 * @return 
 		 * 
 		 */
-		private function loadFromFilesystem(filename:String):String {
+		private function loadFromFilesystem(filePath:String):String {
 			var file:File = new File();
-			file.nativePath = datasetRoot + File.separator + filename;
+			file.nativePath = filePath;
 
 			var stream:FileStream = new FileStream();
 			stream.open(file, FileMode.READ);
