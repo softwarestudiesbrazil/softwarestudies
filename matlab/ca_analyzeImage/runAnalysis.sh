@@ -16,11 +16,13 @@ fi
 ASTANA_LOGIN="jeremydouglass@astana.ucsd.edu"
 
 # path to source on Astana
-SOURCE_PREFIX="/Volumes/SWS02/projects/jeremy/comics/manga/onemanga-all"
+SOURCE_PREFIX="/Volumes/SWS02"
 # path to results on Astana
-RESULT_PREFIX="/Volumes/SWS02/projects/jeremy/comics/manga/onemanga-all-results"
+RESULT_PREFIX="/Volumes/SWS02/results"
 # path to workspace
-WORKSPACE_PREFIX="/u1/jdouglas/workspace"
+# WORKSPACE_PREFIX="/u1/jdouglas/workspace"
+# WORKSPACE_PREFIX=$SCRATCH
+WORKSPACE_PREFIX="/project/projectdirs/m860"
 
 MATLAB_PATH="/u1/jdouglas/tools/softwarestudies/matlab/ca_analyzeImage"
 
