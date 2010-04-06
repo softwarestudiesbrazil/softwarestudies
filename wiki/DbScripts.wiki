@@ -34,3 +34,17 @@
   * `$ sqlite3 test < visualCultures.sql` - create a SQLite database `test` and create table s according to the description in [DbScripts#Database_Structure]
   * `$ ./importToSqlite.py test sample-results.txt set1 testset`
   * `$ echo "select * from object_;" | sqlite3 test` - print `object_` table
+
+----
+
+= db/importToSqliteV2.py =
+
+== Usage ==
+`./importToSqliteV2.py <dbname> <data-file> <set-name> <set-description>`
+
+== Direction ==
+  * `$ cd db`
+  * `$ sqlite3 dbfile < dbSchema.sql` - create a SQLite database `dbfile` and create table s according to the description in dbSchema.sql.
+  * `$ ./importToSqliteV2.py dbfile data_withmetadata.csv onemanga onemanga` - this will insert each row in data_withmetadata.csv into the database.
+
+
