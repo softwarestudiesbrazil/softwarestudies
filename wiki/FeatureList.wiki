@@ -111,7 +111,7 @@
  # GH_8_6
  # GH_8_7
  # GH_8_8
- # BH_8_1 - Bin 1-8 of 4-bin blue histogram
+ # BH_8_1 - Bin 1-8 of 8-bin blue histogram
  # BH_8_2
  # BH_8_3
  # BH_8_4
