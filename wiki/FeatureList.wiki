@@ -8,7 +8,7 @@
  # Brightness_Kurtosis
  # Brightness_Min
  # Brightness_Max
- # GH_8_1
+ # GH_8_1 - Bin 1-8 of 8-bin gray-level histogram
  # GH_8_2
  # GH_8_3
  # GH_8_4
@@ -16,7 +16,7 @@
  # GH_8_6
  # GH_8_7
  # GH_8_8
- # GH_32_1
+ # GH_32_1 - Bin 1-32 of 32-bin gray-level histogram
  # GH_32_2
  # GH_32_3
  # GH_32_4
@@ -71,31 +71,31 @@
  # Blue_Kurtosis
  # Blue_Min
  # Blue_Max
- # ACQ_R_16_1
+ # ACQ_R_16_1 - Most dominant color after 16-color adaptive quantization
  # ACQ_G_16_1
  # ACQ_B_16_1
  # ACQ_H_16_1
  # ACQ_S_16_1
  # ACQ_V_16_1
- # ACQ_R_16_2
+ # ACQ_R_16_2 - 2nd most dominant color after 16-color adaptive quantization
  # ACQ_G_16_2
  # ACQ_B_16_2
  # ACQ_H_16_2
  # ACQ_S_16_2
  # ACQ_V_16_2
- # RH_4_1
+ # RH_4_1 - Bin 1-4 of 4-bin red histogram
  # RH_4_2
  # RH_4_3
  # RH_4_4
- # GH_4_1
+ # GH_4_1 - Bin 1-4 of 4-bin green histogram
  # GH_4_2
  # GH_4_3
  # GH_4_4
- # BH_4_1
+ # BH_4_1 - Bin 1-4 of 4-bin blue histogram
  # BH_4_2
  # BH_4_3
  # BH_4_4
- # RH_8_1
+ # RH_8_1  - Bin 1-8 of 8-bin red histogram
  # RH_8_2
  # RH_8_3
  # RH_8_4
@@ -103,7 +103,7 @@
  # RH_8_6
  # RH_8_7
  # RH_8_8
- # GH_8_1
+ # GH_8_1 - Bin 1-8 of 8-bin green histogram
  # GH_8_2
  # GH_8_3
  # GH_8_4
@@ -111,7 +111,7 @@
  # GH_8_6
  # GH_8_7
  # GH_8_8
- # BH_8_1
+ # BH_8_1 - Bin 1-8 of 4-bin blue histogram
  # BH_8_2
  # BH_8_3
  # BH_8_4
@@ -142,19 +142,19 @@
  # Value_Kurtosis
  # Value_Min
  # Value_Max
- # HH_4_1
+ # HH_4_1 - Bin 1-4 of 4-bin hue histogram
  # HH_4_2
  # HH_4_3
  # HH_4_4
- # SH_4_1
+ # SH_4_1 - Bin 1-4 of 4-bin saturation histogram
  # SH_4_2
  # SH_4_3
  # SH_4_4
- # VH_4_1
+ # VH_4_1 - Bin 1-4 of 4-bin value histogram
  # VH_4_2
  # VH_4_3
  # VH_4_4
- # HH_8_1
+ # HH_8_1 - Bin 1-8 of 8-bin hue histogram
  # HH_8_2
  # HH_8_3
  # HH_8_4
@@ -162,7 +162,7 @@
  # HH_8_6
  # HH_8_7
  # HH_8_8
- # SH_8_1
+ # SH_8_1 - Bin 1-8 of 8-bin saturation histogram
  # SH_8_2
  # SH_8_3
  # SH_8_4
@@ -170,7 +170,7 @@
  # SH_8_6
  # SH_8_7
  # SH_8_8
- # VH_8_1
+ # VH_8_1 - Bin 1-8 of 8-bin value histogram
  # VH_8_2
  # VH_8_3
  # VH_8_4
@@ -180,21 +180,21 @@
  # VH_8_8
 
 = Texture =
- # Contrast_1
+ # Contrast_1 - GLCM features of distance 1
  # Correlation_1
  # Energy_1
  # Homogeneity_1
- # Contrast_2
+ # Contrast_2 - GLCM features of distance 2
  # Correlation_2
  # Energy_2
  # Homogeneity_2
- # Contrast_4
+ # Contrast_4 - GLCM features of distance 4
  # Correlation_4
  # Energy_4
  # Homogeneity_4
- # Contrast_8
+ # Contrast_8- GLCM features of distance 8
  # Correlation_8
  # Energy_8
  # Homogeneity_8
- # EdgeAmountSobel
+ # EdgeAmountSobel - Ratio of edge pixels to the size of the image
  # Entropy
