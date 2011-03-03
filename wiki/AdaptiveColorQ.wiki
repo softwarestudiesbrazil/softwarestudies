@@ -1,5 +1,7 @@
 #summary Adaptive color quantization program (Matlab)
 
+AdaptiveColorQ is adaptive bin-size color quantization. It reduces the number of colors in the image to N colors and report top K colors. Each color doest not necessarily have the same volume in the color space.
+
 = Usage =
 
 {{{
