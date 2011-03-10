@@ -1,0 +1,6 @@
+./123_test.jpg
+./a/1947_13_rothko_untitled_8.jpg
+./a/c/1947_13_rothko_untitled_8.jpg
+./1947_13_rothko_untitled_8.jpg
+./b/1947_13_rothko_untitled_8.jpg
+./123_test_gray.jpg

@@ -1,5 +1,11 @@
-function FeatureExtractor(input_dir, prefix)
-% FeatureExtractor Visual features from jpeg files in a directory
+function FeatureExtractor(input_location, prefix, options)
+% FEATUREEXTRACTOR Extract visual features from jpeg files.
+%     FeatureExtractor(input_location, prefix, options) -
+%      input_location: path to images or a file containing paths to images.
+%      prefix: prefix of the output files
+%      options: 
+%        '-r' Also process files in sub-directories
+%
 %  Author: Sunsern Cheamanunkul 
 
 if nargin < 2
@@ -8,11 +14,12 @@ else
     prefix = [prefix '_'];
 end
 
-if ~exist(input_dir,'dir')
-    fprintf('Error: Input directory does not exist!\n');
-    return;
+if nargin > 2 && strcmp(options,'-r')
+    recursion = true;
+else
+    recursion = false;
 end
-
+ 
 %%%%%%%%%%%%
 % Parameters
 %%%%%%%%%%%%
@@ -21,25 +28,39 @@ light_file   = 'light.txt';
 rgb_file     = 'rgb.txt';
 hsv_file     = 'hsv.txt';
 texture_file = 'texture.txt';
+gabor_file   = 'gabor.txt';
 
-light_fn = fullfile(input_dir,[prefix light_file]);
-rgb_fn = fullfile(input_dir,[prefix rgb_file]);
-hsv_fn = fullfile(input_dir,[prefix hsv_file]);
-texture_fn = fullfile(input_dir,[prefix texture_file]);
+light_fn = fullfile([prefix light_file]);
+rgb_fn = fullfile([prefix rgb_file]);
+hsv_fn = fullfile([prefix hsv_file]);
+texture_fn = fullfile([prefix texture_file]);
+gabor_fn = fullfile([prefix gabor_file]);
 
-fprintf(['Input directory: ' input_dir '\n']);
+if exist(input_location,'dir')
+    filelist = getFilelistFromDir(input_location,...
+        supported_extension, recursion);
+elseif exist(input_location,'file')
+    filelist = getFilelistFromFile(input_location);
+else
+    fprintf(['Input Error. Input must be a directory containing jpegs '... 
+        'or a file containing paths to images.\n']);
+    return;
+end
+
+fprintf(['Input directory: ' input_location '\n']);
 fprintf(['Light features -> ' light_fn '\n']);
 fprintf(['RGB features -> ' rgb_fn '\n']);
 fprintf(['HSV features -> ' hsv_fn '\n']);
 fprintf(['Texture features -> ' texture_fn '\n']);
+fprintf(['Gabor features -> ' gabor_fn '\n']);
 fprintf('\n');
 
-filelist = dir(fullfile(input_dir,supported_extension));
 nimages = length(filelist);
 lightf = fopen(light_fn,'w');
 rgbf = fopen(rgb_fn,'w');
 hsvf = fopen(hsv_fn,'w');
 texturef = fopen(texture_fn,'w');
+gaborf = fopen(gabor_fn,'w');
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Print header and data type
@@ -71,6 +92,11 @@ h = [f_glcm([],1)...
      f_entropy()];
 writeHeader(texturef, h);
 fprintf('%d Texture features\n',length(h));
+
+h = f_gabor();
+writeHeader(gaborf, h);
+fprintf('%d Gabor features\n',length(h));
+
 fprintf('\n');
 
 %%%%%%%%%%%%%%%%
@@ -80,7 +106,10 @@ for i=1:nimages
     fprintf([filelist(i).name '\n']);
     
     % read image from file
-    I = imread([input_dir '/' filelist(i).name]);
+    if ~exist(filelist(i).name,'file')
+        continue;
+    end
+    I = imread(filelist(i).name);
     
     if (ndims(I) == 3 && size(I,3) == 3)
         I_gray = rgb2gray(I);
@@ -127,6 +156,13 @@ for i=1:nimages
         fprintf('SKIPPED\n');
     end
     
+    % Gabor features
+    fprintf('\t-Gabor...');
+    tstart = tic;
+    v = f_gabor(I_gray); % gabor features
+    writeToFile(gaborf, filelist(i).name, v);
+    fprintf('DONE(%.2fs)\n',toc(tstart));
+    
     % Texture features
     fprintf('\t-Texture...');
     tstart = tic;
@@ -163,3 +199,48 @@ function writeToFile(f, iname, v)
     fprintf(f,',%f',v(:));
     fprintf(f,'\n');
 end
+
+function filelist = getFilelistFromFile(f)
+filelist = struct('name',{},'isdir',{});
+fin = fopen(f,'r');
+i = 1;
+tline = deblank(fgets(fin));
+while ischar(tline)
+    if ~isempty(tline)
+        filelist(i).name = tline;
+        filelist(i).isdir = false;
+        i = i + 1;
+    end
+    tline = deblank(fgets(fin));
+end
+fclose(fin);
+end
+
+function filelist = getFilelistFromDir(d,ext,recursion)
+if ~recursion
+    % no recursion
+    filelist = dir(fullfile(d,ext));
+    % insert d in front of filenames
+    for j=1:length(filelist)
+        filelist(j).name = fullfile(d,filelist(j).name);
+    end
+else
+    filelist = dir(fullfile(d,ext));
+    % insert d in front of filenames
+    for j=1:length(filelist)
+        filelist(j).name = fullfile(d,filelist(j).name);
+    end
+    allfile = dir(d);
+    for i=1:length(allfile)
+        if allfile(i).isdir && ...
+                isempty(regexp(allfile(i).name,'^[.]', 'once'))
+            filelist = [filelist; ...
+                getFilelistFromDir(fullfile(d,allfile(i).name),...
+                ext,recursion)];
+        end
+    end
+end
+end
+
+
+
