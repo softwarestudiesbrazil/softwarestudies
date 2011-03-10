@@ -9,6 +9,7 @@ if nargin == 0
     return;
 end
 
-output = sum(sum(edge(I,'sobel')))/(size(I,1)*size(I,2));
+J = edge(I,'sobel');
+output = sum(J(:))/(size(I,1)*size(I,2));
  
 end
