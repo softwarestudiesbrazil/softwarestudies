@@ -3,18 +3,21 @@ function [output,outImg] = f_gabor(I)
 %   I = grayscale image
 %   output = [Gabor feature vecter]
 %   outImg = [Gabor filtered images]
+% NOTE: When the image is too small for the filter size, NaN is returned.
 
-lambda_all = [5,10,15,20]; % >= 2
-theta_all = [0 pi/4 pi/2 3*pi/4];
+lambda = 5; % >= 2
+theta = [0 pi/4 pi/2 3*pi/4];
+numScales = 4;
 gamma = 0.5;
 
 % returns the name of the features when no argument is given.
 if nargin == 0
     output = {};
     k=1;
-    for i=1:length(lambda_all)
-        for j=1:length(theta_all)
-            output{k} = ['Gabor_' num2str(lambda_all(i)) '_' num2str(theta_all(j))];
+    for i=1:numScales
+        for j=1:length(theta)
+            output{k} = ['Gabor_' num2str(i) '_' ...
+                num2str(rad2deg(theta(j)))];
             k=k+1;
         end
     end
@@ -22,18 +25,37 @@ if nargin == 0
 end
 
 output = [];
-outImg = [];
+outImg = {};
+
+% precompute gabor filters
+n = length(theta);
+gb = cell(1,n);
+for i=1:n
+    gb{i} = gabor_fn(lambda,gamma,theta(i),0) + ...
+        1i*gabor_fn(lambda,gamma,theta(i),pi/2);
+end
+
+% operate on different sizes exponentially smaller
 k=1;
-for i=1:length(lambda_all)
-    for j=1:length(theta_all)
-        lambda = lambda_all(i);
-        theta = theta_all(j);
-        gb = gabor_fn(lambda,gamma,theta,0) +...
-            1i*gabor_fn(lambda,gamma,theta,pi/2);
-        Iout = abs(conv2(double(I),gb,'same'));
-        outImg(:,:,k) = Iout;
-        output(k) = sum(Iout(:))/(size(I,1)*size(I,2));
+for i=1:numScales
+    for j=1:length(theta)
+        if (~isempty(I) && ...
+                size(I,1) > size(gb{j},1) && ...
+                size(I,2) > size(gb{j},2))
+            Iout = abs(conv2(double(I),gb{j},'same'));
+            outImg{k} = Iout;
+            output(k) = sum(Iout(:))/(size(I,1)*size(I,2));
+        else
+            outImg{k} = [];
+            output(k) = NaN;
+        end
         k = k + 1;
+    end
+    % only downsize if current size is larger than 2x2
+    if (size(I,1) > 2 && size(I,2) > 2)
+        I = imresize(I, 0.5);
+    else
+        I = [];
     end
 end
 

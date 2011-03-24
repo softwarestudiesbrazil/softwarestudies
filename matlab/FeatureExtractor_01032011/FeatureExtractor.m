@@ -29,12 +29,14 @@ rgb_file     = 'rgb.txt';
 hsv_file     = 'hsv.txt';
 texture_file = 'texture.txt';
 gabor_file   = 'gabor.txt';
+spatial_file = 'spatial.txt';
 
 light_fn = fullfile([prefix light_file]);
 rgb_fn = fullfile([prefix rgb_file]);
 hsv_fn = fullfile([prefix hsv_file]);
 texture_fn = fullfile([prefix texture_file]);
 gabor_fn = fullfile([prefix gabor_file]);
+spatial_fn = fullfile([prefix spatial_file]);
 
 if exist(input_location,'dir')
     filelist = getFilelistFromDir(input_location,...
@@ -53,6 +55,7 @@ fprintf(['RGB features -> ' rgb_fn '\n']);
 fprintf(['HSV features -> ' hsv_fn '\n']);
 fprintf(['Texture features -> ' texture_fn '\n']);
 fprintf(['Gabor features -> ' gabor_fn '\n']);
+fprintf(['Spatial features -> ' spatial_fn '\n']);
 fprintf('\n');
 
 nimages = length(filelist);
@@ -61,6 +64,7 @@ rgbf = fopen(rgb_fn,'w');
 hsvf = fopen(hsv_fn,'w');
 texturef = fopen(texture_fn,'w');
 gaborf = fopen(gabor_fn,'w');
+spatialf = fopen(spatial_fn,'w');
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Print header and data type
@@ -96,6 +100,15 @@ fprintf('%d Texture features\n',length(h));
 h = f_gabor();
 writeHeader(gaborf, h);
 fprintf('%d Gabor features\n',length(h));
+
+h = [f_bdip([],2)...
+     f_bdip([],3)...
+     f_bdip([],4)...
+     f_bvlc([],2,1)...
+     f_bvlc([],3,1)...
+     f_bvlc([],4,1)];
+writeHeader(spatialf, h);
+fprintf('%d Spatial features\n',length(h));
 
 fprintf('\n');
 
@@ -159,8 +172,20 @@ for i=1:nimages
     % Gabor features
     fprintf('\t-Gabor...');
     tstart = tic;
-    v = f_gabor(I_gray); % gabor features
+    v = f_gabor(I_gray); % Gabor features
     writeToFile(gaborf, filelist(i).name, v);
+    fprintf('DONE(%.2fs)\n',toc(tstart));
+    
+    % Spatial features
+    fprintf('\t-Spatial...');
+    tstart = tic;
+    v = [f_bdip(I_gray,2)... % 2x2 BDIP features
+         f_bdip(I_gray,3)... % 3x3 BDIP features
+         f_bdip(I_gray,4)... % 4x4 BDIP features
+         f_bvlc(I_gray,2,1)... % 2x2 BCLV D=1 
+         f_bvlc(I_gray,3,1)... % 3x3 BCLV D=1 
+         f_bvlc(I_gray,4,1)];  % 4x4 BCLV D=1  
+    writeToFile(spatialf, filelist(i).name, v);
     fprintf('DONE(%.2fs)\n',toc(tstart));
     
     % Texture features
@@ -180,6 +205,8 @@ fclose(lightf);
 fclose(rgbf);
 fclose(hsvf);
 fclose(texturef);
+fclose(gaborf);
+fclose(spatialf);
 
 end
 
