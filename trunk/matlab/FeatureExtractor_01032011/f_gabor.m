@@ -17,7 +17,7 @@ if nargin == 0
     for i=1:numScales
         for j=1:length(theta)
             output{k} = ['Gabor_' num2str(i) '_' ...
-                num2str(rad2deg(theta(j)))];
+				  num2str(180*theta(j)/pi)];
             k=k+1;
         end
     end

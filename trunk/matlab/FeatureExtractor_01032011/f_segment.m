@@ -42,7 +42,7 @@ I = imfilter(I, gaussianFilter);
 % ALWAYS reduce to 4 colors
 %%%%%%%%%%%%%%%%%%%%%%%%%%%
 d = 4;
-[Iindx,~] = rgb2ind(I,d,'nodither');
+[Iindx,map] = rgb2ind(I,d,'nodither');
 k = 0;
 L_combined = zeros(size(I,1),size(I,2));
 for i=0:d-1
