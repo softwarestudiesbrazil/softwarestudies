@@ -30,6 +30,7 @@ hsv_file     = 'hsv.txt';
 texture_file = 'texture.txt';
 gabor_file   = 'gabor.txt';
 spatial_file = 'spatial.txt';
+segment_file = 'segment.txt';
 
 light_fn = fullfile([prefix light_file]);
 rgb_fn = fullfile([prefix rgb_file]);
@@ -37,6 +38,7 @@ hsv_fn = fullfile([prefix hsv_file]);
 texture_fn = fullfile([prefix texture_file]);
 gabor_fn = fullfile([prefix gabor_file]);
 spatial_fn = fullfile([prefix spatial_file]);
+segment_fn = fullfile([prefix segment_file]);
 
 if exist(input_location,'dir')
     filelist = getFilelistFromDir(input_location,...
@@ -56,6 +58,7 @@ fprintf(['HSV features -> ' hsv_fn '\n']);
 fprintf(['Texture features -> ' texture_fn '\n']);
 fprintf(['Gabor features -> ' gabor_fn '\n']);
 fprintf(['Spatial features -> ' spatial_fn '\n']);
+fprintf(['Segment features -> ' segment_fn '\n']);
 fprintf('\n');
 
 nimages = length(filelist);
@@ -65,6 +68,7 @@ hsvf = fopen(hsv_fn,'w');
 texturef = fopen(texture_fn,'w');
 gaborf = fopen(gabor_fn,'w');
 spatialf = fopen(spatial_fn,'w');
+segmentf = fopen(segment_fn,'w');
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Print header and data type
@@ -109,6 +113,10 @@ h = [f_bdip([],2)...
      f_bvlc([],4,1)];
 writeHeader(spatialf, h);
 fprintf('%d Spatial features\n',length(h));
+
+h = f_segment([]);
+writeHeader(segmentf, h);
+fprintf('%d Segment features\n',length(h));
 
 fprintf('\n');
 
@@ -175,6 +183,13 @@ for i=1:nimages
     v = f_gabor(I_gray); % Gabor features
     writeToFile(gaborf, filelist(i).name, v);
     fprintf('DONE(%.2fs)\n',toc(tstart));
+
+    % Segment features
+    fprintf('\t-Segment...');
+    tstart = tic;
+    v = f_segment(I); % Segment features
+    writeToFile(segmentf, filelist(i).name, v);
+    fprintf('DONE(%.2fs)\n',toc(tstart));
     
     % Spatial features
     fprintf('\t-Spatial...');
@@ -207,6 +222,7 @@ fclose(hsvf);
 fclose(texturef);
 fclose(gaborf);
 fclose(spatialf);
+fclose(segmentf);
 
 end
 
