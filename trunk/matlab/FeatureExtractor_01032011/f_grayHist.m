@@ -1,16 +1,20 @@
 function [output] = f_grayHist(I,n)
-% f_grayHist n-bin histogram
-%   I = grayscale image
-%   output = [GH_n_1, GH_n_2, ..., GH_n_n]
-% NOTE: output histogram is normalized so that the bin with maximum
-%  frequency always has value of 1.0
+% f_grayHist n-bin grayscale histogram
+%
+%   Input: I - grayscale image
+%          n - number of bins
+%   Remarks: 
+%     1. The output histogram is normalized so that the bin with maximum
+%     frequency always has value of 1.0
 
 % returns the name of the features when I is empty
 if isempty(I)
-    output = {};
+    output.header = {};
+    output.type = {};
     for i=1:n
         fname = ['GH_' num2str(n) '_' num2str(i)];
-        output = [output fname];
+        output.header = [output.header fname];
+        output.type = [output.type 'float'];
     end
     return;
 end

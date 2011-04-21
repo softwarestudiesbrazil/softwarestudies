@@ -1,15 +1,23 @@
 function [output] = f_bvlc(I,n,d)
-% f_bvlc Block variabtion of local correlation coeff.
-%   I = grayscale image
-%   output = [nxn BVLC features]
+% f_bvlc Block variabtion of local correlation coefficients.
 %
-% NOTE: higher BVLC is higher degree of roughness
+%   Input: I - grayscale image
+%          n - number of spatial blocks
+%          d - distance to calculate correlation
+%   Remarks:
+%     1. Ordering of spatial features is assigned left-to-right e.g.
+%                1 | 2
+%               -------
+%                3 | 4 
+%     2. Higher BVLC indicates higher degree of roughness.
 
 % returns the name of the features when no argument is given.
 if isempty(I)
-    output = {};
+    output.header = {};
+    output.type = {};
     for i=1:n*n
-        output{i} = sprintf('BVLC_%d_%d_%d_%d',d,n,n,i);
+        output(i).header = {sprintf('BVLC_%d_%dx%d_%d',d,n,n,i)};
+        output(i).type = {'float'};
     end
     return;
 end

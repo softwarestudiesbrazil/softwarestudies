@@ -1,19 +1,36 @@
 function [output] = f_segment(I)
 % f_segment Partition image into segments of similar colors.
-%   I = RGB image
 %
-% Ordering of spatial features:
-%   1 | 2
-%  -------
-%   3 | 4 
+%   Input: I - RGB or grayscale image
+%   Remarks:
+%     1. Ordering of spatial features is assigned left-to-right e.g.
+%                1 | 2
+%               -------
+%                3 | 4 
+%     2. When the input image is grayscale, the intensity histogram is
+%     enhanced by adaptive histogram equalization technique. Also, the
+%     edges are thickened by erosion. 
+%
 
 % returns the name of the features when I is empty
 if isempty(I)
-    output = {'TOTLA_NUM_SEGMENTS','MEAN_AREA','MIN_AREA','MAX_AREA',...
-        'MEDIAN_AREA'};
+    output.header = {...
+        'Total_Num_Segments',...
+        'Meam_Area',...
+        'Min_Area',...
+        'Max_Area',...
+        'Median_Area'};
+    output.type = {...
+        'int',...
+        'int',...
+        'int',...
+        'int',...
+        'int'};
     for n=2:4
         for i=1:n*n
-            output = [output sprintf('NUM_SEGMENTS_%d_%d_%d',n,n,i)];
+            output.header = [output.header ...
+                sprintf('Num_Segments_%dx%d_%d',n,n,i)];
+            output.type = [output.type 'int'];
         end
     end
     return;

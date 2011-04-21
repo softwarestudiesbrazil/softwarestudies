@@ -1,21 +1,24 @@
 function [output] = f_rgbHist(I,n)
-% f_rgbHist n-bin histogram
-%   I = RGB image
-%   output = [RH_n_1, RH_n_2, ..., RH_n_n,...
-%             GH_n_1, GH_n_2, ..., GH_n_n,...
-%             BH_n_1, BH_n_2, ..., BH_n_n]
-% NOTE: output histogram is normalized so that the bin with maximum
-%  frequency always has value of 1.0. The normalization is done across
-%  colors i.e. [RH GH BH]/max([RH GH BH])
+% f_rgbHist n-bin RGB histogram
+%
+%   Input: I - RGB image
+%          n - number of bins
+%   Remarks:
+%     1. The output histogram is normalized so that the bin with maximum
+%     frequency always has value of 1.0. The normalization is done across 
+%     colors i.e. [RH GH BH]/max([RH GH BH])
+%     
 
 % returns the name of the features when I is empty
 if isempty(I)
     Cnames = {'R','G','B'};
-    output = {};
+    output.header = {};
+    output.type = {};
     for j=1:length(Cnames)
         for i=1:n
             fname = [Cnames{j} 'H_' num2str(n) '_' num2str(i)];
-            output = [output fname];
+            output.header = [output.header fname];
+            output.type = [output.type 'float'];
         end
     end
     return;
