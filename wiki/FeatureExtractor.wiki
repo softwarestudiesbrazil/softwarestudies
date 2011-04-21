@@ -5,12 +5,12 @@
 
 Simple mode:
 {{{
-./runFeatureExtractor.sh {path-to-images or file-list} {prefix}
+./runFeatureExtractor.sh {path-to-images-or-image-list} {prefix}
 }}}
 
 Or, also process sub-directories:
 {{{
-./runFeatureExtractor_subdirs.sh {path-to-images or file-list} {prefix}
+./runFeatureExtractor_subdirs.sh {path-to-images-or-image-list} {prefix}
 }}}
 
 == Option 2: Run from matlab interactively ==
@@ -19,13 +19,17 @@ Or, also process sub-directories:
 {{{
 matlab -nodisplay
 }}}
-  # Set script path
+  # In matlab, set script path
 {{{
 path(path,'PUT-YOUR-SCRIPT-PATH-HERE');
 }}}
   # Run FeatureExtractor
 {{{
-
+FeatureExtractor('PATH-TO-IMAGES-OR-IMAGE-LIST','PREFIX');
+}}}
+  # Exit matlab
+{{{
+exit;
 }}}
 
 = More about FeatureExtractor =
