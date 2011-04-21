@@ -1,17 +1,22 @@
 function [output] = f_basicRGB(I)
-% f_basicRGB Basic statistics from RGB
-%   I = RGB image
-%   output = [mean, median, std, skewness, kurtosis, min, max]
+% f_basicRGB Basic statistics from RGB channel
+%
+%   Input: I - RGB image
+%   Remarks: 
+%     1. Skewness and kurtosis can be NaN.
+%
 
 % returns the name of the features when no argument is given.
 if nargin == 0
     Cnames = {'Red','Green','Blue'};
     Cfeatures = {'Mean','Median','Std','Skewness','Kurtosis','Min','Max'};
-    output = {};
+    output.header = {};
+    output.type = {};
     for i=1:length(Cnames)
         for j=1:length(Cfeatures)
             fname = [Cnames{i} '_' Cfeatures{j}];
-            output = [output fname];
+            output.header = [output.header fname];
+            output.type = [output.type 'float'];
         end
     end
     return;

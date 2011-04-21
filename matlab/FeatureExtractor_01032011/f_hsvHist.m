@@ -1,21 +1,24 @@
 function [output] = f_hsvHist(I,n)
-% f_hsvHist n-bin histogram
-%   I = HSV image
-%   output = [HH_n_1, SH_n_2, ..., VH_n_n,...
-%             HH_n_1, SH_n_2, ..., VH_n_n,...
-%             HH_n_1, SH_n_2, ..., VH_n_n]
-% NOTE: output histogram is normalized so that the bin with maximum
-%  frequency always has value of 1.0. The normalization is done across
-%  colors i.e. [HH SH VH]/max([HH SH VH])
+% f_hsvHist n-bin HSV histogram
+%
+%   Input: I - HSV image
+%          n - number of bins
+%   Remarks:
+%     1. The output histogram is normalized so that the bin with maximum
+%     frequency always has value of 1.0. The normalization is done across 
+%     colors i.e. [HH SH VH]/max([HH SH VH])
+%
 
 % returns the name of the features when I is empty
 if isempty(I)
     Cnames = {'H','S','V'};
-    output = {};
+    output.header = {};
+    output.type = {};
     for j=1:length(Cnames)
         for i=1:n
             fname = [Cnames{j} 'H_' num2str(n) '_' num2str(i)];
-            output = [output fname];
+            output.header = [output.header fname];
+            output.type = [output.type 'float'];
         end
     end
     return;

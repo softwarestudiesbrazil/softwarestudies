@@ -1,28 +1,35 @@
 function [output] = f_adaptiveColorQ(I,n,k)
 % f_adaptiveColorQ Adaptive color quantization
-%   I = RGB image
-%   n = number of different colors
-%   k = number of colors to report
-%   output = [red_n_1,green_n_1,blue_n_1,hue_n_1,sat_n_1,value_n_1,
-%             red_n_2,green_n_2,blue_n_2,hue_n_2,sat_n_2,value_n_2,...
-%             red_n_k,green_n_k,blue_n_k,hue_n_k,sat_n_k,value_n_k]
+%
+%   Input: I = RGB image
+%          n = number of different colors to reduce to
+%          k = number of colors to report
+%   Remarks: 
+%     1. When number of colors on the image is less than k, NaN is used
+%        to indicate extra colors.
+%     2. RGB has range [0,255]. HSV has range [0,1].
+%
 
 if nargin < 2
+    % default n = 16
     n = 16;
 end
 
 if nargin < 3
+    % default k = 2
     k = 2;
 end
 
 % return header when I is empty
 if isempty(I)
     Cnames = {'ACQ_R','ACQ_G','ACQ_B','ACQ_H','ACQ_S','ACQ_V'};
-    output = {};
+    output.header = {};
+    output.type = {};
     for i=1:k
         for j=1:length(Cnames)
             fname = [Cnames{j} '_' num2str(n) '_' num2str(i)];
-            output = [output fname];
+            output.header = [output.header fname];
+            output.type = [output.type 'float'];
         end
     end
     return;

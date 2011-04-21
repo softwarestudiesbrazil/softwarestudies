@@ -1,9 +1,11 @@
 function [output,outImg] = f_gabor(I)
 % f_gabor Gabor features
-%   I = grayscale image
-%   output = [Gabor feature vecter]
-%   outImg = [Gabor filtered images]
-% NOTE: When the image is too small for the filter size, NaN is returned.
+%
+%   Input: I - grayscale image
+%   Remarks:
+%     1. When the image is too small for the filter size, NaN is returned
+%     instead.
+%
 
 lambda = 5; % >= 2
 theta = [0 pi/4 pi/2 3*pi/4];
@@ -12,12 +14,14 @@ gamma = 0.5;
 
 % returns the name of the features when no argument is given.
 if nargin == 0
-    output = {};
+    output.header = {};
+    output.type = {};
     k=1;
     for i=1:numScales
         for j=1:length(theta)
-            output{k} = ['Gabor_' num2str(i) '_' ...
-				  num2str(180*theta(j)/pi)];
+            output(k).header = {'Gabor_' num2str(i) '_' ...
+				  num2str(180*theta(j)/pi)};
+            output(k).type = {'float'};
             k=k+1;
         end
     end

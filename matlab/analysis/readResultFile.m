@@ -1,4 +1,4 @@
-function [ data, headers filenames ] = readResultFile( resultfile )
+function [ data, headers, filenames ] = readResultFile( resultfile )
 %READRESULTFILE Read result.txt produced by CAscript
 
 % reading data

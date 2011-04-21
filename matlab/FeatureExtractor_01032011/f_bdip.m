@@ -1,16 +1,26 @@
 function [output] = f_bdip(I,n)
-% f_bdip Block difference of inverse probabilities
-%   I = grayscale image
-%   output = [nxn BDIP features]
+% f_bdip Block difference of inverse probabilities.
 %
-% NOTE: feature value has range from 0 to 1 where 0 means no texture
+%   Input: I - grayscale image
+%          n - number of spatial blocks
+%          d - distance to calculate correlation
+%   Remarks:
+%     1. Ordering of spatial features is assigned left-to-right e.g.
+%                1 | 2
+%               -------
+%                3 | 4 
+%     2. The feature values has range from 0 to 1 where 0 corresponds to
+%     no texture.
+%
 
 
 % returns the name of the features when no argument is given.
 if isempty(I)
-    output = {};
+    output.header = {};
+    output.type = {};
     for i=1:n*n
-        output{i} = sprintf('BDIP_%d_%d_%d',n,n,i);
+        output(i).header = {sprintf('BDIP_%d_%d_%d',n,n,i)};
+        output(i).type = {'float'};
     end
     return;
 end

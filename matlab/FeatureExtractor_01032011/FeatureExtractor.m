@@ -1,12 +1,19 @@
 function FeatureExtractor(input_location, prefix, options)
 % FEATUREEXTRACTOR Extract visual features from jpeg files.
-%     FeatureExtractor(input_location, prefix, options) -
-%      input_location: path to images or a file containing paths to images.
-%      prefix: prefix of the output files
-%      options: 
+%
+%   Input: 
+%      input_location - path to images or a file containing paths to images.
+%      prefix - prefix of the output files.
+%      options - can be any of the following:
 %        '-r' Also process files in sub-directories
 %
-%  Author: Sunsern Cheamanunkul 
+%  Important Notes:
+%   1. Input files must have .jpg extension.
+%   2. Type of an image (RGB or grayscale) is determined by using jpeg 
+%   header. As a result, if a grayscale image is saved as an RGB image,
+%   FeatureExtractor will assume that the image is an RGB image.
+%   3. A log file named "prefix_log.txt" is generated automatically
+%
 
 if nargin < 2
     prefix = '';
@@ -39,6 +46,9 @@ texture_fn = fullfile([prefix texture_file]);
 gabor_fn = fullfile([prefix gabor_file]);
 spatial_fn = fullfile([prefix spatial_file]);
 segment_fn = fullfile([prefix segment_file]);
+
+% start log
+diary([prefix 'log.txt']);
 
 if exist(input_location,'dir')
     filelist = getFilelistFromDir(input_location,...
@@ -224,15 +234,19 @@ fclose(gaborf);
 fclose(spatialf);
 fclose(segmentf);
 
+diary off;
+
 end
 
 function writeHeader(f, h)
     fprintf(f,'filename');
-    fprintf(f,',%s',h{:});
+    for i=1:length(h)
+        fprintf(f,',%s',h(i).header{:});
+    end
     fprintf(f,'\n');
     fprintf(f,'string');
     for i=1:length(h)
-        fprintf(f,',float');
+        fprintf(f,',%s',h(i).type{:});
     end
     fprintf(f,'\n');
 end
