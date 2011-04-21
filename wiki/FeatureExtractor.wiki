@@ -1,6 +1,34 @@
 #summary Documentation for FeatureExtractor
 
+= How to run =
+== Option 1: Use the wrapper scripts ==
 
+Simple mode:
+{{{
+./runFeatureExtractor.sh {path-to-images or file-list} {prefix}
+}}}
+
+Or, also process sub-directories:
+{{{
+./runFeatureExtractor_subdirs.sh {path-to-images or file-list} {prefix}
+}}}
+
+== Option 2: Run from matlab interactively ==
+
+  # Start matlab without GUI
+{{{
+matlab -nodisplay
+}}}
+  # Set script path
+{{{
+path(path,'PUT-YOUR-SCRIPT-PATH-HERE');
+}}}
+  # Run FeatureExtractor
+{{{
+
+}}}
+
+= More about FeatureExtractor =
 {{{
 FEATUREEXTRACTOR Extract visual features from jpeg files.
  
