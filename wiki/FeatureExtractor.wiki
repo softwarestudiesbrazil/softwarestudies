@@ -34,7 +34,8 @@ exit;
 
 == Option 3: Run matlab in batch mode ==
 {{{
-matlab -nodisplay -r "path(path,'PUT-YOUR-SCRIPT-PATH-HERE'); FeatureExtractor('PATH-TO-IMAGES-OR-IMAGE-LIST','PREFIX'); exit;"
+matlab -nodisplay -r "path(path,'PUT-YOUR-SCRIPT-PATH-HERE'); 
+FeatureExtractor('PATH-TO-IMAGES-OR-IMAGE-LIST','PREFIX'); exit;"
 }}}
 
 = More about FeatureExtractor =
