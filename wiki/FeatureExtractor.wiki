@@ -18,7 +18,7 @@ FEATUREEXTRACTOR Extract visual features from jpeg files.
     3. A log file named "prefix_log.txt" is generated automatically
  }}}
 
-== Features ==
+= Features =
 
 === Adaptive color quantization features ===
 {{{ 
@@ -33,7 +33,7 @@ f_adaptiveColorQ Adaptive color quantization
       2. RGB has range [0,255]. HSV has range [0,1]. 
 }}}
 
-=== Basic Light features ===
+=== Basic Color features ===
 {{{
   f_basicLight Basic statistics from a grayscale image.
  
@@ -42,8 +42,6 @@ f_adaptiveColorQ Adaptive color quantization
       1. Skewness and kurtosis can be NaN.
 }}}
 
-
-=== Basic RGB features ===
 {{{
   f_basicRGB Basic statistics from RGB channel
  
@@ -52,12 +50,118 @@ f_adaptiveColorQ Adaptive color quantization
       1. Skewness and kurtosis can be NaN.
 }}}
 
-
-=== Basic HSV features ===
 {{{
   f_basicHSV Basic statistics from HSV channel
  
     Input: I - HSV image
     Remarks: 
       1. Skewness and kurtosis can be NaN.
+}}}
+
+=== BDIP and BVLC ===
+{{{
+  f_bdip Block difference of inverse probabilities.
+ 
+    Input: I - grayscale image
+           n - number of spatial blocks
+           d - distance to calculate correlation
+    Remarks:
+      1. Ordering of spatial features is assigned left-to-right e.g.
+                 1 | 2
+                -------
+                 3 | 4 
+      2. The feature values has range from 0 to 1 where 0 corresponds to
+      no texture.
+}}}
+
+{{{
+  f_bvlc Block variabtion of local correlation coefficients.
+ 
+    Input: I - grayscale image
+           n - number of spatial blocks
+           d - distance to calculate correlation
+    Remarks:
+      1. Ordering of spatial features is assigned left-to-right e.g.
+                 1 | 2
+                -------
+                 3 | 4 
+      2. Higher BVLC indicates higher degree of roughness.
+}}}
+
+=== Color Histograms ===
+{{{
+  f_grayHist n-bin grayscale histogram
+ 
+    Input: I - grayscale image
+           n - number of bins
+    Remarks: 
+      1. The output histogram is normalized so that the bin with maximum
+      frequency always has value of 1.0
+}}}
+
+{{{
+  f_rgbHist n-bin RGB histogram
+ 
+    Input: I - RGB image
+           n - number of bins
+    Remarks:
+      1. The output histogram is normalized so that the bin with maximum
+      frequency always has value of 1.0. The normalization is done across 
+      colors i.e. [RH GH BH]/max([RH GH BH])
+}}}
+
+{{{
+  f_hsvHist n-bin HSV histogram
+ 
+    Input: I - HSV image
+           n - number of bins
+    Remarks:
+      1. The output histogram is normalized so that the bin with maximum
+      frequency always has value of 1.0. The normalization is done across 
+      colors i.e. [HH SH VH]/max([HH SH VH])
+}}}
+
+=== Gabor features ===
+{{{
+  f_gabor Gabor features
+ 
+    Input: I - grayscale image
+    Remarks:
+      1. When the image is too small for the filter size, NaN is returned
+      instead.
+}}}
+
+=== Texture features ===
+{{{
+  f_entropy Entropy
+ 
+    Input: I - grayscale image
+}}}
+
+{{{
+  f_sobel Average energy of sobel filter per pixel
+ 
+    Input: I - grayscale image
+}}}
+
+{{{
+  f_glcm GLCM information
+ 
+    Input: I - grayscale image
+           D - distance for GLCM
+}}}
+
+=== Color segmentation features ===
+{{{
+  f_segment Partition image into segments of similar colors.
+ 
+    Input: I - RGB or grayscale image
+    Remarks:
+      1. Ordering of spatial features is assigned left-to-right e.g.
+                 1 | 2
+                -------
+                 3 | 4 
+      2. When the input image is grayscale, the intensity histogram is
+      enhanced by adaptive histogram equalization technique. Also, the
+      edges are thickened by erosion. 
 }}}
