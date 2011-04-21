@@ -1,0 +1,63 @@
+#summary Documentation for FeatureExtractor
+
+
+{{{
+FEATUREEXTRACTOR Extract visual features from jpeg files.
+ 
+    Input: 
+       input_location - path to images or a file containing paths to images.
+       prefix - prefix of the output files.
+       options - can be any of the following:
+         '-r' Also process files in sub-directories
+ 
+   Important Notes:
+    1. Input files must have .jpg extension.
+    2. Type of an image (RGB or grayscale) is determined by using jpeg 
+    header. As a result, if a grayscale image is saved as an RGB image,
+    FeatureExtractor will assume that the image is an RGB image.
+    3. A log file named "prefix_log.txt" is generated automatically
+ }}}
+
+== Features ==
+
+=== Adaptive color quantization features ===
+{{{ 
+f_adaptiveColorQ Adaptive color quantization
+ 
+    Input: I = RGB image
+           n = number of different colors to reduce to
+           k = number of colors to report
+    Remarks: 
+      1. When number of colors on the image is less than k, NaN is used
+         to indicate extra colors.
+      2. RGB has range [0,255]. HSV has range [0,1]. 
+}}}
+
+=== Basic Light features ===
+{{{
+  f_basicLight Basic statistics from a grayscale image.
+ 
+    Input: I - grayscale image
+    Remarks: 
+      1. Skewness and kurtosis can be NaN.
+}}}
+
+
+=== Basic RGB features ===
+{{{
+  f_basicRGB Basic statistics from RGB channel
+ 
+    Input: I - RGB image
+    Remarks: 
+      1. Skewness and kurtosis can be NaN.
+}}}
+
+
+=== Basic HSV features ===
+{{{
+  f_basicHSV Basic statistics from HSV channel
+ 
+    Input: I - HSV image
+    Remarks: 
+      1. Skewness and kurtosis can be NaN.
+}}}
