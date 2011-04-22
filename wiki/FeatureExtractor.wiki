@@ -108,6 +108,8 @@ f_adaptiveColorQ Adaptive color quantization
 === BDIP and BVLC ===
 {{{
   f_bdip Block difference of inverse probabilities.
+
+  BDIP is a line detection feature defined by M^2 - \frac{\sum_{I(x,y)}}{\max_{I(x,y)}}.
  
     Input: I - grayscale image
            n - number of spatial blocks
