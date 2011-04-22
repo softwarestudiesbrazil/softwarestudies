@@ -18,6 +18,8 @@ FEATUREEXTRACTOR Extract visual features from jpeg files.
     3. A log file named "prefix_log.txt" is generated automatically
  }}}
 
+----
+
 = How to run =
 == Option 1: Use the wrapper scripts ==
 
@@ -55,6 +57,8 @@ exit;
 matlab -nodisplay -r "path(path,'PUT-YOUR-SCRIPT-PATH-HERE'); 
 FeatureExtractor('PATH-TO-IMAGES-OR-IMAGE-LIST','PREFIX'); exit;"
 }}}
+
+----
 
 = Features =
 
@@ -209,7 +213,9 @@ f_adaptiveColorQ Adaptive color quantization
       edges are thickened by erosion. 
 }}}
 
-=== PCA analysis scripts ===
+----
+
+== PCA analysis scripts ==
 {{{
 
 How to run
