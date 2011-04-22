@@ -1,5 +1,23 @@
 #summary Documentation for FeatureExtractor
 
+= More about FeatureExtractor =
+{{{
+FEATUREEXTRACTOR Extract visual features from jpeg files.
+ 
+    Input: 
+       input_location - path to images or a file containing paths to images.
+       prefix - prefix of the output files.
+       options - can be any of the following:
+         '-r' Also process files in sub-directories
+ 
+   Important Notes:
+    1. Input files must have .jpg extension.
+    2. Type of an image (RGB or grayscale) is determined by using jpeg 
+    header. As a result, if a grayscale image is saved as an RGB image,
+    FeatureExtractor will assume that the image is an RGB image.
+    3. A log file named "prefix_log.txt" is generated automatically
+ }}}
+
 = How to run =
 == Option 1: Use the wrapper scripts ==
 
@@ -38,25 +56,12 @@ matlab -nodisplay -r "path(path,'PUT-YOUR-SCRIPT-PATH-HERE');
 FeatureExtractor('PATH-TO-IMAGES-OR-IMAGE-LIST','PREFIX'); exit;"
 }}}
 
-= More about FeatureExtractor =
-{{{
-FEATUREEXTRACTOR Extract visual features from jpeg files.
- 
-    Input: 
-       input_location - path to images or a file containing paths to images.
-       prefix - prefix of the output files.
-       options - can be any of the following:
-         '-r' Also process files in sub-directories
- 
-   Important Notes:
-    1. Input files must have .jpg extension.
-    2. Type of an image (RGB or grayscale) is determined by using jpeg 
-    header. As a result, if a grayscale image is saved as an RGB image,
-    FeatureExtractor will assume that the image is an RGB image.
-    3. A log file named "prefix_log.txt" is generated automatically
- }}}
-
 = Features =
+
+=== Output Files ===
+{{{
+List of output files with features next to file name 
+}}}
 
 === Adaptive color quantization features ===
 {{{ 
@@ -202,4 +207,13 @@ f_adaptiveColorQ Adaptive color quantization
       2. When the input image is grayscale, the intensity histogram is
       enhanced by adaptive histogram equalization technique. Also, the
       edges are thickened by erosion. 
+}}}
+
+=== PCA analysis scripts ===
+{{{
+
+How to run
+(Specific to this data)
+Two types of file output
+
 }}}
