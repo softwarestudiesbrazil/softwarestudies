@@ -62,7 +62,7 @@ if (ndims(I) == 3 && size(I,3) == 3)
     output = output';
     output = output(:)';
 else
-    output = NaN(1,3*k);
+    output = NaN(1,6*k);
 end
 
 end
