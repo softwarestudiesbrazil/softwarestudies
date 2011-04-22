@@ -18,7 +18,7 @@ FEATUREEXTRACTOR Extract visual features from jpeg files.
     3. A log file named "prefix_log.txt" is generated automatically
  }}}
 
-----
+&nbsp;
 
 = How to run =
 == Option 1: Use the wrapper scripts ==
