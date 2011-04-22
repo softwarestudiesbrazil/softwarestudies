@@ -19,8 +19,8 @@ if isempty(I)
     output.header = {};
     output.type = {};
     for i=1:n*n
-        output(i).header = {sprintf('BDIP_%d_%d_%d',n,n,i)};
-        output(i).type = {'float'};
+        output.header{i} = sprintf('BDIP_%d_%d_%d',n,n,i);
+        output.type{i} = 'float';
     end
     return;
 end

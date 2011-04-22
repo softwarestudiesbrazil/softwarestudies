@@ -35,30 +35,34 @@ if isempty(I)
     return;
 end
 
-[idx_img,map] = rgb2ind(I, n, 'nodither');
-
-count = zeros(n,2);
-for i=1:n
-    count(i,1) = i;
-    count(i,2) = size(find(idx_img(:) == (i-1)),1);
-end
-
-count = sortrows(count,-2);
-
-% if number of colors is fewer than k
-if size(map,1) < k
-    l = size(map,1);
-    rgb = map(count(1:l,1),:);
-    hsv = rgb2hsv(rgb);
-    output = [rgb*255.0 hsv];
-    output = [output;NaN(k-l,6)];
+if (ndims(I) == 3 && size(I,3) == 3)
+    [idx_img,map] = rgb2ind(I, n, 'nodither');
+    
+    count = zeros(n,2);
+    for i=1:n
+        count(i,1) = i;
+        count(i,2) = size(find(idx_img(:) == (i-1)),1);
+    end
+    
+    count = sortrows(count,-2);
+    
+    % if number of colors is fewer than k
+    if size(map,1) < k
+        l = size(map,1);
+        rgb = map(count(1:l,1),:);
+        hsv = rgb2hsv(rgb);
+        output = [rgb*255.0 hsv];
+        output = [output;NaN(k-l,6)];
+    else
+        rgb = map(count(1:k,1),:);
+        hsv = rgb2hsv(rgb);
+        output = [rgb*255.0 hsv];
+    end
+    
+    output = output';
+    output = output(:)';
 else
-    rgb = map(count(1:k,1),:);
-    hsv = rgb2hsv(rgb);
-    output = [rgb*255.0 hsv];
+    output = NaN(1,3*k);
 end
-
-output = output';
-output = output(:)';
 
 end

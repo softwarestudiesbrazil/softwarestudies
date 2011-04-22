@@ -157,35 +157,31 @@ for i=1:nimages
     writeToFile(lightf, filelist(i).name, v);
     fprintf('DONE(%.2fs)\n',toc(tstart));
     
-    % RGB features (color only)
+    % RGB features
     fprintf('\t-RGB...');
-    if (ndims(I) == 3 && size(I,3) == 3)
-        tstart = tic;
-        v = [f_basicRGB(I)...           % Basic RGB info
-            f_adaptiveColorQ(I,16,2)... % 2 most dominant colors
-            f_rgbHist(I,4)...           % 4-bin histogram
-            f_rgbHist(I,8)];            % 8-bin histogram
-        writeToFile(rgbf, filelist(i).name, v);
-        fprintf('DONE(%.2fs)\n',toc(tstart));
-    else
-        % not colored image
-        fprintf('SKIPPED\n');
-    end
-    
+    tstart = tic;
+    v = [f_basicRGB(I)...           % Basic RGB info
+        f_adaptiveColorQ(I,16,2)... % 2 most dominant colors
+        f_rgbHist(I,4)...           % 4-bin histogram
+        f_rgbHist(I,8)];            % 8-bin histogram
+    writeToFile(rgbf, filelist(i).name, v);
+    fprintf('DONE(%.2fs)\n',toc(tstart));
+
     % HSV features (color only)
     fprintf('\t-HSV...');
     if (ndims(I) == 3 && size(I,3) == 3)
         I_hsv = rgb2hsv(I);
-        tstart = tic;
-        v = [f_basicHSV(I_hsv)... % Basic HSV info
-            f_hsvHist(I_hsv,4)... % 4-bin histogram
-            f_hsvHist(I_hsv,8)];  % 8-bin histogram
-        writeToFile(hsvf, filelist(i).name, v);
-        fprintf('DONE(%.2fs)\n',toc(tstart));
     else
-        % not colored image
-        fprintf('SKIPPED\n');
+        % When the image is grayscale, we let I_hsv = I so
+        % the HSV features will not process the image.
+        I_hsv = I;
     end
+    tstart = tic;
+    v = [f_basicHSV(I_hsv)... % Basic HSV info
+        f_hsvHist(I_hsv,4)... % 4-bin histogram
+        f_hsvHist(I_hsv,8)];  % 8-bin histogram
+    writeToFile(hsvf, filelist(i).name, v);
+    fprintf('DONE(%.2fs)\n',toc(tstart));
     
     % Gabor features
     fprintf('\t-Gabor...');
