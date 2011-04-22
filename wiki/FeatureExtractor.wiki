@@ -1,6 +1,6 @@
 #summary Documentation for FeatureExtractor
 
-= More about FeatureExtractor =
+= About =
 {{{
 FEATUREEXTRACTOR Extract visual features from jpeg files.
  
