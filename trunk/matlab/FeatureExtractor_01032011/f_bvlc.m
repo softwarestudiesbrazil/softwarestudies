@@ -16,8 +16,8 @@ if isempty(I)
     output.header = {};
     output.type = {};
     for i=1:n*n
-        output(i).header = {sprintf('BVLC_%d_%dx%d_%d',d,n,n,i)};
-        output(i).type = {'float'};
+        output.header{i} = sprintf('BVLC_%d_%dx%d_%d',d,n,n,i);
+        output.type{i} = 'float';
     end
     return;
 end

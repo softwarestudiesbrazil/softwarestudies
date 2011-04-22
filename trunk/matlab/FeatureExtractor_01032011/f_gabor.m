@@ -19,9 +19,9 @@ if nargin == 0
     k=1;
     for i=1:numScales
         for j=1:length(theta)
-            output(k).header = {'Gabor_' num2str(i) '_' ...
-				  num2str(180*theta(j)/pi)};
-            output(k).type = {'float'};
+            output.header{k} = ['Gabor_' num2str(i) '_' ...
+				  num2str(180*theta(j)/pi)];
+            output.type{k} = 'float';
             k=k+1;
         end
     end

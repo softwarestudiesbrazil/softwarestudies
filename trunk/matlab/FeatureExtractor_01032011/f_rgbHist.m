@@ -24,26 +24,30 @@ if isempty(I)
     return;
 end
 
-% center of each bin
-center = linspace(0,255,n+1);
-center = (center(2:end) + center(1:end-1))/2;
-
-% R
-y = double(I(:,:,1));
-y = y(:);
-RH = hist(y,center);
-
-% G
-y = double(I(:,:,2));
-y = y(:);
-GH = hist(y,center);
-
-% B
-y = double(I(:,:,3));
-y = y(:);
-BH = hist(y,center);
-
-Z = max([RH GH BH]);
-output = [RH GH BH]/Z;
+if (ndims(I) == 3 && size(I,3) == 3)
+    % center of each bin
+    center = linspace(0,255,n+1);
+    center = (center(2:end) + center(1:end-1))/2;
+    
+    % R
+    y = double(I(:,:,1));
+    y = y(:);
+    RH = hist(y,center);
+    
+    % G
+    y = double(I(:,:,2));
+    y = y(:);
+    GH = hist(y,center);
+    
+    % B
+    y = double(I(:,:,3));
+    y = y(:);
+    BH = hist(y,center);
+    
+    Z = max([RH GH BH]);
+    output = [RH GH BH]/Z;
+else
+    output = zeros(1,3*n);
+end
 
 end
