@@ -38,6 +38,7 @@ texture_file = 'texture.txt';
 gabor_file   = 'gabor.txt';
 spatial_file = 'spatial.txt';
 segment_file = 'segment.txt';
+acq_file = 'acq.txt';
 
 light_fn = fullfile([prefix light_file]);
 rgb_fn = fullfile([prefix rgb_file]);
@@ -46,8 +47,9 @@ texture_fn = fullfile([prefix texture_file]);
 gabor_fn = fullfile([prefix gabor_file]);
 spatial_fn = fullfile([prefix spatial_file]);
 segment_fn = fullfile([prefix segment_file]);
+acq_fn = fullfile([prefix acq_file]);
 
-% start log
+% start logging
 diary([prefix 'log.txt']);
 
 if exist(input_location,'dir')
@@ -61,6 +63,8 @@ else
     return;
 end
 
+totalTime = tic();
+
 fprintf(['Input directory: ' input_location '\n']);
 fprintf(['Light features -> ' light_fn '\n']);
 fprintf(['RGB features -> ' rgb_fn '\n']);
@@ -69,6 +73,7 @@ fprintf(['Texture features -> ' texture_fn '\n']);
 fprintf(['Gabor features -> ' gabor_fn '\n']);
 fprintf(['Spatial features -> ' spatial_fn '\n']);
 fprintf(['Segment features -> ' segment_fn '\n']);
+fprintf(['ACQ features -> ' acq_fn '\n']);
 fprintf('\n');
 
 nimages = length(filelist);
@@ -79,28 +84,37 @@ texturef = fopen(texture_fn,'w');
 gaborf = fopen(gabor_fn,'w');
 spatialf = fopen(spatial_fn,'w');
 segmentf = fopen(segment_fn,'w');
+acqf = fopen(acq_fn,'w');
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Print header and data type
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Notes:
+%    1. To customize features, you need to do change BOTH header
+%       and actual call to the feature functions. For example,
+%       if you want to change the number of bins for grayscale
+%	histogram from 8 to 4, you need to make two changes:
+%	 a) f_grayHist([],8) --> f_grayHist([],4)
+%        b) f_grayHist(I_gray,8) --> f_grayHist(I_gray,4) 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 h = [f_basicLight()...
     f_grayHist([],8)...
     f_grayHist([],32)];
 writeHeader(lightf, h);
-fprintf('%d Light features\n',length(h));
+fprintf('%d Light features\n',countFeatures(h));
 
 h = [f_basicRGB()...
-    f_adaptiveColorQ([],16,2)...
     f_rgbHist([],4)...
     f_rgbHist([],8)];
 writeHeader(rgbf, h);
-fprintf('%d RGB features\n',length(h));
+fprintf('%d RGB features\n',countFeatures(h));
 
 h = [f_basicHSV()...
     f_hsvHist([],4)...
     f_hsvHist([],8)];
 writeHeader(hsvf, h);
-fprintf('%d HSV features\n',length(h));
+fprintf('%d HSV features\n',countFeatures(h));
 
 h = [f_glcm([],1)...
      f_glcm([],2)...
@@ -109,11 +123,11 @@ h = [f_glcm([],1)...
      f_sobel()...
      f_entropy()];
 writeHeader(texturef, h);
-fprintf('%d Texture features\n',length(h));
+fprintf('%d Texture features\n',countFeatures(h));
 
 h = f_gabor();
 writeHeader(gaborf, h);
-fprintf('%d Gabor features\n',length(h));
+fprintf('%d Gabor features\n',countFeatures(h));
 
 h = [f_bdip([],2)...
      f_bdip([],3)...
@@ -122,11 +136,15 @@ h = [f_bdip([],2)...
      f_bvlc([],3,1)...
      f_bvlc([],4,1)];
 writeHeader(spatialf, h);
-fprintf('%d Spatial features\n',length(h));
+fprintf('%d Spatial features\n',countFeatures(h));
 
 h = f_segment([]);
 writeHeader(segmentf, h);
-fprintf('%d Segment features\n',length(h));
+fprintf('%d Segment features\n',countFeatures(h));
+
+h = f_adaptiveColorQ([],16,16);
+writeHeader(acqf, h);
+fprintf('%d ACQ features\n',countFeatures(h));
 
 fprintf('\n');
 
@@ -161,7 +179,6 @@ for i=1:nimages
     fprintf('\t-RGB...');
     tstart = tic;
     v = [f_basicRGB(I)...           % Basic RGB info
-        f_adaptiveColorQ(I,16,2)... % 2 most dominant colors
         f_rgbHist(I,4)...           % 4-bin histogram
         f_rgbHist(I,8)];            % 8-bin histogram
     writeToFile(rgbf, filelist(i).name, v);
@@ -197,6 +214,13 @@ for i=1:nimages
     writeToFile(segmentf, filelist(i).name, v);
     fprintf('DONE(%.2fs)\n',toc(tstart));
     
+    % ACQ features
+    fprintf('\t-ACQ...');
+    tstart = tic;
+    v = f_adaptiveColorQ(I,16,16); % Adaptive color quantization
+    writeToFile(acqf, filelist(i).name, v);
+    fprintf('DONE(%.2fs)\n',toc(tstart));
+    
     % Spatial features
     fprintf('\t-Spatial...');
     tstart = tic;
@@ -230,8 +254,16 @@ fclose(gaborf);
 fclose(spatialf);
 fclose(segmentf);
 
+fprintf('\nTotal processing time: %.2f\n',toc(totalTime));
 diary off;
 
+end
+
+function c = countFeatures(h)
+   c = 0;
+   for i=1:length(h)
+      c = c + length(h(i).header);
+   end
 end
 
 function writeHeader(f, h)
@@ -294,6 +326,3 @@ else
     end
 end
 end
-
-
-

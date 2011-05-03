@@ -16,13 +16,13 @@ if nargin < 2
 end
 
 if nargin < 3
-    % default k = 2
-    k = 2;
+    % default k = 16
+    k = 16;
 end
 
 % return header when I is empty
 if isempty(I)
-    Cnames = {'ACQ_R','ACQ_G','ACQ_B','ACQ_H','ACQ_S','ACQ_V'};
+    Cnames = {'ACQ_R','ACQ_G','ACQ_B','ACQ_H','ACQ_S','ACQ_V','ACQ_Weight'};
     output.header = {};
     output.type = {};
     for i=1:k
@@ -50,9 +50,10 @@ if (ndims(I) == 3 && size(I,3) == 3)
     if size(map,1) < k
         l = size(map,1);
         rgb = map(count(1:l,1),:);
+	w = count(1:l,2)/sum(count(:,2))
         hsv = rgb2hsv(rgb);
-        output = [rgb*255.0 hsv];
-        output = [output;NaN(k-l,6)];
+        output = [rgb*255.0 hsv w];
+        output = [output;NaN(k-l,7)];
     else
         rgb = map(count(1:k,1),:);
         hsv = rgb2hsv(rgb);
@@ -62,7 +63,7 @@ if (ndims(I) == 3 && size(I,3) == 3)
     output = output';
     output = output(:)';
 else
-    output = NaN(1,6*k);
+    output = NaN(1,7*k);
 end
 
 end
