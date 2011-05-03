@@ -63,9 +63,15 @@ FeatureExtractor('PATH-TO-IMAGES-OR-IMAGE-LIST','PREFIX'); exit;"
 = Features =
 
 === Output Files ===
-{{{
-List of output files with features next to file name 
-}}}
+  * PREFIX_acq.txt - Adaptive color quantization (Default: 16 colors)
+  * PREFIX_gabor.txt - Gabor features (Default: 4 scales x 4 orientations)
+  * PREFIX_hsv.txt - Basic HSV features and HSV histograms.
+  * PREFIX_light.txt - Basic grayscale features and grayscale histograms.
+  * PREFIX_log.txt - Log file
+  * PREFIX_rgb.txt - Basic RGB features and RGB histograms.
+  * PREFIX_segment.txt - Image similar-color segmentation.
+  * PREFIX_spatial.txt - BDIP and BVLC.
+  * PREFIX_texture.txt - GLCM, Sobel energy, Entropy.
 
 === Adaptive color quantization features ===
 {{{ 
