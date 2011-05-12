@@ -12,7 +12,7 @@ if isempty(I)
     output.header = {};
     output.type = {};
     for i=1:n
-        fname = ['GH_' num2str(n) '_' num2str(i)];
+        fname = ['GrayH_' num2str(n) '_' num2str(i)];
         output.header = [output.header fname];
         output.type = [output.type 'float'];
     end
