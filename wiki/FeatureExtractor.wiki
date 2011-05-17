@@ -119,7 +119,6 @@ f_adaptiveColorQ Adaptive color quantization
  
     Input: I - grayscale image
            n - number of spatial blocks
-           d - distance to calculate correlation
     Remarks:
       1. Ordering of spatial features is assigned left-to-right e.g.
                  1 | 2
