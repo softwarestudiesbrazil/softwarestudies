@@ -3,7 +3,6 @@ function [output] = f_bdip(I,n)
 %
 %   Input: I - grayscale image
 %          n - number of spatial blocks
-%          d - distance to calculate correlation
 %   Remarks:
 %     1. Ordering of spatial features is assigned left-to-right e.g.
 %                1 | 2
@@ -19,7 +18,7 @@ if isempty(I)
     output.header = {};
     output.type = {};
     for i=1:n*n
-        output.header{i} = sprintf('BDIP_%d_%d_%d',n,n,i);
+        output.header{i} = sprintf('BDIP_%dx%d_%d',n,n,i);
         output.type{i} = 'float';
     end
     return;
