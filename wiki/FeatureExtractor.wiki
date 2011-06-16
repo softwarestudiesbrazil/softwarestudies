@@ -7,46 +7,46 @@
 = List of Features =
 
   # Adaptive color quantization -- reduces colors on each image to N colors using adaptive bin size. 
-    * Number of features: 112
+    * Number of features: *112*
     * Output: `PREFIX_acq.txt`
   # Basic statistics on light channel -- mean, standard deviation, etc.
-    * Number of features: 7
+    * Number of features: *7*
     * Output: `PREFIX_light.txt`
   # Grayscale histograms -- 8 and 32 bins
-    * Number of features: 40
+    * Number of features: *40*
     * Output: `PREFIX_light.txt`
   # Basic statistics on RGB channels -- mean, standard deviation, etc.
-    * Number of features: 21
+    * Number of features: *21*
     * Output: `PREFIX_rgb.txt`
   # RGB color histograms -- 4 and 8 bins
-    * Number of features: 36
+    * Number of features: *36*
     * Output: `PREFIX_rgb.txt`
   # Basic statistics on HSV channels -- mean, standard deviation, etc.
-    * Number of features: 21
+    * Number of features: *21*
     * Output: `PREFIX_hsv.txt`
   # HSV color histograms -- 4 and 8 bins
-    * Number of features: 36
+    * Number of features: *36*
     * Output: `PREFIX_hsv.txt`
   # Block difference of inverse probabilities -- 2x2, 3x3, 4x4 
-    * Number of features: 29
+    * Number of features: *29*
     * Output: `PREFIX_spatial.txt`
   # Block variation of local correlation coefficients -- 2x2, 3x3, 4x4
-    * Number of features: 29
+    * Number of features: *29*
     * Output: `PREFIX_spatial.txt`
   # Entropy 
-    * Number of features: 1
+    * Number of features: *1*
     * Output: `PREFIX_texture.txt`
   # Grey-Level Co-occurrence Matrix texture measurements (GLCM) -- constrast, correlation, energy, etc.
-    * Number of features: 16
+    * Number of features: *16*
     * Output: `PREFIX_texture.txt`
   # Sobel edge energy 
-    * Number of features: 1
+    * Number of features: *1*
     * Output: `PREFIX_texture.txt`
   # Gabor features -- 4 orientations (0,45,90,135) and 4 sizes (1x,0.5x,0.25x,0.125x)
-    * Number of features: 16
+    * Number of features: *16*
     * Output: `PREFIX_gabor.txt`
   # Similarity-based color segmentation -- 4 block sizes (1x1,2x2,3x3,4x4) 
-    * Number of features: 34
+    * Number of features: *34*
     * Output: `PREFIX_segment.txt`
 
 Total number of features: *399*
@@ -97,13 +97,14 @@ matlab -nodisplay -r "path(path,'PUT-YOUR-SCRIPT-PATH-HERE');
 FeatureExtractor('PATH-TO-IMAGES-OR-IMAGE-LIST','PREFIX'); exit;"
 }}}
 
+
 ----
 
-= Performing PCA on the output files =
+== Performing PCA on the output files ==
 
 The PCA script is located under `matlab/PCA`. There are two ways to run the PCA script.
 
-== How to run ==
+=== How to run ===
 {{{
 cd matlab/PCA
 ./runPCA.sh {path-to-result-files} {prefix}
@@ -111,7 +112,7 @@ cd matlab/PCA
 
 `{path-to-result-files}` is the path to the output files of FeatureExtractor
  
-== Outputs ==
+=== Outputs ===
 
 Different PCAs are performed:
   # *all* - using all features
