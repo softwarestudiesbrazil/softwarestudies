@@ -1,189 +1,26 @@
 #summary Documentation for FeatureExtractor
 
-= Overview =
-
 FeatureExtractor is a matlab script that extracts variety of visual features from image files.
-
-----
 
 = List of Features =
 
-  # Adaptive color quantization -- reduces colors on each image to N colors using adaptive bin size. (Output: PREFIX_acq.txt)
-  # Basic statistics on light channel -- mean, standard deviation, etc.
-  # Grayscale histograms
-Basic statistics on RGB channels -- mean,stdev,etc.
-RGB color histograms
-Basic statistics on HSV channels -- mean,stdev,etc.
-HSV color histograms
-Block difference of inverse probabilities
-Block variabtion of local correlation coefficients.
-Entropy
-Grey-Level Co-occurrence Matrix texture measurements (GLCM) -- Constrast, Correlation, Energy, etc.
-Sobel Edge energy
-Gabor filter responses -- 4 orientations (0,45,90,135) and 4 sizes (1x,0.5x,0.25x,0.125x)
-Count number of regions on the image -- (fullimage, 2x2,3x3,4x4 )
+  # Adaptive color quantization -- reduces colors on each image to N colors using adaptive bin size. (Number of features: 112, Output: PREFIX_acq.txt)
+  # Basic statistics on light channel -- mean, standard deviation, etc. (Number of features: 7, Output: PREFIX_light.txt)
+  # Grayscale histograms -- 8 and 32 bins (Number of features: 40, Output: PREFIX_light.txt)
+  # Basic statistics on RGB channels -- mean, standard deviation, etc. (Number of features: 21, Output: PREFIX_rgb.txt)
+  # RGB color histograms -- 4 and 8 bins (Number of features: 36, Output: PREFIX_rgb.txt)
+  # Basic statistics on HSV channels -- mean, standard deviation, etc. (Number of features: 21, Output: PREFIX_hsv.txt)
+  # HSV color histograms -- 4 and 8 bins (Number of features: 36, Output: PREFIX_hsv.txt)
+  # Block difference of inverse probabilities -- 2x2, 3x3, 4x4 (Number of features: 29, Output: PREFIX_spatial.txt)
+  # Block variation of local correlation coefficients -- 2x2, 3x3, 4x4 (Number of features: 29, Output: PREFIX_spatial.txt) 
+  # Entropy (Number of features: 1, Output: PREFIX_texture.txt)
+  # Grey-Level Co-occurrence Matrix texture measurements (GLCM) -- constrast, correlation, energy, etc. (Number of features: 16, Output: PREFIX_texture.txt)
+  # Sobel edge energy (Number of features: 1, Output: PREFIX_texture.txt)
+  # Gabor filter responses -- 4 orientations (0,45,90,135) and 4 sizes (1x,0.5x,0.25x,0.125x) (Number of features: 16, Output: PREFIX_gabor.txt)
+  # Similarity-based color segmentation -- 4 settings (1x1,2x2,3x3,4x4) (Number of features: 34, Output: PREFIX_segment.txt)
 
+Total number of features: 399
 
-
-=== Output Files ===
-  * PREFIX_acq.txt - Adaptive color quantization (Default: 16 colors)
-  * PREFIX_gabor.txt - Gabor features (Default: 4 scales x 4 orientations)
-  * PREFIX_hsv.txt - Basic HSV features and HSV histograms.
-  * PREFIX_light.txt - Basic grayscale features and grayscale histograms.
-  * PREFIX_log.txt - Log file
-  * PREFIX_rgb.txt - Basic RGB features and RGB histograms.
-  * PREFIX_segment.txt - Image similar-color segmentation.
-  * PREFIX_spatial.txt - BDIP and BVLC.
-  * PREFIX_texture.txt - GLCM, Sobel energy, Entropy.
-
-=== Adaptive color quantization features ===
-{{{ 
-f_adaptiveColorQ Adaptive color quantization
- 
-    Input: I = RGB image
-           n = number of different colors to reduce to
-           k = number of colors to report
-    Remarks: 
-      1. When number of colors on the image is less than k, NaN is used
-         to indicate extra colors.
-      2. RGB has range [0,255]. HSV has range [0,1]. 
-}}}
-
-=== Basic Color features ===
-{{{
-  f_basicLight Basic statistics from a grayscale image.
- 
-    Input: I - grayscale image
-    Remarks: 
-      1. Skewness and kurtosis can be NaN.
-}}}
-
-{{{
-  f_basicRGB Basic statistics from RGB channel
- 
-    Input: I - RGB image
-    Remarks: 
-      1. Skewness and kurtosis can be NaN.
-}}}
-
-{{{
-  f_basicHSV Basic statistics from HSV channel
- 
-    Input: I - HSV image
-    Remarks: 
-      1. Skewness and kurtosis can be NaN.
-}}}
-
-=== BDIP and BVLC ===
-{{{
-  f_bdip Block difference of inverse probabilities.
-
-  BDIP is a line detection feature defined by M^2 - \frac{\sum_{I(x,y)}}{\max_{I(x,y)}}.
- 
-    Input: I - grayscale image
-           n - number of spatial blocks
-    Remarks:
-      1. Ordering of spatial features is assigned left-to-right e.g.
-                 1 | 2
-                -------
-                 3 | 4 
-      2. The feature values has range from 0 to 1 where 0 corresponds to
-      no texture.
-}}}
-
-{{{
-  f_bvlc Block variabtion of local correlation coefficients.
- 
-    Input: I - grayscale image
-           n - number of spatial blocks
-           d - distance to calculate correlation
-    Remarks:
-      1. Ordering of spatial features is assigned left-to-right e.g.
-                 1 | 2
-                -------
-                 3 | 4 
-      2. Higher BVLC indicates higher degree of roughness.
-}}}
-
-=== Color Histograms ===
-{{{
-  f_grayHist n-bin grayscale histogram
- 
-    Input: I - grayscale image
-           n - number of bins
-    Remarks: 
-      1. The output histogram is normalized so that the bin with maximum
-      frequency always has value of 1.0
-}}}
-
-{{{
-  f_rgbHist n-bin RGB histogram
- 
-    Input: I - RGB image
-           n - number of bins
-    Remarks:
-      1. The output histogram is normalized so that the bin with maximum
-      frequency always has value of 1.0. The normalization is done across 
-      colors i.e. [RH GH BH]/max([RH GH BH])
-}}}
-
-{{{
-  f_hsvHist n-bin HSV histogram
- 
-    Input: I - HSV image
-           n - number of bins
-    Remarks:
-      1. The output histogram is normalized so that the bin with maximum
-      frequency always has value of 1.0. The normalization is done across 
-      colors i.e. [HH SH VH]/max([HH SH VH])
-}}}
-
-=== Gabor features ===
-{{{
-  f_gabor Gabor features
- 
-    Input: I - grayscale image
-    Remarks:
-      1. When the image is too small for the filter size, NaN is returned
-      instead.
-}}}
-
-=== Texture features ===
-{{{
-  f_entropy Entropy
- 
-    Input: I - grayscale image
-}}}
-
-{{{
-  f_sobel Average energy of sobel filter per pixel
- 
-    Input: I - grayscale image
-}}}
-
-{{{
-  f_glcm GLCM information
- 
-    Input: I - grayscale image
-           D - distance for GLCM
-}}}
-
-=== Color segmentation features ===
-{{{
-  f_segment Partition image into segments of similar colors.
- 
-    Input: I - RGB or grayscale image
-    Remarks:
-      1. Ordering of spatial features is assigned left-to-right e.g.
-                 1 | 2
-                -------
-                 3 | 4 
-      2. When the input image is grayscale, the intensity histogram is
-      enhanced by adaptive histogram equalization technique. Also, the
-      edges are thickened by erosion. 
-}}}
-
-----
 
 = How to run =
 
