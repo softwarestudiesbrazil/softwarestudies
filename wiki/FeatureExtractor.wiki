@@ -4,7 +4,8 @@ FeatureExtractor is a matlab script that extracts variety of visual features fro
 
 = List of Features =
 
-  # Adaptive color quantization -- reduces colors on each image to N colors using adaptive bin size. (Number of features: 112, Output: PREFIX_acq.txt)
+  # Adaptive color quantization -- reduces colors on each image to N colors using adaptive bin size. 
+    * (Number of features: 112, Output: PREFIX_acq.txt)
   # Basic statistics on light channel -- mean, standard deviation, etc. (Number of features: 7, Output: PREFIX_light.txt)
   # Grayscale histograms -- 8 and 32 bins (Number of features: 40, Output: PREFIX_light.txt)
   # Basic statistics on RGB channels -- mean, standard deviation, etc. (Number of features: 21, Output: PREFIX_rgb.txt)
