@@ -1,8 +1,10 @@
 #summary Documentation for FeatureExtractor
 
+= FeatureExtractor =
+
 FeatureExtractor is a matlab script that extracts variety of visual features from image files.
 
-= List of Features =
+= Features =
 
   # Adaptive color quantization -- reduces colors on each image to N colors using adaptive bin size. 
     * Number of features: 112
