@@ -4,7 +4,7 @@
 
 !FeatureExtractor is a matlab script that extracts variety of visual features from image files.
 
-= Features =
+= List of Features =
 
   # Adaptive color quantization -- reduces colors on each image to N colors using adaptive bin size. 
     * Number of features: 112
@@ -91,6 +91,7 @@ exit;
 }}}
 
 == Option 3: Run matlab in batch mode ==
+
 {{{
 matlab -nodisplay -r "path(path,'PUT-YOUR-SCRIPT-PATH-HERE'); 
 FeatureExtractor('PATH-TO-IMAGES-OR-IMAGE-LIST','PREFIX'); exit;"
@@ -98,11 +99,27 @@ FeatureExtractor('PATH-TO-IMAGES-OR-IMAGE-LIST','PREFIX'); exit;"
 
 ----
 
-== PCA analysis scripts ==
+= Performing PCA on the output files =
+
+The PCA script is located under `matlab/PCA`. There are two ways to run the PCA script.
+
+== How to run ==
 {{{
-
-How to run
-(Specific to this data)
-Two types of file output
-
+cd matlab/PCA
+./runPCA.sh {path-to-result-files} {prefix}
 }}}
+
+`{path-to-result-files}` is the path to the output files of FeatureExtractor
+ 
+== Outputs ==
+
+Different PCAs are performed:
+  # *all* - using all features
+  # *composition* - using _segment.txt and _spatial.txt
+  # *color* - using _light.txt, _rgb.txt and _hsv.txt
+  # *texture* - using _texture.txt
+  # *orientation* - using _gabor.txt
+ 
+For each PCA, there are two output files:
+  # `*.coeff.txt` - coefficients of the top three principal components
+  # `*.score.txt` - coordinates of each image in the space spanned by the top three principal components
