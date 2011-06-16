@@ -1,66 +1,29 @@
 #summary Documentation for FeatureExtractor
 
-= About =
-{{{
-FEATUREEXTRACTOR Extract visual features from jpeg files.
- 
-    Input: 
-       input_location - path to images or a file containing paths to images.
-       prefix - prefix of the output files.
-       options - can be any of the following:
-         '-r' Also process files in sub-directories
- 
-   Important Notes:
-    1. Input files must have .jpg extension.
-    2. Type of an image (RGB or grayscale) is determined by using jpeg 
-    header. As a result, if a grayscale image is saved as an RGB image,
-    FeatureExtractor will assume that the image is an RGB image.
-    3. A log file named "prefix_log.txt" is generated automatically
- }}}
+= Overview =
+
+FeatureExtractor is a matlab script that extracts variety of visual features from image files.
 
 ----
 
-= How to run =
-== Option 1: Use the wrapper scripts ==
+= List of Features =
 
-Simple mode:
-{{{
-./runFeatureExtractor.sh {path-to-images-or-image-list} {prefix}
-}}}
+  # Adaptive color quantization -- reduces colors on each image to N colors using adaptive bin size. (Output: PREFIX_acq.txt)
+  # Basic statistics on light channel -- mean, standard deviation, etc.
+  # Grayscale histograms
+Basic statistics on RGB channels -- mean,stdev,etc.
+RGB color histograms
+Basic statistics on HSV channels -- mean,stdev,etc.
+HSV color histograms
+Block difference of inverse probabilities
+Block variabtion of local correlation coefficients.
+Entropy
+Grey-Level Co-occurrence Matrix texture measurements (GLCM) -- Constrast, Correlation, Energy, etc.
+Sobel Edge energy
+Gabor filter responses -- 4 orientations (0,45,90,135) and 4 sizes (1x,0.5x,0.25x,0.125x)
+Count number of regions on the image -- (fullimage, 2x2,3x3,4x4 )
 
-Or, also process sub-directories:
-{{{
-./runFeatureExtractor_subdirs.sh {path-to-images-or-image-list} {prefix}
-}}}
 
-== Option 2: Run from matlab interactively ==
-
-  # Start matlab without GUI
-{{{
-matlab -nodisplay
-}}}
-  # In matlab, set script path
-{{{
-path(path,'PUT-YOUR-SCRIPT-PATH-HERE');
-}}}
-  # Run FeatureExtractor
-{{{
-FeatureExtractor('PATH-TO-IMAGES-OR-IMAGE-LIST','PREFIX');
-}}}
-  # Exit matlab
-{{{
-exit;
-}}}
-
-== Option 3: Run matlab in batch mode ==
-{{{
-matlab -nodisplay -r "path(path,'PUT-YOUR-SCRIPT-PATH-HERE'); 
-FeatureExtractor('PATH-TO-IMAGES-OR-IMAGE-LIST','PREFIX'); exit;"
-}}}
-
-----
-
-= Features =
 
 === Output Files ===
   * PREFIX_acq.txt - Adaptive color quantization (Default: 16 colors)
@@ -218,6 +181,53 @@ f_adaptiveColorQ Adaptive color quantization
       2. When the input image is grayscale, the intensity histogram is
       enhanced by adaptive histogram equalization technique. Also, the
       edges are thickened by erosion. 
+}}}
+
+----
+
+= How to run =
+
+There are two different ways to specify input images.
+  # Using absolute or relative path to the directory of the images
+  # Using path to a text file containing a list of images
+
+The second approach is useful when pausing/resuming is necessary for the processing job.
+
+== Option 1: Use the wrapper scripts ==
+
+Simple mode:
+{{{
+./runFeatureExtractor.sh {path-to-images-or-image-list} {prefix}
+}}}
+
+Or, also process sub-directories:
+{{{
+./runFeatureExtractor_subdirs.sh {path-to-images-or-image-list} {prefix}
+}}}
+
+== Option 2: Run from matlab interactively ==
+
+  # Start matlab without GUI
+{{{
+matlab -nodisplay
+}}}
+  # In matlab, set script path
+{{{
+path(path,'PUT-YOUR-SCRIPT-PATH-HERE');
+}}}
+  # Run FeatureExtractor
+{{{
+FeatureExtractor('PATH-TO-IMAGES-OR-IMAGE-LIST','PREFIX');
+}}}
+  # Exit matlab
+{{{
+exit;
+}}}
+
+== Option 3: Run matlab in batch mode ==
+{{{
+matlab -nodisplay -r "path(path,'PUT-YOUR-SCRIPT-PATH-HERE'); 
+FeatureExtractor('PATH-TO-IMAGES-OR-IMAGE-LIST','PREFIX'); exit;"
 }}}
 
 ----
