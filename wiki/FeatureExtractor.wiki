@@ -1,8 +1,8 @@
 #summary Documentation for FeatureExtractor
 
-= FeatureExtractor =
+= !FeatureExtractor =
 
-FeatureExtractor is a matlab script that extracts variety of visual features from image files.
+!FeatureExtractor is a matlab script that extracts variety of visual features from image files.
 
 = Features =
 
