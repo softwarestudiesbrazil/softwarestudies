@@ -105,12 +105,34 @@ FeatureExtractor('PATH-TO-IMAGES-OR-IMAGE-LIST','PREFIX'); exit;"
 The PCA script is located under `matlab/PCA`. There are two ways to run the PCA script.
 
 === How to run ===
+
+==== Option 1: Use the wrapper script ====
 {{{
 cd matlab/PCA
-./runPCA.sh {path-to-result-files} {prefix}
+./runPCA.sh {PATH-TO-RESULT-FILES} {PREFIX}
 }}}
 
-`{path-to-result-files}` is the path to the output files of FeatureExtractor
+==== Option 2: Run from matlab interactively ====
+
+  # Start matlab without GUI
+{{{
+matlab -nodisplay
+}}}
+  # In matlab, set script path
+{{{
+path(path,'PUT-YOUR-SCRIPT-PATH-HERE');
+}}}
+  # Run PCA script
+{{{
+runPCA('PATH-TO-RESULT-FILES','PREFIX');
+}}}
+  # Exit matlab
+{{{
+exit;
+}}}
+
+
+`{PATH-TO-RESULT-FILES}` is the path to the output files of FeatureExtractor
  
 === Outputs ===
 
