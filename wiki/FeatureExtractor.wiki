@@ -102,7 +102,18 @@ FeatureExtractor('PATH-TO-IMAGES-OR-IMAGE-LIST','PREFIX'); exit;"
 
 == Performing PCA on the output files ==
 
-The PCA script is located under `matlab/PCA`. There are two ways to run the PCA script.
+The PCA script is located under `matlab/PCA`.
+
+The purpose of the script is to process the text files that have been created by FeatureExtractor and calculate PCAs of the data. It calculates a PCA for each sub file (e.g. one set of PCA values for light, one for texture etc.) and also its calculates one PCA for the entire data set.
+
+The command consists of:
+1) the full path to the script itself
+2) the directory containing FeatureExtractor data files
+3) the 'prefix' that was previously used by FeatureExtractor in creating the data.
+
+For example: if FeatureExtractor used "all" as the prefix, and output was 'all_light.txt' 'all_texture.txt' etc., the PCA command uses 'all' in order to analyze those data files.
+
+There are two ways to run the PCA script.
 
 === How to run ===
 
