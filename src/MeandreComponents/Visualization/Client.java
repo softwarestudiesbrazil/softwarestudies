@@ -31,8 +31,8 @@ public class Client{
 					System.err.println(name);
 				}
 			}
+			System.err.println(commands.size());
 			//////
-			
 			requestSocket = new Socket("jeju.ucsd.edu", 2000);
 			System.out.println("Connected to jeju in port 2000");
 
@@ -41,17 +41,23 @@ public class Client{
 			in = new ObjectInputStream(requestSocket.getInputStream());
 
 			do{
-				try{
+				message = (String)in.readObject();
+				System.out.println("server>" + message);
+				//send files one at a time
+				//Object file[];
+				for(int i=0;i<commands.size();i++)
+				{
+					Object[] file = PrepareFileToSend(commands.get(i).getPath(),commands.get(i).getName());
+					out.writeObject(file);
+					out.flush();
+					System.out.println("client>" + "sent file");
 					message = (String)in.readObject();
 					System.out.println("server>" + message);
-
-					sendMessageBulk(commands);
-					message = "bye";
-					sendMessage(message);
 				}
-				catch(ClassNotFoundException classNot){
-					System.err.println("data received in unknown format");
-				}
+				//sendMessageBulk(commands);
+				//message = "bye";
+				//sendMessage(message);
+				System.exit(0);
 			}while(!message.equals("end"));
 		}
 		catch(UnknownHostException unknownHost){
@@ -59,17 +65,20 @@ public class Client{
 		}
 		catch(IOException ioException){
 			ioException.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		finally{
-
+/*
 			try{
-				in.close();
-				out.close();
-				requestSocket.close();
+				//in.close();
+				//out.close();
+				//requestSocket.close();
 			}
 			catch(IOException ioException){
 				ioException.printStackTrace();
-			}
+			}*/
 		}
 	}
 	void sendMessage(String msg)
@@ -98,12 +107,26 @@ public class Client{
 				out.writeObject(file);
 				out.flush();
 				System.out.println("client>" + "sent file");
-				break;
+				
 			}
 		}
 		catch(IOException ioException){
 			ioException.printStackTrace();
 		}		
+	}
+	
+	Object[] PrepareFileToSend(String FilePath,String FileName)
+	{
+		Object file[];
+		try{
+			InputStream bis = new FileInputStream(FilePath);
+			byte[] filebytes = IOUtils.toByteArray(bis);
+			file = new Object[2];
+			file[0] = FileName;
+			file[1] = filebytes;
+			return file;
+		} catch(Exception e){e.printStackTrace();}
+		return null;
 	}
 /*	public static void main(String args[])
 	{
