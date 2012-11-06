@@ -7,14 +7,16 @@ import java.util.zip.ZipOutputStream;
 
 public class Utilities {
 	static byte[] buffer = new byte[1024];
-	
-	public static boolean zipfile(String file, String Dir){
+	static ZipEntry ze = null;
+	public static boolean zipfile(String[] file, String Dir){
 		try{
 			 
     		FileOutputStream fos = new FileOutputStream(Dir+file+".zip");
     		ZipOutputStream zos = new ZipOutputStream(fos);
-    		ZipEntry ze= new ZipEntry(file);
-    		zos.putNextEntry(ze);
+    		for(int i=0;i<file.length;i++){
+	    		ze= new ZipEntry(file[i]);
+	    		zos.putNextEntry(ze);
+    		}
     		FileInputStream in = new FileInputStream(Dir+file);
  
     		int len;
