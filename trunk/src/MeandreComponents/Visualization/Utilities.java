@@ -8,7 +8,7 @@ import java.util.zip.ZipOutputStream;
 public class Utilities {
 	static byte[] buffer = new byte[1024];
 	static ZipEntry ze = null;
-	public static boolean zipfile(String[] file, String Dir){
+	public static String zipfile(String[] file, String Dir){
 		try{
 			 
     		FileOutputStream fos = new FileOutputStream(Dir+file+".zip");
@@ -29,11 +29,11 @@ public class Utilities {
  
     		zos.close();
     		
-    		return true;
+    		return Dir+file+".zip";
  
     	}catch(IOException ex){
     	   ex.printStackTrace();
-    	   return false;
+    	   return null;
     	}
     }
 }
