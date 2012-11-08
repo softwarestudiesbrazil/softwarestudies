@@ -45,7 +45,7 @@ public class ServerImageAnalyze{
 						
 						//Now call FeatureExtractor using UNIX class
 						UnixCommands u = new UnixCommands();
-						u.RunFeatureExtractor(f.getFEImageFilePath(),f.getFEImageDirPath());
+						u.RunFeatureExtractor(f.getFEImageFilePath()/*,f.getFEImageDirPath()*/);
 						sendMessage(u.getMessage());
 						sendMessage("bye");
 						break;
