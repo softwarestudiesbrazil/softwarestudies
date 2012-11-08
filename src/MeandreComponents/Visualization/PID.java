@@ -18,9 +18,9 @@ public class PID {
 			p.waitFor();
 			
 			BufferedReader in = new BufferedReader(
-		               new InputStreamReader(p.getInputStream()) ); //interesting, must open input stream or else matlab crashes
+		               new InputStreamReader(p.getInputStream()) ); //interesting...must open input stream on java end or else matlab can't export to files
 		       while ((line = in.readLine()) != null) {
-		         //System.out.println(line);
+		         //System.out.println(line); //don't output to screen, just write the files
 		       }
 		       in.close();
 			
