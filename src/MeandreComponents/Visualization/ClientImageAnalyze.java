@@ -20,10 +20,11 @@ public class ClientImageAnalyze{
  	String message;
  	JTextArea ClientLog;
  	String DirectoryPath;
+ 	String OutputPath;
  	
- 	ClientImageAnalyze(String dirPath,JTextArea log){
- 		ClientLog = log;
- 		ClientLog.setText("Connecting to Server...\n");
+ 	ClientImageAnalyze(String dirPath/*,JTextArea log*/){
+ 		//ClientLog = log;
+ 		//ClientLog.setText("Connecting to Server...\n");
  		DirectoryPath = dirPath;
  		
  	}
@@ -40,12 +41,13 @@ public class ClientImageAnalyze{
 			try{
 			message = (String)in.readObject();
 			sendMessage(DirectoryPath);
-			ClientLog.append("Connection to Server Successful\n");
+			//ClientLog.append("Connection to Server Successful\n");
 			//3: Communicating with the server
 				do{	
 					message = (String)in.readObject(); //get message from server
-					
-					ClientLog.append(message+"\n"); //send messages back to user
+					if(message.charAt(0) == '/')
+						OutputPath = message;
+					//ClientLog.append(message+"\n"); //send messages back to user
 				}while(!message.equals("bye"));
 
 			}catch(ClassNotFoundException classNot){
