@@ -6,6 +6,7 @@ import org.meandre.core.ComponentContext;
 import org.meandre.core.ComponentContextProperties;
 import org.seasr.datatypes.core.BasicDataTypes.Strings;
 import org.seasr.datatypes.core.BasicDataTypesTools;
+import org.seasr.datatypes.core.DataTypeParser;
 import org.seasr.datatypes.core.Names;
 import org.seasr.meandre.components.abstracts.AbstractExecutableComponent;
 
@@ -68,10 +69,11 @@ public class ImageAnalyzeComponent extends AbstractExecutableComponent {
 	@Override
 	public void executeCallBack(ComponentContext cc) throws Exception {
 		//send to output, could also replace _text with a String
-		Strings InputFilePath = (Strings) cc.getDataComponentFromInput(IN_FILE_PATH);
-		ClientImageAnalyze client = new ClientImageAnalyze(InputFilePath,cc);
+		Object input = cc.getDataComponentFromInput(IN_FILE_PATH);
+		String InputFilePath[] = DataTypeParser.parseAsString(input);
+		ClientImageAnalyze client = new ClientImageAnalyze(InputFilePath[0]);
 		client.run();
-		cc.pushDataComponentToOutput(OUT_RESULT_PATH,BasicDataTypesTools.stringToStrings(_text));
+		cc.pushDataComponentToOutput(OUT_RESULT_PATH,BasicDataTypesTools.stringToStrings(client.OutputPath));
 
 	}
 

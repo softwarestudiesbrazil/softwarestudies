@@ -34,8 +34,12 @@ public class ServerImageAnalyze{
 			//4. The two parts communicate via the input and output streams
 			do{
 				try{
+					System.out.println("waiting for String");
 					message = (String)in.readObject();
+					System.out.println("String is: "+message);
+					//message = "/Users/culturevis/Documents/MeandreTesting/ImageAnalyze/images/paths_short.txt";
 					if(message.charAt(0) == '/'){ //There must be a better way to check for a directory String
+						System.out.println("got the path:"+message);
 						sendMessage("Received Directory: "+message);
 						
 						//call FeatureExtractor class to prepare images and files
@@ -47,6 +51,10 @@ public class ServerImageAnalyze{
 						UnixCommands u = new UnixCommands();
 						u.RunFeatureExtractor(f.getFEImageFilePath()/*,f.getFEImageDirPath()*/);
 						sendMessage(u.getMessage());
+						
+						//Now compile files and directories to send back to client on component output port
+						sendMessage(f.getFEImageDirPath());
+						
 						sendMessage("bye");
 						break;
 					

@@ -11,10 +11,11 @@ public class ComponentPanel extends JPanel implements ActionListener{
 	JTextArea log;
 	static private final String newline = "\n";
 	File[] filesInDirectory;
-	
-/*	public File[] getFilesInDir(){
+/*	
+	public File[] getFilesInDir(){
 		return filesInDirectory;
-	}*/
+	}
+*/
 	public ComponentPanel(){
 		super(new BorderLayout());
 		
@@ -62,7 +63,7 @@ public class ComponentPanel extends JPanel implements ActionListener{
     		client.run();
 		}
 	}
-	
+
 	public static void main(String[] args){
         JFrame frame = new JFrame("FileChooserDemo");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -74,4 +75,5 @@ public class ComponentPanel extends JPanel implements ActionListener{
         frame.pack();
         frame.setVisible(true);
 	}
+
 }
