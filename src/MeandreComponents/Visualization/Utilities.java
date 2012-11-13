@@ -1,5 +1,7 @@
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -16,7 +18,7 @@ public class Utilities {
 	static byte[] buffer = new byte[1024];
 	//public static String zipfile(String[] files){
 
-	public static void main(String[] args){
+	public static void zip(String[] args){
 		try{
 			final OutputStream out = new FileOutputStream("C:\\Users\\ommirbod\\Desktop\\javazipped.zip");
 	        ArchiveOutputStream os = new
@@ -35,4 +37,15 @@ public class Utilities {
 	        os.close(); 
 		} catch(Exception e){e.printStackTrace();}
     }
+	
+	public static void sendFile(OutputStream out, File file){
+		byte[] bytearray = new byte[(int) file.length()];
+		try{
+			BufferedInputStream bis = new BufferedInputStream(new FileInputStream(file));
+			bis.read(bytearray, 0, bytearray.length);
+		    out.write(bytearray, 0, bytearray.length);
+		    out.flush();
+		}
+		catch(Exception e){e.printStackTrace();}
+	}
 }
