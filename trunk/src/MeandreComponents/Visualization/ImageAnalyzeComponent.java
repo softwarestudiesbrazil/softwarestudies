@@ -73,7 +73,8 @@ public class ImageAnalyzeComponent extends AbstractExecutableComponent {
 		String InputFilePath[] = DataTypeParser.parseAsString(input);
 		ClientImageAnalyze client = new ClientImageAnalyze(InputFilePath[0]);
 		client.run();
-		cc.pushDataComponentToOutput(OUT_RESULT_PATH,BasicDataTypesTools.stringToStrings(client.OutputPath));
+		cc.pushDataComponentToOutput(OUT_RESULT_PATH,BasicDataTypesTools.stringToStrings(client.OutputResultPath));
+		cc.pushDataComponentToOutput(OUT_LOG_PATH,BasicDataTypesTools.stringToStrings(client.OutputLogPath));
 
 	}
 

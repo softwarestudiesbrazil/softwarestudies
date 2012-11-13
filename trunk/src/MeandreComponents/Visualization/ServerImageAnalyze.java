@@ -47,13 +47,18 @@ public class ServerImageAnalyze{
 						f.GenerateImgPathsFile();
 						sendMessage(f.getMessage());
 						
-						//Now call FeatureExtractor using UNIX class
+						//Now call FeatureExtractor command using UNIX class
 						UnixCommands u = new UnixCommands();
 						u.RunFeatureExtractor(f.getFEImageFilePath()/*,f.getFEImageDirPath()*/);
 						sendMessage(u.getMessage());
 						
-						//Now compile files and directories to send back to client on component output port
-						sendMessage(f.getFEImageDirPath());
+						//Now compile files(logPath,logFile,resultPath,resultFile) and send back to Meandre Server
+						sendMessage(u.log_file.getAbsolutePath());
+						Utilities.sendFile(connection.getOutputStream(),u.log_file);
+						sendMessage(u.result_file.getAbsolutePath());
+						Utilities.sendFile(connection.getOutputStream(),u.result_file);
+						
+						//sendMessage(f.getFEImageDirPath());
 						
 						sendMessage("bye");
 						break;

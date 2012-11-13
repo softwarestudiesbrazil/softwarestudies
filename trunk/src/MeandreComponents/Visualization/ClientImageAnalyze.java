@@ -17,10 +17,13 @@ public class ClientImageAnalyze{
 	Socket requestSocket;
 	ObjectOutputStream out;
  	ObjectInputStream in;
- 	String message;
+ 	//String message;
+ 	Object message;
  	JTextArea ClientLog;
  	String DirectoryPath;
- 	String OutputPath;
+ 	
+ 	String OutputLogPath;
+ 	String OutputResultPath;
  	
  	ClientImageAnalyze(String dirPath/*,JTextArea log*/){
  		//ClientLog = log;
@@ -39,14 +42,22 @@ public class ClientImageAnalyze{
 			out.flush();
 			in = new ObjectInputStream(requestSocket.getInputStream());
 			try{
-			message = (String)in.readObject();
+			message = in.readObject();
 			sendMessage(DirectoryPath);
 			//ClientLog.append("Connection to Server Successful\n");
 			//3: Communicating with the server
-				do{	
-					message = (String)in.readObject(); //get message from server
-					if(message.charAt(0) == '/')
-						OutputPath = message;
+				do{
+					message = in.readObject(); //get Object from server
+					if(((String) message).charAt(0) == '/' && ((String) message).endsWith("_log.txt"))
+						OutputLogPath = (String)message;
+					
+					if(((String) message).charAt(0) == '/' && ((String) message).endsWith("resultsCollection.txt"))
+						OutputResultPath = (String)message;
+					/*
+					if(message instanceof Integer){ //get job id from server
+						//C:\Users\ommirbod\Desktop\Meandre\Meandre-1.4.11\Meandre-1.4.11\meandre-instance\published_resources
+					}
+					*/
 					//ClientLog.append(message+"\n"); //send messages back to user
 				}while(!message.equals("bye"));
 

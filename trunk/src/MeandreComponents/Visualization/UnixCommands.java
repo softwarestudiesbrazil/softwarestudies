@@ -3,6 +3,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Writer;
@@ -19,10 +20,15 @@ public class UnixCommands {
 	Runtime rt = null;
 	Process p = null;
 	String feedbackMessage = null;
+	File log_file;
+	File result_file;
+	int JobID;
 	public UnixCommands(){
 		rt = Runtime.getRuntime();
-		this.feedbackMessage = new String();
-		
+		this.feedbackMessage = new String(); //for GUI version of this component, as debug message
+		log_file = null;	//path of feature extractor result log file, will get sent to Meandre Server
+		result_file = null;	//path of feature extractor result txt files(grouped by UNIX paste), will get sent to Meandre Server
+		JobID = 0;		//unique job id of this ImageAnalysis, will get sent to Meandre Server 
 	}
 	
 	/**
@@ -46,11 +52,12 @@ public class UnixCommands {
 		    while ((nextLine = reader.readNext()) != null) {
 		    	prev=Integer.parseInt(nextLine[1]);
 		    }
-		    id = (prev != 0) ? (prev+1) : 1; 
+		    id = (prev != 0) ? (prev+1) : 1;
+		    this.JobID = id;
 		    
 		} catch (Exception e){e.printStackTrace();}
 		//String imgFilePaths = "/Users/culturevis/Documents/MeandreTesting/ImageAnalyze/images";
-		String[] runCommand = new String[] {"sh", "-c","matlab -nodisplay -r \"path(path,'/Applications/Programming/softwarestudies/matlab/FeatureExtractor'); FeatureExtractor('"+imgFilePaths+"', '"+imgFilePaths+"results'); exit;\" & PID=$!; echo $PID,"+id+",started,$(date +'%F %T') >> PIDlog.csv"};
+		String[] runCommand = new String[] {"sh", "-c","matlab -nodisplay -r \"path(path,'/Applications/Programming/softwarestudies/matlab/FeatureExtractor'); FeatureExtractor('"+imgFilePaths+"', '"+imgFilePaths+"results'); exit;\" & PID=$!; echo $PID,"+id+",started,$(date +'%F %T'),"+imgFilePaths+" >> PIDlog.csv"};
 		
 		String line;
 		//execute command
@@ -67,6 +74,14 @@ public class UnixCommands {
 		       }
 		       in.close();
 			
+		       //Use Unix Paste to combine txt files into one
+		       String pasteCommand = PrepareUnixPaste(imgFilePaths);
+		       runCommand = new String[] {"sh","-c",pasteCommand};
+		       p = rt.exec(runCommand);
+		       p.waitFor();
+		       
+		       //update log file using UNIX SED command
+		       
 		} catch (Exception e) {e.printStackTrace();}
 		this.feedbackMessage = "FeatureExtractor Executed with code: "+p.exitValue();
 	}
@@ -101,6 +116,27 @@ public class UnixCommands {
 		this.feedbackMessage = "FeatureExtractor Executed with code: "+p.exitValue();
 	}
 	*/
+	
+	public String PrepareUnixPaste(String dirName){
+    	File dir = new File(dirName);
+    	File[] txtfiles = dir.listFiles(new FilenameFilter() { 
+    	         public boolean accept(File dir, String filename)
+    	              { return filename.endsWith(".txt"); }
+    	});
+    	
+    	String command = "paste ";
+    	for(int i=0;i<txtfiles.length;i++){
+    		if(txtfiles[i].getName().endsWith("_log.txt")){
+    			this.log_file = new File(txtfiles[i].getAbsolutePath());
+    			continue;
+    		}
+    		command+= txtfiles[i]+" ";
+    	}
+    	command+= "> "+dirName+"/resultsCollection.txt";
+    	this.result_file = new File(dirName+"/resultsCollection.txt");
+    	return command;
+	}
+	
 	public String getMessage(){
 		return this.feedbackMessage;
 	}
