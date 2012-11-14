@@ -51,15 +51,17 @@ public class ClientImageAnalyze{
 				do{
 					message = in.readObject(); //get Object from server
 					
-					if(((String) message).charAt(0) == '/' && ((String) message).endsWith("_log.txt"))
+					if(message instanceof Vector){ //is a file content
+						vector = message;
+					}
+					else if(((String) message).charAt(0) == '/' && ((String) message).endsWith("_log.txt")) //is log file path
 						OutputLogPath = (String)message;
 					
-					else if(((String) message).charAt(0) == '/' && ((String) message).endsWith("resultsCollection.txt"))
+					else if(((String) message).charAt(0) == '/' && ((String) message).endsWith("resultsCollection.txt")) //is result path
 						OutputResultPath = (String)message;
 					
 					else{
-						vector = message;
-						System.err.println(vector instanceof Vector);
+						//It is debug messages, can output to error port if needed.
 					}
 					
 					//ClientLog.append(message+"\n"); //send messages back to user
