@@ -1,5 +1,6 @@
 import java.io.*;
 import java.net.*;
+import java.util.Vector;
 
 import javax.swing.JTextArea;
 /**
@@ -24,6 +25,7 @@ public class ClientImageAnalyze{
  	
  	String OutputLogPath;
  	String OutputResultPath;
+ 	Object vector;
  	
  	ClientImageAnalyze(String dirPath/*,JTextArea log*/){
  		//ClientLog = log;
@@ -48,16 +50,18 @@ public class ClientImageAnalyze{
 			//3: Communicating with the server
 				do{
 					message = in.readObject(); //get Object from server
+					
 					if(((String) message).charAt(0) == '/' && ((String) message).endsWith("_log.txt"))
 						OutputLogPath = (String)message;
 					
-					if(((String) message).charAt(0) == '/' && ((String) message).endsWith("resultsCollection.txt"))
+					else if(((String) message).charAt(0) == '/' && ((String) message).endsWith("resultsCollection.txt"))
 						OutputResultPath = (String)message;
-					/*
-					if(message instanceof Integer){ //get job id from server
-						//C:\Users\ommirbod\Desktop\Meandre\Meandre-1.4.11\Meandre-1.4.11\meandre-instance\published_resources
+					
+					else{
+						vector = message;
+						System.err.println(vector instanceof Vector);
 					}
-					*/
+					
 					//ClientLog.append(message+"\n"); //send messages back to user
 				}while(!message.equals("bye"));
 

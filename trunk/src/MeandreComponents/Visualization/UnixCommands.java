@@ -43,21 +43,21 @@ public class UnixCommands {
 	 * 		comparing it to list of imgFilePaths could be one method.
 	 */
 	
-	public void RunFeatureExtractor(String imgFilePaths){
+	public void RunFeatureExtractor(String imgFilePaths,String imgDirPath){
 		int id=0;
 		try{
 			CSVReader reader = new CSVReader(new FileReader("PIDlog.csv"));
 		    String [] nextLine;
 		    int prev=0;
 		    while ((nextLine = reader.readNext()) != null) {
-		    	prev=Integer.parseInt(nextLine[1]);
+		    	prev=Integer.parseInt(nextLine[0]);
 		    }
 		    id = (prev != 0) ? (prev+1) : 1;
 		    this.JobID = id;
 		    
 		} catch (Exception e){e.printStackTrace();}
 		//String imgFilePaths = "/Users/culturevis/Documents/MeandreTesting/ImageAnalyze/images";
-		String[] runCommand = new String[] {"sh", "-c","matlab -nodisplay -r \"path(path,'/Applications/Programming/softwarestudies/matlab/FeatureExtractor'); FeatureExtractor('"+imgFilePaths+"', '"+imgFilePaths+"results'); exit;\" & PID=$!; echo $PID,"+id+",started,$(date +'%F %T'),"+imgFilePaths+" >> PIDlog.csv"};
+		String[] runCommand = new String[] {"sh", "-c","matlab -nodisplay -r \"path(path,'/Applications/Programming/softwarestudies/matlab/FeatureExtractor'); FeatureExtractor('"+imgFilePaths+"', '"+imgFilePaths+"results'); exit;\" & PID=$!; echo "+id+",$PID,started,$(date +'%F %T'),"+imgFilePaths+" >> PIDlog.csv"};
 		
 		String line;
 		//execute command
@@ -75,12 +75,16 @@ public class UnixCommands {
 		       in.close();
 			
 		       //Use Unix Paste to combine txt files into one
-		       String pasteCommand = PrepareUnixPaste(imgFilePaths);
+		       String pasteCommand = PrepareUnixPaste(imgDirPath); //was imgFilePaths
 		       runCommand = new String[] {"sh","-c",pasteCommand};
 		       p = rt.exec(runCommand);
 		       p.waitFor();
 		       
-		       //update log file using UNIX SED command
+		       //update log file using UNIX AWK command
+		       String awkCommand = "TMPFILE=`mktemp numbers.tmpXXX`;awk -F, -v OFS=',' '($1+0) == "+this.JobID+" { $3 = \"Finished\" } 1' PIDlog.csv > $TMPFILE;rm PIDlog.csv;mv $TMPFILE PIDlog.csv";
+		       runCommand = new String[] {"sh","-c",awkCommand};
+		       p = rt.exec(runCommand);
+		       p.waitFor();
 		       
 		} catch (Exception e) {e.printStackTrace();}
 		this.feedbackMessage = "FeatureExtractor Executed with code: "+p.exitValue();
@@ -119,6 +123,7 @@ public class UnixCommands {
 	
 	public String PrepareUnixPaste(String dirName){
     	File dir = new File(dirName);
+    	//System.err.println(dir.getAbsolutePath());System.exit(0);
     	File[] txtfiles = dir.listFiles(new FilenameFilter() { 
     	         public boolean accept(File dir, String filename)
     	              { return filename.endsWith(".txt"); }

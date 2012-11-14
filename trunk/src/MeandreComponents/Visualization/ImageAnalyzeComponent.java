@@ -25,16 +25,16 @@ public class ImageAnalyzeComponent extends AbstractExecutableComponent {
     protected static final String IN_FILE_PATH = Names.PORT_TEXT;
 	
     @ComponentOutput(
-            name = Names.PORT_TEXT,
+            name = Names.PORT_TEXT_2,
             description = "Result File Path"
     )
-    protected static final String OUT_RESULT_PATH = Names.PORT_TEXT;
+    protected static final String OUT_RESULT_PATH = Names.PORT_TEXT_2;
 
     @ComponentOutput(
-            name = Names.PORT_TEXT,
+            name = Names.PORT_OBJECT_2,
             description = "Result Files(zipped)"
     )
-    protected static final String OUT_RESULT_FILES = Names.PORT_TEXT;
+    protected static final String OUT_RESULT_FILES = Names.PORT_OBJECT_2;
     
     @ComponentOutput(
             name = Names.PORT_TEXT,
@@ -43,16 +43,16 @@ public class ImageAnalyzeComponent extends AbstractExecutableComponent {
     protected static final String OUT_LOG_PATH = Names.PORT_TEXT;
     
     @ComponentOutput(
-            name = Names.PORT_TEXT,
-            description = "Log file(Text)"
+            name = Names.PORT_OBJECT,
+            description = "Log file(Text Document)"
     )
-    protected static final String OUT_LOG_FILE = Names.PORT_TEXT;
+    protected static final String OUT_LOG_FILE = Names.PORT_OBJECT;
     
     @ComponentProperty(
     		name = Names.PORT_TEXT,
     		description = "The text message to send to output",
     		//default value: allows component to execute without user input
-    		defaultValue = "Hello World!"
+    		defaultValue = "Place Directory Path Here"
     )
     protected static final String PROP_MESSAGE = Names.PORT_TEXT;
     
@@ -75,7 +75,7 @@ public class ImageAnalyzeComponent extends AbstractExecutableComponent {
 		client.run();
 		cc.pushDataComponentToOutput(OUT_RESULT_PATH,BasicDataTypesTools.stringToStrings(client.OutputResultPath));
 		cc.pushDataComponentToOutput(OUT_LOG_PATH,BasicDataTypesTools.stringToStrings(client.OutputLogPath));
-
+		cc.pushDataComponentToOutput(OUT_LOG_FILE,client.vector);
 	}
 
 	@Override
