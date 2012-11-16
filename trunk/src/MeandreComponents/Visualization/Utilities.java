@@ -21,7 +21,7 @@ import au.com.bytecode.opencsv.CSVReader;
 
 public class Utilities {
 	
-	static byte[] buffer = new byte[1024];
+	//static byte[] buffer = new byte[1024];
 	//public static String zipfile(String[] files){
 /*
 	public static void zip(String[] args){
@@ -55,7 +55,8 @@ public class Utilities {
 		}
 		catch(Exception e){e.printStackTrace();}
 	}
-*/	
+*/
+/*
 	public static void sendFileVector(ObjectOutputStream out, File file){
 		Vector v = new Vector();
 		try {
@@ -67,5 +68,24 @@ public class Utilities {
 		    out.writeObject(v);
 		    System.err.println("vector file sent");
 		} catch (Exception e) { e.printStackTrace(); }
+	}
+*/
+	//Sends data in buffer size of 6Mb
+	public static void sendFileVector(ObjectOutputStream out, File file){
+		Vector v = new Vector();
+		int buffer = 0;
+		try {
+			CSVReader reader = new CSVReader(new FileReader(file.getAbsolutePath()), '\t');
+			String [] nextLine;
+			
+		    while ((nextLine = reader.readNext()) != null){
+		    	out.writeObject(nextLine);
+		    	if(buffer>6000000){
+		    		out.reset();buffer=0;
+		    	}
+		    	buffer+=(nextLine.length*8);
+		    }
+		    System.err.println("vector file sent");
+		} catch (Exception e) {System.err.println(buffer); e.printStackTrace(); }
 	}
 }
