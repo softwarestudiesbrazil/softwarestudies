@@ -43,11 +43,19 @@ public class FeatureExtractor {
 		try {
 			output = new BufferedWriter(new FileWriter(configFile)); //Open output file for writing
 			readbuffer = new BufferedReader(new FileReader(clientFilePath));
-			readbuffer.readLine(); //first line is header, don't write it to file
+			String headers[] = readbuffer.readLine().split("\t"); //first line is header, don't write it to file
+			int imagefileindex = 0;
+			int imagedirindex = 0;
+			for(int i=0;i<headers.length;i++){
+				if(headers[i].toLowerCase().equals("filename")) //filename is the header of all image filenames
+					imagefileindex = i;
+				if(headers[i].toLowerCase().equals("path")) //path is the header of all image file paths
+					imagedirindex = i;
+			}
 			while ((strRead=readbuffer.readLine())!=null){
 				String splitarray[] = strRead.split("\t");
-				String filename = splitarray[10]; //filename, will it always be 10?
-				String filepath = splitarray[11]; //filepath
+				String filename = splitarray[imagefileindex];
+				String filepath = splitarray[imagedirindex];
 				output.write(filepath + filename+"\n"); //write one line to file
 			}
 			output.close();
