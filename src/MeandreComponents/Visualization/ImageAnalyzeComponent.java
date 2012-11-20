@@ -75,7 +75,7 @@ public class ImageAnalyzeComponent extends AbstractExecutableComponent {
 		client.run();
 		cc.pushDataComponentToOutput(OUT_RESULT_PATH,BasicDataTypesTools.stringToStrings(client.OutputResultPath));
 		cc.pushDataComponentToOutput(OUT_LOG_PATH,BasicDataTypesTools.stringToStrings(client.OutputLogPath));
-		cc.pushDataComponentToOutput(OUT_LOG_FILE,client.vector);
+		//cc.pushDataComponentToOutput(OUT_LOG_FILE,client.vector);
 	}
 
 	@Override

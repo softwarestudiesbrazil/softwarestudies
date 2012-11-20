@@ -44,7 +44,7 @@ public class ImageAnalyzeView extends JPanel implements ActionListener{
         add(logScrollPane, BorderLayout.CENTER);
 	}
 	
-	@Override
+	//@Override
 	public void actionPerformed(ActionEvent e) {
 		String path = filePath.getText();
 		
@@ -55,7 +55,7 @@ public class ImageAnalyzeView extends JPanel implements ActionListener{
 		//send directory to client class to 
 		else{
 			//call TCP Class
-			ClientImageAnalyze client = new ClientImageAnalyze(path,log);
+			ClientImageAnalyze client = new ClientImageAnalyze(path/*,log*/);
 			client.run();
 		}
 	}
