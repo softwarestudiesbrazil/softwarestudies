@@ -90,6 +90,33 @@ public class UnixCommands {
 		this.feedbackMessage = "FeatureExtractor Executed with code: "+p.exitValue();
 	}
 
+	
+	public void RunImageMontage(String imgFilePaths,String imgDirPath){
+		final String DEFAULT_HEIGHT = "100"; //height of each tile image, aspect ratio is kept
+		final String DEFAULT_BG = "#808080"; //gray background
+		final String DEFAULT_TILE = "40x40"; //40 rows and 40 columns of images
+		final String TITLE = "Title";
+		
+		String[] runCommand = new String[] {"sh", "-c","montage -background "+DEFAULT_BG+" -tile "+DEFAULT_TILE+" -title "+TITLE+" -xheight "+DEFAULT_HEIGHT+" "+imgDirPath+"/* resultMontage.jpg"};
+		
+		String line;
+		//execute command
+		Runtime rt = Runtime.getRuntime();
+		Process p = null;
+		try {
+			p = rt.exec(runCommand);
+			p.waitFor();
+			
+			BufferedReader in = new BufferedReader(
+		               new InputStreamReader(p.getInputStream()) ); //interesting...must open input stream on java end or else matlab can't export to files
+		       while ((line = in.readLine()) != null) {
+		         //System.out.println(line); //don't output to screen, just write the files 
+		       }
+		       in.close();
+		} catch(Exception e){e.printStackTrace();}
+		
+	}
+	
 	/*
 	public void RunFeatureExtractor(String imgFilePaths,String imgFilePathsDir){
 		Writer output = null;

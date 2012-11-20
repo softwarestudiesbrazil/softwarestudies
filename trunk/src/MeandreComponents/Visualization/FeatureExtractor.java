@@ -34,7 +34,7 @@ public class FeatureExtractor {
 		txtImagePaths = new String();
 	}
 	
-	public void GenerateImgPathsFile(){
+	public void GenerateImgPathsFile(){ //also generates file for meta data segment to be later concatenated
 		Writer output = null; //writer for FeatureExtractor TXT file
 		Writer outputMeta = null;
 		this.clientDirectoryPath = clientFilePath.substring(0,clientFilePath.lastIndexOf("/"));
