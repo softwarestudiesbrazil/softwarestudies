@@ -7,6 +7,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
+
 /**
  * 
  * Class contains methods for preparing arguments to be passed to 
@@ -33,8 +36,10 @@ public class FeatureExtractor {
 	
 	public void GenerateImgPathsFile(){
 		Writer output = null; //writer for FeatureExtractor TXT file
+		Writer outputMeta = null;
 		this.clientDirectoryPath = clientFilePath.substring(0,clientFilePath.lastIndexOf("/"));
 		File configFile = new File(clientDirectoryPath+"/paths.txt");
+		File meta = new File(clientDirectoryPath+"/meta.txt");
 		
 		txtImagePaths = configFile.getAbsolutePath();
 		BufferedReader readbuffer = null; //Reader for file uploaded by client
@@ -42,6 +47,7 @@ public class FeatureExtractor {
 		
 		try {
 			output = new BufferedWriter(new FileWriter(configFile)); //Open output file for writing
+			outputMeta = new BufferedWriter(new FileWriter(configFile)); //Open outputMeta file for writing
 			readbuffer = new BufferedReader(new FileReader(clientFilePath));
 			String headers[] = readbuffer.readLine().split("\t"); //first line is header, don't write it to file
 			int imagefileindex = 0;
@@ -57,8 +63,11 @@ public class FeatureExtractor {
 				String filename = splitarray[imagefileindex];
 				String filepath = splitarray[imagedirindex];
 				output.write(filepath + filename+"\n"); //write one line to file
+				outputMeta.write(StringUtils.join(ArrayUtils.subarray(splitarray,0,imagefileindex),"/t")); //write meta data to a file
 			}
 			output.close();
+			outputMeta.close();
+			
 			this.feedbackMessage = "FeatureExtractor Image Path File Created"; 
 		
 		} catch (FileNotFoundException e) {

@@ -39,7 +39,7 @@ public class ComponentPanel extends JPanel implements ActionListener{
         add(logScrollPane, BorderLayout.CENTER);
 	}
 
-	@Override
+	//@Override
 	public void actionPerformed(ActionEvent e) {
 		// TODO Auto-generated method stub
 		if (e.getSource() == browseButton) {

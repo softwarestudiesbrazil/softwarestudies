@@ -53,9 +53,9 @@ public class ServerImageAnalyze{
 						sendMessage(u.getMessage());
 						
 						//Now compile files(logPath,logFile,resultPath,resultFile) and send back to Meandre Server
-						System.out.println("before sending paths");
+						//System.out.println("before sending paths");
 						sendMessage(u.log_file.getAbsolutePath());
-						Utilities.sendFileVector(out,u.log_file);
+						//Utilities.sendFileVector(out,u.log_file);
 						sendMessage(u.result_file.getAbsolutePath());
 						//Utilities.sendFileVector(out,u.result_file);
 						

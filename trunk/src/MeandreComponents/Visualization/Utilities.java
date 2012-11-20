@@ -70,7 +70,14 @@ public class Utilities {
 		} catch (Exception e) { e.printStackTrace(); }
 	}
 */
-	//Sends data in buffer size of 6Mb
+	/**
+	 * Takes a file and outputs its content through a socket via ObjectOutputStream.
+	 * Data is sent in 6Mb buffer stream to avoid heap space error.
+	 * 
+	 * @param out - The output stream to write to(Should be from socket)
+	 * @param file - The File object that will be written to the socket
+	 * 
+	 */
 	public static void sendFileVector(ObjectOutputStream out, File file){
 		Vector v = new Vector();
 		int buffer = 0;

@@ -121,6 +121,16 @@ public class UnixCommands {
 	}
 	*/
 	
+	/**
+	 * Prepares the the arguments to be run by UNIX command paste. Given a directory path
+	 * this function will search for all relevant text files that were output by 
+	 * FeatureExtractor. It will then create a string that can be run by UNIX paste command
+	 * that will concatenate each of those text files. 
+	 * 
+	 * @param dirName - Directory name containing text files that were output by FeatureExtractor
+	 * 
+	 * TODO Needs to also concatenate the meta data found in original file given by user
+	 */	
 	public String PrepareUnixPaste(String dirName){
     	File dir = new File(dirName);
     	//System.err.println(dir.getAbsolutePath());System.exit(0);
@@ -135,10 +145,14 @@ public class UnixCommands {
     			this.log_file = new File(txtfiles[i].getAbsolutePath());
     			continue;
     		}
+    		if(txtfiles[i].getName().endsWith("paths.txt") || txtfiles[i].getName().endsWith("short.txt"))
+    			continue;
     		command+= txtfiles[i]+" ";
     	}
     	command+= "> "+dirName+"/resultsCollection.txt";
+    	//System.out.println(command);
     	this.result_file = new File(dirName+"/resultsCollection.txt");
+    	//System.out.println(this.result_file.getAbsolutePath());
     	return command;
 	}
 	
