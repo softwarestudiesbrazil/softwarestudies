@@ -47,7 +47,7 @@ public class FeatureExtractor {
 		
 		try {
 			output = new BufferedWriter(new FileWriter(configFile)); //Open output file for writing
-			outputMeta = new BufferedWriter(new FileWriter(configFile)); //Open outputMeta file for writing
+			outputMeta = new BufferedWriter(new FileWriter(meta)); //Open outputMeta file for writing
 			readbuffer = new BufferedReader(new FileReader(clientFilePath));
 			String headers[] = readbuffer.readLine().split("\t"); //first line is header, don't write it to file
 			int imagefileindex = 0;
@@ -55,15 +55,24 @@ public class FeatureExtractor {
 			for(int i=0;i<headers.length;i++){
 				if(headers[i].toLowerCase().equals("filename")) //filename is the header of all image filenames
 					imagefileindex = i;
-				if(headers[i].toLowerCase().equals("path")) //path is the header of all image file paths
+				else if(headers[i].toLowerCase().equals("path")) //path is the header of all image file paths
 					imagedirindex = i;
+				else
+					outputMeta.write(headers[i]+",");
 			}
+			
+			outputMeta.write("\n");
+			for(int i=0;i<headers.length;i++)
+				outputMeta.write(" ,");
+			outputMeta.write("\n");
+			
 			while ((strRead=readbuffer.readLine())!=null){
 				String splitarray[] = strRead.split("\t");
 				String filename = splitarray[imagefileindex];
 				String filepath = splitarray[imagedirindex];
 				output.write(filepath + filename+"\n"); //write one line to file
-				outputMeta.write(StringUtils.join(ArrayUtils.subarray(splitarray,0,imagefileindex),"/t")); //write meta data to a file
+				outputMeta.write(StringUtils.join(ArrayUtils.subarray(splitarray,0,imagefileindex),",")); //write meta data to a file
+				outputMeta.write(",\n");
 			}
 			output.close();
 			outputMeta.close();
