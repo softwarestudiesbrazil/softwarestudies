@@ -16,8 +16,13 @@ import javax.swing.JTextArea;
  */
 public class ClientImageAnalyze{
 	Socket requestSocket;
+	Socket requestFileSocket;
 	ObjectOutputStream out;
  	ObjectInputStream in;
+ 	//filestreams
+ 	FileOutputStream outFile;
+ 	FileInputStream inFile;
+ 	File tmpfile;
  	//String message;
  	Object message;
  	JTextArea ClientLog;
@@ -43,6 +48,14 @@ public class ClientImageAnalyze{
 			out = new ObjectOutputStream(requestSocket.getOutputStream());
 			out.flush();
 			in = new ObjectInputStream(requestSocket.getInputStream());
+			/*file socket*/
+			/*
+			requestFileSocket = new Socket("jeju.ucsdl.edu",2002);
+			outFile = new FileOutputStream(requestFileSocket.getOutputStream());
+			outFile.flush();
+			inFile = new FileInputStream(requestFileSocket.getInputStream());
+			*/
+			
 			try{
 			message = in.readObject();
 			sendMessage(DirectoryPath);
@@ -60,6 +73,13 @@ public class ClientImageAnalyze{
 					else if(((String) message).charAt(0) == '/' && ((String) message).endsWith("resultsCollection.txt")) //is result path
 						OutputResultPath = (String)message;
 					
+					/*filestreams
+					else if(((String) message).equals("file"){
+						listen from requestFileSocket
+						create bufferedinputstream for reading bytes at a time
+						tmpfile = new File();
+					}
+					endfilestreams*/
 					else{
 						//It is debug messages, can output to error port if needed.
 					}

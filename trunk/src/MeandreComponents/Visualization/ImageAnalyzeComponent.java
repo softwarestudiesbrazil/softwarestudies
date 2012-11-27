@@ -81,7 +81,10 @@ public class ImageAnalyzeComponent extends AbstractExecutableComponent {
 	@Override
 	public void disposeCallBack(ComponentContextProperties ccp)
 			throws Exception {
-
+		/*
+			delete client.tmpFile 
+			
+		*/
 	}
 
 }
