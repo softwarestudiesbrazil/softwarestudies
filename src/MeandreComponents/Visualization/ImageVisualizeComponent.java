@@ -74,7 +74,7 @@ public class ImageVisualizeComponent extends AbstractExecutableComponent {
 		ClientImageVisualize client = new ClientImageVisualize(InputFilePath[0]);
 		client.run();
 		cc.pushDataComponentToOutput(OUT_RESULT_PATH,BasicDataTypesTools.stringToStrings(client.OutputResultPath));
-		cc.pushDataComponentToOutput(OUT_LOG_PATH,BasicDataTypesTools.stringToStrings(client.OutputLogPath));
+		//cc.pushDataComponentToOutput(OUT_LOG_PATH,BasicDataTypesTools.stringToStrings(client.OutputLogPath));
 	}
 
 	@Override

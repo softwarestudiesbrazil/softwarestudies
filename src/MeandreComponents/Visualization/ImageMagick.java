@@ -23,7 +23,7 @@ public class ImageMagick {
 	public void GenerateImgPathsFile(){
 		Writer output = null;
 		this.clientDirectoryPath = clientFilePath.substring(0,clientFilePath.lastIndexOf("/"));
-		File configFile = new File(clientDirectoryPath+"/paths.txt");
+		File configFile = new File(clientDirectoryPath+"/pathsVis.txt");
 		
 		txtImagePaths = configFile.getAbsolutePath();
 		BufferedReader readbuffer = null; //Reader for file uploaded by client
@@ -33,20 +33,21 @@ public class ImageMagick {
 			output = new BufferedWriter(new FileWriter(configFile)); //Open output file for writing
 			readbuffer = new BufferedReader(new FileReader(clientFilePath));
 			String headers[] = readbuffer.readLine().split(","); //first line is header, don't write it to file
-			
 			int imagefileindex = 0;
 			for(int i=0;i<headers.length;i++){ //find index of where image filenames
-				if(headers[i].toLowerCase().equals("filename")) //filename is the header of all image filenames
+				if(headers[i].toLowerCase().replaceAll("\t", "").equals("filename")) //filename is the header of all image filenames
 					imagefileindex = i;
 			}
+			System.out.println(clientFilePath);
+			System.out.println(imagefileindex);
 			
 			while ((strRead=readbuffer.readLine())!=null){
-				String splitarray[] = strRead.split("\t");
+				String splitarray[] = strRead.split(",");
 				String filename = splitarray[imagefileindex];
-				output.write(filename+"\n"); //write one line to file
+				if(!filename.replaceAll("\t", "").trim().equals(""))
+					output.write(filename.replaceAll("\t", "")+"\n"); //write one line to file
 			}
 			output.close();
-			
 			this.feedbackMessage = "ImageMagick Image Path File Created"; 
 			
 		} catch(Exception e){e.printStackTrace();}

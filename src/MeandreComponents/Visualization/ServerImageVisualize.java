@@ -16,7 +16,7 @@ public class ServerImageVisualize {
 	{
 		try{
 			//1. creating a server socket
-			providerSocket = new ServerSocket(2000, 10);
+			providerSocket = new ServerSocket(2001, 10);
 			//2. Wait for connection
 			System.out.println("Waiting for connection");
 			connection = providerSocket.accept();
@@ -42,7 +42,9 @@ public class ServerImageVisualize {
 						//Now call montage command using UNIX class
 						UnixCommands u = new UnixCommands();
 						u.RunImageMontage(im.getIMImageFilePath(),im.getIMImageDirPath());
-						sendMessage(u.getMessage());
+						sendMessage(u.getMontagePath());
+						sendMessage("bye");
+						break;
 					}
 					
 					
@@ -81,7 +83,7 @@ public class ServerImageVisualize {
 	}
 	public static void main(String args[])
 	{
-		ServerImageAnalyze server = new ServerImageAnalyze();
+		ServerImageVisualize server = new ServerImageVisualize();
 		while(true){
 			server.run();
 		}
