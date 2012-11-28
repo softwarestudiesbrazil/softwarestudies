@@ -28,8 +28,8 @@ public class ClientImageVisualize{
 	{
 		try{
 			//1. creating a socket to connect to the server
-			requestSocket = new Socket("jeju.ucsd.edu", 2002);
-			System.out.println("Connected to jeju in port 2002");
+			requestSocket = new Socket("jeju.ucsd.edu", 2001);
+			System.out.println("Connected to jeju in port 2001");
 			//2. get Input and Output streams
 			out = new ObjectOutputStream(requestSocket.getOutputStream());
 			out.flush();
@@ -45,7 +45,7 @@ public class ClientImageVisualize{
 					if(message instanceof Vector){ //is a file content
 						vector = message;
 					}
-					else if(((String) message).charAt(0) == '/' && ((String) message).endsWith("_log.txt")) //is log file path
+					else if(((String) message).charAt(0) == '/' && ((String) message).endsWith("_vislog.txt")) //is log file path
 						OutputLogPath = (String)message;
 					
 					else if(((String) message).charAt(0) == '/' && ((String) message).endsWith("resultMontage.jpg")) //is result path

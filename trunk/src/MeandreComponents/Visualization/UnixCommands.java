@@ -7,6 +7,7 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Writer;
+import java.util.Arrays;
 
 import au.com.bytecode.opencsv.CSVReader;
 
@@ -22,13 +23,15 @@ public class UnixCommands {
 	String feedbackMessage = null;
 	File log_file;
 	File result_file;
+	String result_montage;
 	int JobID;
 	public UnixCommands(){
 		rt = Runtime.getRuntime();
 		this.feedbackMessage = new String(); //for GUI version of this component, as debug message
 		log_file = null;	//path of feature extractor result log file, will get sent to Meandre Server
 		result_file = null;	//path of feature extractor result txt files(grouped by UNIX paste), will get sent to Meandre Server
-		JobID = 0;		//unique job id of this ImageAnalysis, will get sent to Meandre Server 
+		JobID = 0;		//unique job id of this ImageAnalysis, will get sent to Meandre Server
+		result_montage = null;
 	}
 	
 	/**
@@ -96,9 +99,18 @@ public class UnixCommands {
 		final String DEFAULT_BG = "#808080"; //gray background
 		final String DEFAULT_TILE = "40x40"; //40 rows and 40 columns of images
 		final String TITLE = "Title";
+		final String RESULT_FILE_PATH = imgDirPath+"/resultMontage.jpg";
 		
-		String[] runCommand = new String[] {"sh", "-c","montage -background "+DEFAULT_BG+" -tile "+DEFAULT_TILE+" -title "+TITLE+" -xheight "+DEFAULT_HEIGHT+" "+imgDirPath+"/* resultMontage.jpg"};
+		//Original command
+		//String[] runCommand = new String[] {"sh", "-c","montage -background \""+DEFAULT_BG+"\" -tile "+DEFAULT_TILE+" -title "+TITLE+" -size x"+DEFAULT_HEIGHT+" "+imgDirPath+"/* "+RESULT_FILE_PATH};
 		
+		//command reading image paths from file
+		String[] runCommand = new String[] {"sh", "-c","montage -background \""+DEFAULT_BG+"\" -tile "+DEFAULT_TILE+" -title "+TITLE+" -size x"+DEFAULT_HEIGHT+" @pathsVis.txt "+RESULT_FILE_PATH};
+		
+		//command reading image paths from file and outputting -monitor option to log file
+		//String[] runCommand = new String[] {"sh", "-c","montage -monitor -background \""+DEFAULT_BG+"\" -tile "+DEFAULT_TILE+" -title "+TITLE+" -size x"+DEFAULT_HEIGHT+" @pathsVis.txt "+RESULT_FILE_PATH+" >& montage_vislog.txt"};
+		
+		System.out.println(Arrays.toString(runCommand));
 		String line;
 		//execute command
 		Runtime rt = Runtime.getRuntime();
@@ -113,6 +125,7 @@ public class UnixCommands {
 		         //System.out.println(line); //don't output to screen, just write the files 
 		       }
 		       in.close();
+		       this.result_montage = RESULT_FILE_PATH;
 		} catch(Exception e){e.printStackTrace();}
 		
 	}
@@ -185,5 +198,9 @@ public class UnixCommands {
 	
 	public String getMessage(){
 		return this.feedbackMessage;
+	}
+	
+	public String getMontagePath(){
+		return this.result_montage;
 	}
 }
