@@ -34,7 +34,7 @@ public class ImageAnalyzeComponent extends AbstractExecutableComponent {
             name = Names.PORT_OBJECT_2,
             description = "Result Files(zipped)"
     )
-    protected static final String OUT_RESULT_FILES = Names.PORT_OBJECT_2;
+    protected static final String OUT_RESULT_FILE = Names.PORT_OBJECT_2;
     
     @ComponentOutput(
             name = Names.PORT_TEXT,
@@ -75,7 +75,7 @@ public class ImageAnalyzeComponent extends AbstractExecutableComponent {
 		client.run();
 		cc.pushDataComponentToOutput(OUT_RESULT_PATH,BasicDataTypesTools.stringToStrings(client.OutputResultPath));
 		cc.pushDataComponentToOutput(OUT_LOG_PATH,BasicDataTypesTools.stringToStrings(client.OutputLogPath));
-		//cc.pushDataComponentToOutput(OUT_LOG_FILE,client.vector);
+		cc.pushDataComponentToOutput(OUT_RESULT_FILE,client.tmpFilePath);
 	}
 
 	@Override

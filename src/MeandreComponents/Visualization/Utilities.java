@@ -1,4 +1,5 @@
 import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -7,6 +8,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.net.Socket;
 import java.util.Vector;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -94,5 +96,27 @@ public class Utilities {
 		    }
 		    System.err.println("vector file sent");
 		} catch (Exception e) {System.err.println(buffer); e.printStackTrace(); }
+	}
+	
+	public static void sendFile(File file)
+	{
+		byte[] buf = new byte[1024];
+		try{
+			Socket fileSocket = new Socket("oec0232.ad.ucsd.edu", 10000);
+			OutputStream os = fileSocket.getOutputStream();
+			BufferedOutputStream out = new BufferedOutputStream(os, 1024);
+			FileInputStream in = new FileInputStream(file.getAbsolutePath());
+		    int i = 0;
+		    int bytecount = 1024;
+		    while ((i = in.read(buf, 0, 1024)) != -1) {
+		      bytecount = bytecount + 1024;
+		      out.write(buf, 0, i);
+		      out.flush();
+		    }
+		    fileSocket.shutdownOutput(); /* important */
+		    System.out.println("Bytes Sent :" + bytecount);
+		
+		
+		} catch(Exception e){e.printStackTrace();}
 	}
 }

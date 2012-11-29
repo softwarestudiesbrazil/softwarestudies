@@ -17,6 +17,9 @@ import javax.swing.JTextArea;
 public class ClientImageAnalyze{
 	Socket requestSocket;
 	Socket requestFileSocket;
+	ServerSocket fileSocket;
+	Socket connection = null;
+	
 	ObjectOutputStream out;
  	ObjectInputStream in;
  	//filestreams
@@ -31,6 +34,8 @@ public class ClientImageAnalyze{
  	String OutputLogPath;
  	String OutputResultPath;
  	Object vector;
+ 	File tmpFile = null;
+ 	String tmpFilePath = "";
  	
  	ClientImageAnalyze(String dirPath/*,JTextArea log*/){
  		//ClientLog = log;
@@ -72,6 +77,25 @@ public class ClientImageAnalyze{
 					
 					else if(((String) message).charAt(0) == '/' && ((String) message).endsWith("resultsCollection.txt")) //is result path
 						OutputResultPath = (String)message;
+					
+					else if(((String) message).equals("file")){ //is a file
+						
+						fileSocket = new ServerSocket(10000,10);
+						System.out.println("file socket open on port 10000");
+						connection = fileSocket.accept();
+						tmpFile = File.createTempFile("ImageAnalyze_",".txt",new File("C:\\Users\\ommirbod\\Desktop\\Meandre\\Meandre-1.4.11\\Meandre-1.4.11\\meandre-instance\\published_resources\\"));
+						tmpFilePath = tmpFile.getAbsolutePath();
+						byte[] b = new byte[1024];
+					    int len = 0;
+					    int bytcount = 1024;
+					    FileOutputStream inFile = new FileOutputStream(tmpFile);
+					    InputStream is = connection.getInputStream();
+					    BufferedInputStream bin = new BufferedInputStream(is, 1024);
+					    while ((len = bin.read(b, 0, 1024)) != -1) {
+					      bytcount = bytcount + 1024;
+					      inFile.write(b, 0, len);
+					    }
+					}
 					
 					/*filestreams
 					else if(((String) message).equals("file"){

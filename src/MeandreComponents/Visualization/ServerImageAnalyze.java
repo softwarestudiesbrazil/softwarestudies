@@ -58,7 +58,8 @@ public class ServerImageAnalyze{
 						//Utilities.sendFileVector(out,u.log_file);
 						sendMessage(u.result_file.getAbsolutePath());
 						//Utilities.sendFileVector(out,u.result_file);
-						
+						sendMessage("file");
+						Utilities.sendFile(u.result_file);
 						//sendMessage(f.getFEImageDirPath());
 						
 						sendMessage("bye");
