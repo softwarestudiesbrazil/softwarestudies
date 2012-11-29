@@ -1,4 +1,8 @@
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
@@ -9,6 +13,7 @@ import javax.swing.JTextArea;
 
 public class ClientImageVisualize{
 	Socket requestSocket;
+	Socket fileSocket;
 	ObjectOutputStream out;
  	ObjectInputStream in;
  	//String message;
@@ -19,6 +24,8 @@ public class ClientImageVisualize{
  	String OutputLogPath;
  	String OutputResultPath;
  	Object vector;
+ 	
+ 	File tmpFile;
  	
  	ClientImageVisualize(String dirPath){
  		DirectoryPath = dirPath;
@@ -51,6 +58,7 @@ public class ClientImageVisualize{
 					else if(((String) message).charAt(0) == '/' && ((String) message).endsWith("resultMontage.jpg")) //is result path
 						OutputResultPath = (String)message;
 					
+
 					else{
 						//It is debug messages, can output to error port if needed.
 					}
