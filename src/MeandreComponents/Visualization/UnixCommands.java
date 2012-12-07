@@ -109,7 +109,7 @@ public class UnixCommands {
 		
 		//command reading image paths from file and outputting -monitor option to log file
 		//String[] runCommand = new String[] {"sh", "-c","montage -monitor -background \""+DEFAULT_BG+"\" -tile "+DEFAULT_TILE+" -title "+TITLE+" -size x"+DEFAULT_HEIGHT+" @pathsVis.txt "+RESULT_FILE_PATH+" >& montage_vislog.txt"};
-		 
+		
 		System.out.println(Arrays.toString(runCommand));
 		String line;
 		//execute command
@@ -185,7 +185,7 @@ public class UnixCommands {
     			this.log_file = new File(txtfiles[i].getAbsolutePath());
     			continue;
     		}
-    		if(txtfiles[i].getName().endsWith("paths.txt") || txtfiles[i].getName().endsWith("short.txt"))
+    		if(txtfiles[i].getName().endsWith("paths.txt")/* || txtfiles[i].getName().endsWith("short.txt")*/) //dont' add paths.txt to final output data
     			continue;
     		command+= txtfiles[i]+" ";
     	}
