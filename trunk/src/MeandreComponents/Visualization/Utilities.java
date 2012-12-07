@@ -113,7 +113,7 @@ public class Utilities {
 		      out.write(buf, 0, i);
 		      out.flush();
 		    }
-		    fileSocket.shutdownOutput(); /* important */
+		    fileSocket.shutdownOutput();
 		    System.out.println("Bytes Sent :" + bytecount);
 		
 		
