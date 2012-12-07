@@ -7,7 +7,10 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Writer;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 
 import au.com.bytecode.opencsv.CSVReader;
 
@@ -48,6 +51,7 @@ public class UnixCommands {
 	
 	public void RunFeatureExtractor(String imgFilePaths,String imgDirPath){
 		int id=0;
+		File newdir = null;
 		try{
 			CSVReader reader = new CSVReader(new FileReader("PIDlog.csv"));
 		    String [] nextLine;
@@ -58,9 +62,24 @@ public class UnixCommands {
 		    id = (prev != 0) ? (prev+1) : 1;
 		    this.JobID = id;
 		    
+		    //create new directory for job
+			DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
+			Date date = new Date();
+		    newdir =  new File(imgDirPath+"/"+id+"_"+dateFormat.format(date));
+			if(!newdir.exists()){
+				if (newdir.mkdir()) {
+					System.out.println("Directory created");
+				} else {
+					System.out.println("Failed to create directory");
+				}
+			}
+			
+		    System.out.println("imgFilePath: "+imgFilePaths);
+		    System.out.println("imgDirPath: "+imgDirPath);
+		    System.out.println("new dir path:"+imgDirPath+"/"+id);
 		} catch (Exception e){e.printStackTrace();}
 		//String imgFilePaths = "/Users/culturevis/Documents/MeandreTesting/ImageAnalyze/images";
-		String[] runCommand = new String[] {"sh", "-c","matlab -nodisplay -r \"path(path,'/Applications/Programming/softwarestudies/matlab/FeatureExtractor'); FeatureExtractor('"+imgFilePaths+"', '"+imgFilePaths+"results'); exit;\" & PID=$!; echo "+id+",$PID,started,$(date +'%F %T'),"+imgFilePaths+" >> PIDlog.csv"};
+		String[] runCommand = new String[] {"sh", "-c","matlab -nodisplay -r \"path(path,'/Applications/Programming/softwarestudies/matlab/FeatureExtractor'); FeatureExtractor('"+imgFilePaths+"', '"+newdir+"/results'); exit;\" & PID=$!; echo "+id+",$PID,started,$(date +'%F %T'),"+imgFilePaths+" >> PIDlog.csv"};
 		
 		String line;
 		//execute command
@@ -78,7 +97,7 @@ public class UnixCommands {
 		       in.close();
 			
 		       //Use Unix Paste to combine txt files into one
-		       String pasteCommand = PrepareUnixPaste(imgDirPath); //was imgFilePaths
+		       String pasteCommand = PrepareUnixPaste(newdir.getAbsolutePath()); //was imgFilePaths, was imgDirPath
 		       runCommand = new String[] {"sh","-c",pasteCommand};
 		       p = rt.exec(runCommand);
 		       p.waitFor();
