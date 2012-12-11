@@ -198,7 +198,7 @@ public class UnixCommands {
     	              { return filename.endsWith(".txt"); }
     	});
     	
-    	String command = "paste ";
+    	String command = "paste -d',' ";
     	for(int i=0;i<txtfiles.length;i++){
     		if(txtfiles[i].getName().endsWith("_log.txt")){
     			this.log_file = new File(txtfiles[i].getAbsolutePath());
@@ -222,4 +222,22 @@ public class UnixCommands {
 	public String getMontagePath(){
 		return this.result_montage;
 	}
+	
 }
+
+/* awk code: make NaNs into zero. Fill missing cells in columns with zeros
+ * awk -f filter.awk file.txt > result.txt
+BEGIN { FS = ","}
+{
+if (NF > max)
+	max=NF
+}
+
+BEGIN { FS = ","; OFS="," }
+{
+    for(i = 1; i <= max; i++) {
+         if(!$i) { $i = 0 }
+    }
+    print $0
+}
+ */
