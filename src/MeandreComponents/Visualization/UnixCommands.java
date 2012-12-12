@@ -44,12 +44,13 @@ public class UnixCommands {
 	 * 
 	 * @param imgFilePaths - txt file containing list of image file paths
 	 * @param imgFilePathsDir - Directory of the txt file
+	 * @param clientFilePath - txt file containing orginial meta data which client provides
 	 * 
 	 * TODO need a method to keep track of progress, listening to generated log file and
 	 * 		comparing it to list of imgFilePaths could be one method.
 	 */
 	
-	public void RunFeatureExtractor(String imgFilePaths,String imgDirPath){
+	public void RunFeatureExtractor(String imgFilePaths,String imgDirPath,String clientFilePath){
 		int id=0;
 		File newdir = null;
 		try{
@@ -79,8 +80,8 @@ public class UnixCommands {
 		    System.out.println("new dir path:"+imgDirPath+"/"+id);
 		} catch (Exception e){e.printStackTrace();}
 		//String imgFilePaths = "/Users/culturevis/Documents/MeandreTesting/ImageAnalyze/images";
-		String[] runCommand = new String[] {"sh", "-c","matlab -nodisplay -r \"path(path,'/Applications/Programming/softwarestudies/matlab/FeatureExtractor'); FeatureExtractor('"+imgFilePaths+"', '"+newdir+"/results'); exit;\" & PID=$!; echo "+id+",$PID,started,$(date +'%F %T'),"+imgFilePaths+" >> PIDlog.csv"};
-		
+		//String[] runCommand = new String[] {"sh", "-c","matlab -nodisplay -r \"path(path,'/Applications/Programming/softwarestudies/matlab/FeatureExtractor'); FeatureExtractor('"+imgFilePaths+"', '"+newdir+"/results'); exit;\" & PID=$!; echo "+id+",$PID,started,$(date +'%F %T'),"+imgFilePaths+" >> PIDlog.csv"};
+		String[] runCommand = new String[] {"sh", "-c","matlab -nodisplay -r \"path(path,'/Users/culturevis/Documents/MeandreTesting/FeatureExtractor'); FeatureExtractor('"+imgFilePaths+"', '"+newdir+"/results'); exit;\" & PID=$!; echo "+id+",$PID,started,$(date +'%F %T'),"+imgFilePaths+" >> PIDlog.csv"};
 		String line;
 		//execute command
 		Runtime rt = Runtime.getRuntime();
@@ -96,6 +97,18 @@ public class UnixCommands {
 		       }
 		       in.close();
 			
+		       //Use Unix Cut to delete first column of each file(contains image file paths)
+		       String cutCommand = PrepareUnixCut(newdir.getAbsolutePath()); //was imgFilePaths, was imgDirPath
+		       runCommand = new String[] {"sh","-c",cutCommand};
+		       p = rt.exec(runCommand);
+		       p.waitFor();
+		       
+		       //copy meta data file to same directory as resulting FeatureExtractor files(comma delimited using Unix tr command)
+		       String trCommand = "tr '\\t' ',' <"+clientFilePath+"> "+newdir+"/meta.txt";
+		       runCommand = new String[] {"sh","-c",trCommand};
+		       p = rt.exec(runCommand);
+		       p.waitFor();
+		       
 		       //Use Unix Paste to combine txt files into one
 		       String pasteCommand = PrepareUnixPaste(newdir.getAbsolutePath()); //was imgFilePaths, was imgDirPath
 		       runCommand = new String[] {"sh","-c",pasteCommand};
@@ -204,8 +217,8 @@ public class UnixCommands {
     			this.log_file = new File(txtfiles[i].getAbsolutePath());
     			continue;
     		}
-    		if(txtfiles[i].getName().endsWith("paths.txt")/* || txtfiles[i].getName().endsWith("short.txt")*/) //dont' add paths.txt to final output data
-    			continue;
+    		//if(txtfiles[i].getName().endsWith("paths.txt")/* || txtfiles[i].getName().endsWith("short.txt")*/) //dont' add paths.txt to final output data
+    		//	continue;
     		command+= txtfiles[i]+" ";
     	}
     	command+= "> "+dirName+"/resultsCollection.txt";
@@ -214,6 +227,39 @@ public class UnixCommands {
     	//System.out.println(this.result_file.getAbsolutePath());
     	return command;
 	}
+	
+	/**
+	 * Prepares the the arguments to be run by UNIX command cut. Given a directory path
+	 * this function will search for all relevant text files that were output by 
+	 * FeatureExtractor. It will then create a string that can be run by UNIX cut command
+	 * that will concatenate the first column of each data file. Since meta data already contains
+	 * file paths, the redundancy of these file paths is unnecessary and has created bugs for
+	 * other components
+	 * 
+	 * @param dirName - Directory name containing text files that were output by FeatureExtractor
+	 * 
+	 */	
+	public String PrepareUnixCut(String dirName){
+    	File dir = new File(dirName);
+    	//System.err.println(dir.getAbsolutePath());System.exit(0);
+    	File[] txtfiles = dir.listFiles(new FilenameFilter() { 
+    	         public boolean accept(File dir, String filename)
+    	              { return filename.endsWith(".txt"); }
+    	});
+    	String command = "";
+    	for(int i=0;i<txtfiles.length;i++){
+    		if(txtfiles[i].getName().endsWith("_log.txt"))
+    			continue;
+    		if(txtfiles[i].getName().endsWith("paths.txt"))
+    			continue;
+    		command+= "cut -d ',' -f 2- "+txtfiles[i]+" > "+txtfiles[i]+"tmp;"+"mv "+txtfiles[i]+"tmp "+txtfiles[i]+";";
+    	}
+    	return command;
+	}
+	
+	
+	
+	
 	
 	public String getMessage(){
 		return this.feedbackMessage;

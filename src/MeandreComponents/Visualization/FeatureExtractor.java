@@ -113,5 +113,9 @@ public class FeatureExtractor {
 	public String getFEImageDirPath(){
 		return this.clientDirectoryPath;
 	}
+	
+	public String getClientFilePath(){
+		return this.clientFilePath;
+	}
 
 }
