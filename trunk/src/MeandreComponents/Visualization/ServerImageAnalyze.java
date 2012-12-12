@@ -49,7 +49,7 @@ public class ServerImageAnalyze{
 						
 						//Now call FeatureExtractor command using UNIX class
 						UnixCommands u = new UnixCommands();
-						u.RunFeatureExtractor(f.getFEImageFilePath(),f.getFEImageDirPath());
+						u.RunFeatureExtractor(f.getFEImageFilePath(),f.getFEImageDirPath(),f.getClientFilePath());
 						sendMessage(u.getMessage());
 						
 						//Now compile files(logPath,logFile,resultPath,resultFile) and send back to Meandre Server
