@@ -119,4 +119,9 @@ public class Utilities {
 		
 		} catch(Exception e){e.printStackTrace();}
 	}
+	
+	public static boolean CheckIfBatch(String file){
+		
+		return false;
+	}
 }

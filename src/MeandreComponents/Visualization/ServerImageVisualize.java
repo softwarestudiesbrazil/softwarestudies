@@ -36,12 +36,18 @@ public class ServerImageVisualize {
 						
 						//call ImageMagic class to prepare images and files
 						ImageMagick im = new ImageMagick(message);
+						
+						boolean batch = Utilities.CheckIfBatch(message);
+						//if batch is true, then call functions in loop
+						
 						im.GenerateImgPathsFile();
 						sendMessage(im.getMessage());
-						
 						//Now call montage command using UNIX class
 						UnixCommands u = new UnixCommands();
 						u.RunImageMontage(im.getIMImageFilePath(),im.getIMImageDirPath());
+						
+						//end loop for batch
+						
 						sendMessage(u.getMontagePath());
 						sendMessage("bye");
 						break;
