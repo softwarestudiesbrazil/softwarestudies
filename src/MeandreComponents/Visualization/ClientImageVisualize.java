@@ -20,6 +20,7 @@ public class ClientImageVisualize{
  	Object message;
  	JTextArea ClientLog;
  	String DirectoryPath;
+ 	String MontageCommand;
  	
  	String OutputLogPath;
  	String OutputResultPath;
@@ -27,8 +28,9 @@ public class ClientImageVisualize{
  	
  	File tmpFile;
  	
- 	ClientImageVisualize(String dirPath){
+ 	ClientImageVisualize(String dirPath,String montageCommand){
  		DirectoryPath = dirPath;
+ 		MontageCommand = montageCommand;
  	}
  	
 	void run()
@@ -43,7 +45,7 @@ public class ClientImageVisualize{
 			in = new ObjectInputStream(requestSocket.getInputStream());
 			try{
 			message = in.readObject();
-			sendMessage(DirectoryPath);
+			sendMessage(DirectoryPath+ "|"+MontageCommand);
 			//ClientLog.append("Connection to Server Successful\n");
 			//3: Communicating with the server
 				do{

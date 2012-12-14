@@ -22,6 +22,12 @@ public class ImageVisualizeComponent extends AbstractExecutableComponent {
     )
     protected static final String IN_FILE_PATH = Names.PORT_TEXT;
 	
+    @ComponentInput(
+            name = Names.PORT_TEXT,
+            description="Path to file containing Image File Paths"
+    )
+    protected static final String IN_COMMAND = "PORT_TEXT_3";
+    
     @ComponentOutput(
             name = Names.PORT_TEXT_2,
             description = "Result File Path"
@@ -70,8 +76,10 @@ public class ImageVisualizeComponent extends AbstractExecutableComponent {
 	public void executeCallBack(ComponentContext cc) throws Exception {
 		//send to output, could also replace _text with a String
 		Object input = cc.getDataComponentFromInput(IN_FILE_PATH);
+		Object input_2 = cc.getDataComponentFromInput(IN_COMMAND);
 		String InputFilePath[] = DataTypeParser.parseAsString(input);
-		ClientImageVisualize client = new ClientImageVisualize(InputFilePath[0]);
+		String InputCommand[] = DataTypeParser.parseAsString(input_2);
+		ClientImageVisualize client = new ClientImageVisualize(InputFilePath[0],InputCommand[0]);
 		client.run();
 		cc.pushDataComponentToOutput(OUT_RESULT_PATH,BasicDataTypesTools.stringToStrings(client.OutputResultPath));
 		//cc.pushDataComponentToOutput(OUT_LOG_PATH,BasicDataTypesTools.stringToStrings(client.OutputLogPath));

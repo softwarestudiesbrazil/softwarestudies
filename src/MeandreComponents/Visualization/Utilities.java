@@ -1,14 +1,18 @@
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
+import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.Vector;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -120,8 +124,31 @@ public class Utilities {
 		} catch(Exception e){e.printStackTrace();}
 	}
 	
-	public static boolean CheckIfBatch(String file){
-		
-		return false;
+	/**
+	 * Takes a file path and determines whether the file contains a list of
+	 * montage commands for batch visualize or if the file only contains data
+	 * for 1 imageVisualize component
+	 * 
+	 * @param filepath - The file to check its content
+	 * 
+	 * returns - An arraylist containing montage commands or an empty array(if not batch visualize)  
+	 */
+	public static ArrayList<String> CheckIfBatch(String filepath){
+		ArrayList<String> montages = new ArrayList<String>();
+		try{
+			FileInputStream fstream = new FileInputStream(filepath);
+			DataInputStream in = new DataInputStream(fstream);
+			BufferedReader br = new BufferedReader(new InputStreamReader(in));
+			String linetext;
+			while((linetext = br.readLine()) != null){
+				if(linetext.toLowerCase().indexOf("montage") == -1){
+					montages.add(linetext);
+				}
+			}
+			br.close();
+			in.close();
+			return montages;
+		} catch(Exception e){e.printStackTrace();}
+		return montages;
 	}
 }

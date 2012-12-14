@@ -126,19 +126,22 @@ public class UnixCommands {
 	}
 
 	
-	public void RunImageMontage(String imgFilePaths,String imgDirPath){
+	public void RunImageMontage(String imgFilePaths,String imgDirPath,String userMontageCommand){
 		final String DEFAULT_HEIGHT = "100"; //height of each tile image, aspect ratio is kept
 		final String DEFAULT_BG = "#808080"; //gray background
 		final String DEFAULT_TILE = "40x40"; //40 rows and 40 columns of images
 		final String TITLE = "Title";
 		final String RESULT_FILE_PATH = imgDirPath+"/resultMontage.jpg";
+		String[] runCommand;
 		
 		//Original command
 		//String[] runCommand = new String[] {"sh", "-c","montage -background \""+DEFAULT_BG+"\" -tile "+DEFAULT_TILE+" -title "+TITLE+" -size x"+DEFAULT_HEIGHT+" "+imgDirPath+"/* "+RESULT_FILE_PATH};
 		
 		//command reading image paths from file
-		String[] runCommand = new String[] {"sh", "-c","montage -background \""+DEFAULT_BG+"\" -tile "+DEFAULT_TILE+" -title "+TITLE+" -size x"+DEFAULT_HEIGHT+" @pathsVis.txt "+RESULT_FILE_PATH};
-		
+		if(userMontageCommand.equals(""))
+			runCommand = new String[] {"sh", "-c","montage -background \""+DEFAULT_BG+"\" -tile "+DEFAULT_TILE+" -title "+TITLE+" -size x"+DEFAULT_HEIGHT+" @pathsVis.txt "+RESULT_FILE_PATH};
+		else
+			runCommand = new String[] {"sh", "-c",userMontageCommand+" @pathsVis.txt "+RESULT_FILE_PATH};
 		//command reading image paths from file and outputting -monitor option to log file
 		//String[] runCommand = new String[] {"sh", "-c","montage -monitor -background \""+DEFAULT_BG+"\" -tile "+DEFAULT_TILE+" -title "+TITLE+" -size x"+DEFAULT_HEIGHT+" @pathsVis.txt "+RESULT_FILE_PATH+" >& montage_vislog.txt"};
 		
