@@ -34,18 +34,23 @@ public class ImageMagick {
 			readbuffer = new BufferedReader(new FileReader(clientFilePath));
 			String headers[] = readbuffer.readLine().split(","); //first line is header, don't write it to file
 			int imagefileindex = 0;
+			int imagedirindex = 0;
 			for(int i=0;i<headers.length;i++){ //find index of where image filenames
-				if(headers[i].toLowerCase().replaceAll("\t", "").equals("filename")) //filename is the header of all image filenames
+				if(headers[i].toLowerCase().replaceAll("\t", "").equals("filename"))
 					imagefileindex = i;
+				if(headers[i].toLowerCase().replaceAll("\t", "").equals("path"))
+					imagedirindex = i;
 			}
 			System.out.println(clientFilePath);
 			System.out.println(imagefileindex);
 			
+			strRead=readbuffer.readLine(); //second line is also not of interest
 			while ((strRead=readbuffer.readLine())!=null){
 				String splitarray[] = strRead.split(",");
 				String filename = splitarray[imagefileindex];
+				String filepath = splitarray[imagedirindex];
 				if(!filename.replaceAll("\t", "").trim().equals(""))
-					output.write(filename.replaceAll("\t", "")+"\n"); //write one line to file
+					output.write(filepath.replaceAll("\t", "")+filename.replaceAll("\t", "")+"\n"); //write one line to file
 			}
 			output.close();
 			this.feedbackMessage = "ImageMagick Image Path File Created"; 

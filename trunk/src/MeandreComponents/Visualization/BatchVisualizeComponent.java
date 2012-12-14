@@ -53,7 +53,7 @@ public class BatchVisualizeComponent extends AbstractExecutableComponent {
 		String InputFilePath[] = DataTypeParser.parseAsString(input);
 		
 		//need to let ClientImageVisualize know this is a file containing montage commands, not a file path to ImageAnalysis data
-		ClientImageVisualize client = new ClientImageVisualize(InputFilePath[0]);
+		ClientImageVisualize client = new ClientImageVisualize(InputFilePath[0],"batch");
 		client.run();
 		
 		//end loop
