@@ -36,10 +36,10 @@ public class FeatureExtractor {
 	
 	public void GenerateImgPathsFile(){ //also generates file for meta data segment to be later concatenated
 		Writer output = null; //writer for FeatureExtractor TXT file
-///		Writer outputMeta = null;
+		Writer outputMeta = null;
 		this.clientDirectoryPath = clientFilePath.substring(0,clientFilePath.lastIndexOf("/"));
 		File configFile = new File(clientDirectoryPath+"/paths.txt");
-///		File meta = new File(clientDirectoryPath+"/meta.txt");
+		File meta = new File(clientDirectoryPath+"/meta.txt");
 		
 		txtImagePaths = configFile.getAbsolutePath();
 		BufferedReader readbuffer = null; //Reader for file uploaded by client
@@ -47,9 +47,10 @@ public class FeatureExtractor {
 		
 		try {
 			output = new BufferedWriter(new FileWriter(configFile)); //Open output file for writing
-///			outputMeta = new BufferedWriter(new FileWriter(meta)); //Open outputMeta file for writing
+			outputMeta = new BufferedWriter(new FileWriter(meta)); //Open outputMeta file for writing
 			readbuffer = new BufferedReader(new FileReader(clientFilePath));
-			String headers[] = readbuffer.readLine().split("\t"); //first line is header, don't write it to file
+			String metaheader = readbuffer.readLine(); //need header for meta data file
+			String headers[] = metaheader.split("\t"); //first line is header, don't write it to file
 			int imagefileindex = 0;
 			int imagedirindex = 0;
 			for(int i=0;i<headers.length;i++){
@@ -66,16 +67,23 @@ public class FeatureExtractor {
 ///				outputMeta.write(" ,");
 ///			outputMeta.write("\n");
 			
+			//prepare meta data file
+			outputMeta.write(metaheader+"\n");
+			outputMeta.write(metaheader+"\n"); 
+			
 			while ((strRead=readbuffer.readLine())!=null){
 				String splitarray[] = strRead.split("\t");
 				String filename = splitarray[imagefileindex];
 				String filepath = splitarray[imagedirindex];
-				output.write(filepath + filename+"\n"); //write one line to file
+				if((new File(filepath+filename)).exists()){
+					output.write(filepath + filename+"\n"); //write one line to file
+					outputMeta.write(strRead+"\n");
+				}
 ///				outputMeta.write(StringUtils.join(ArrayUtils.subarray(splitarray,0,imagefileindex),",")); //write meta data to a file
 ///				outputMeta.write(",\n");
 			}
 			output.close();
-///			outputMeta.close();
+			outputMeta.close();
 			
 			this.feedbackMessage = "FeatureExtractor Image Path File Created"; 
 		
