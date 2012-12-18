@@ -104,7 +104,7 @@ public class UnixCommands {
 		       p.waitFor();
 		       
 		       //copy meta data file to same directory as resulting FeatureExtractor files(comma delimited using Unix tr command)
-		       String trCommand = "tr '\\t' ',' <"+clientFilePath+"> "+newdir+"/meta.txt";
+		       String trCommand = "tr '\\t' ',' <"+clientFilePath.substring(0,clientFilePath.lastIndexOf("/"))+"/meta.txt"+"> "+newdir+"/meta.txt";
 		       runCommand = new String[] {"sh","-c",trCommand};
 		       p = rt.exec(runCommand);
 		       p.waitFor();

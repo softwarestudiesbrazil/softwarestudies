@@ -44,7 +44,7 @@ public class ImageMagick {
 			System.out.println(clientFilePath);
 			System.out.println(imagefileindex);
 			
-			strRead=readbuffer.readLine(); //second line is also not of interest
+			strRead=readbuffer.readLine(); //second line is also not of interest as it contains data types, not values
 			while ((strRead=readbuffer.readLine())!=null){
 				String splitarray[] = strRead.split(",");
 				String filename = splitarray[imagefileindex];

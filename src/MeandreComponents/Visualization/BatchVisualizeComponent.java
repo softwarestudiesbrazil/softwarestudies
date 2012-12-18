@@ -12,7 +12,7 @@ import org.seasr.meandre.components.abstracts.AbstractExecutableComponent;
 @Component(	creator = "Omeed Mirbod",
 			description = "Send Path to Component",
 			tags = "text",
-			name = "ImageVisualize")
+			name = "BatchImageVisualize")
 public class BatchVisualizeComponent extends AbstractExecutableComponent {
 
 	//Component input port (uncomment if needed)
