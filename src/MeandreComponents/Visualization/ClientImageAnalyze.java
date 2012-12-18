@@ -95,6 +95,7 @@ public class ClientImageAnalyze{
 					      bytcount = bytcount + 1024;
 					      inFile.write(b, 0, len);
 					    }
+					    inFile.close();
 					}
 					
 					/*filestreams
