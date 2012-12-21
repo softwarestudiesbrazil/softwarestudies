@@ -3,6 +3,7 @@ import java.io.BufferedWriter;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.Writer;
+import java.util.ArrayList;
 
 import org.meandre.annotations.Component;
 import org.meandre.annotations.ComponentInput;
@@ -85,25 +86,46 @@ public class ImageVisualizeComponent extends AbstractExecutableComponent {
 		Object input_2 = cc.getDataComponentFromInput(IN_COMMAND);
 		String InputFilePath[] = DataTypeParser.parseAsString(input);
 		String InputCommand[] = DataTypeParser.parseAsString(input_2);
-		///
+		
+		Runtime rt = Runtime.getRuntime();
+		Process p = null;
+		
+		
 		//see if sorting needs to be done first
-		int sortIndex = InputCommand[0].lastIndexOf("sort");
+		//int sortIndex = InputCommand[0].lastIndexOf("sort");
 		//only sort if user has entered sort command
-		if(sortIndex != -1){
-			String sortCommand = InputCommand[0].substring(InputCommand[0].lastIndexOf("sort")+5,InputCommand[0].lastIndexOf("/"));
-			//depends if I am taking file from client end or file residing on server end
-			String file = InputCommand[0].substring(InputCommand[0].lastIndexOf("/"),InputCommand[0].length());
-			//rewrite file without headers
-			Writer output = new BufferedWriter(new FileWriter(file+"tmp"));
-			BufferedReader readbuffer = new BufferedReader(new FileReader(file));
-			
-			//sort file
-			Runtime rt = Runtime.getRuntime();
-			Process p = null;
-			String[] runCommand = new String[] {"sh","-c",file+" "+sortCommand};
-		    p = rt.exec(runCommand);
-		    p.waitFor();
-			//sorted file has same file name
+		boolean flag = false;
+		ArrayList<Integer> sortargs = new ArrayList<Integer>();
+		String[] commandToken = InputCommand[0].split(" ");
+		for(int i=0;i<commandToken.length;i++){
+			if(commandToken[i].equals("-sort")){
+				flag = true;
+				sortargs.add(i);
+			}
+			if(flag){
+				if(!(commandToken[i].charAt(0) == ('/') || commandToken[i].charAt(0) == ('-')))
+					sortargs.add(i);
+				else
+					flag = false;
+			}
+		}
+		
+		if(sortargs.size() > 0){
+			String[]headCommand = {"sh", "-c", "head -n +2 sortTest.csv > sortTest.head.csv"};
+			String[]tailCommand = {"sh", "-c", "tail -n +3 sortTest.csv > sortTest.tail.csv"};
+			String[]sortCommand = {"sh", "-c","java -jar csvsort.jar "+"sortTest.tail.csv 0i+ 2d+"};
+			String[]joinCommand = {"sh", "-c","cat sortTest.head.csv sortTest.tail.csv > sortTest.csv;rm sortTest.tail.csv;rm sortTest.head.csv"};
+
+			try {
+				p = rt.exec(headCommand);
+				p.waitFor();
+				p = rt.exec(tailCommand);
+				p.waitFor();
+				p = rt.exec(sortCommand);
+				p.waitFor();
+				p = rt.exec(joinCommand);
+				p.waitFor();
+			} catch(Exception e){e.printStackTrace();}
 	    
 		} 
 		
