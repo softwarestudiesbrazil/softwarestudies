@@ -30,8 +30,8 @@ public class ImageVisualizeComponent extends AbstractExecutableComponent {
     protected static final String IN_FILE_PATH = Names.PORT_TEXT;
 	
     @ComponentInput(
-            name = Names.PORT_TEXT,
-            description="Path to file containing Image File Paths"
+            name = "PORT_TEXT_3",
+            description="Montage Command Input"
     )
     protected static final String IN_COMMAND = "PORT_TEXT_3";
     
@@ -90,31 +90,36 @@ public class ImageVisualizeComponent extends AbstractExecutableComponent {
 		Runtime rt = Runtime.getRuntime();
 		Process p = null;
 		
-		
 		//see if sorting needs to be done first
 		//int sortIndex = InputCommand[0].lastIndexOf("sort");
 		//only sort if user has entered sort command
 		boolean flag = false;
-		ArrayList<Integer> sortargs = new ArrayList<Integer>();
-		String[] commandToken = InputCommand[0].split(" ");
+		ArrayList<String> sortargs = new ArrayList<String>();
+		String[] commandToken = InputCommand[0].split("\\s");
+		String filename = "";
 		for(int i=0;i<commandToken.length;i++){
 			if(commandToken[i].equals("-sort")){
 				flag = true;
-				sortargs.add(i);
+				continue;
 			}
 			if(flag){
-				if(!(commandToken[i].charAt(0) == ('/') || commandToken[i].charAt(0) == ('-')))
-					sortargs.add(i);
+				if(!(/*commandToken[i].charAt(0) == ('/') || */commandToken[i].charAt(0) == ('-')))
+					sortargs.add(commandToken[i]);
+				//if(commandToken[i].charAt(0) == ('/'))
+				//	filename = commandToken[i];
 				else
 					flag = false;
 			}
 		}
 		
 		if(sortargs.size() > 0){
-			String[]headCommand = {"sh", "-c", "head -n +2 sortTest.csv > sortTest.head.csv"};
-			String[]tailCommand = {"sh", "-c", "tail -n +3 sortTest.csv > sortTest.tail.csv"};
-			String[]sortCommand = {"sh", "-c","java -jar csvsort.jar "+"sortTest.tail.csv 0i+ 2d+"};
-			String[]joinCommand = {"sh", "-c","cat sortTest.head.csv sortTest.tail.csv > sortTest.csv;rm sortTest.tail.csv;rm sortTest.head.csv"};
+			String args = "";
+			for(int i=0;i<sortargs.size();i++)
+				args+=sortargs.get(i)+" ";
+			String[]headCommand = {"sh", "-c", "head -n +2 "+filename+" > "+filename+".head.csv"};
+			String[]tailCommand = {"sh", "-c", "tail -n +3 "+filename+" > "+filename+".tail.csv"};
+			String[]sortCommand = {"sh", "-c","java -jar csvsort.jar "+filename+".tail.csv "+args.trim()};
+			String[]joinCommand = {"sh", "-c","cat "+filename+".head.csv "+filename+".tail.csv > "+filename}; //+";rm "+filename+".tail.csv;rm "+filename+".head.csv"
 
 			try {
 				p = rt.exec(headCommand);
@@ -129,7 +134,9 @@ public class ImageVisualizeComponent extends AbstractExecutableComponent {
 	    
 		} 
 		
-		ClientImageVisualize client = new ClientImageVisualize(InputFilePath[0],InputCommand[0]);
+		String montageArgs = InputCommand[0].replaceAll("-sort[^.]*", "");
+		
+		ClientImageVisualize client = new ClientImageVisualize(InputFilePath[0],montageArgs);
 		client.run();
 		cc.pushDataComponentToOutput(OUT_RESULT_PATH,BasicDataTypesTools.stringToStrings(client.OutputResultPath));
 		//cc.pushDataComponentToOutput(OUT_LOG_PATH,BasicDataTypesTools.stringToStrings(client.OutputLogPath));

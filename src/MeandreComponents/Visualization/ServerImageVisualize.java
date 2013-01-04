@@ -34,8 +34,9 @@ public class ServerImageVisualize {
 					message = (String)in.readObject(); //Directory path from client
 					
 					if(message.charAt(0) == '/'){ //if it is a directory
-						String[] message_array = message.split("|");
-						System.out.println("Received Directory:"+message);
+						String[] message_array = message.split("[\\|]");
+						System.out.println("first part is: "+message_array[0]);
+						System.out.println("second part is: "+message_array[1]);
 						UnixCommands u = null;
 						ArrayList<String> batch = new ArrayList<String>();
 						
