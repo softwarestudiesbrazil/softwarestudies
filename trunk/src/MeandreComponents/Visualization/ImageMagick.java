@@ -14,6 +14,7 @@ public class ImageMagick {
 	private String feedbackMessage;		//feedback message to pass back to user
 	
 	public ImageMagick(String filepath){
+		
 		clientFilePath = filepath;
 		clientDirectoryPath = new String();
 		feedbackMessage = new String();
@@ -22,9 +23,10 @@ public class ImageMagick {
 	
 	public void GenerateImgPathsFile(){
 		Writer output = null;
+		System.out.println("client path is: "+clientFilePath);
 		this.clientDirectoryPath = clientFilePath.substring(0,clientFilePath.lastIndexOf("/"));
-		File configFile = new File(clientDirectoryPath+"/pathsVis.txt");
-		
+		//File configFile = new File(clientDirectoryPath+"/pathsVis.txt"); // see UnixCommands
+		File configFile = new File("pathsVis.txt");
 		txtImagePaths = configFile.getAbsolutePath();
 		BufferedReader readbuffer = null; //Reader for file uploaded by client
 		String strRead; //reads in each line in Reader

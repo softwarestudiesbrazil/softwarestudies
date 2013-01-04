@@ -140,8 +140,13 @@ public class UnixCommands {
 		//command reading image paths from file
 		if(userMontageCommand.equals(""))
 			runCommand = new String[] {"sh", "-c","montage -background \""+DEFAULT_BG+"\" -tile "+DEFAULT_TILE+" -title "+TITLE+" -size x"+DEFAULT_HEIGHT+" @pathsVis.txt "+RESULT_FILE_PATH};
-		else
+		else{
+			System.out.println("montage command is: "+userMontageCommand+" "+imgDirPath+"/@pathsVis.txt "+RESULT_FILE_PATH);
+			
+			//runCommand = new String[] {"sh", "-c",userMontageCommand+" "+imgDirPath+"/@pathsVis.txt "+RESULT_FILE_PATH};
+			//'@' cannot take an absolute path, when giving list of images to montage, file must be in same directory as running montage
 			runCommand = new String[] {"sh", "-c",userMontageCommand+" @pathsVis.txt "+RESULT_FILE_PATH};
+		}
 		//command reading image paths from file and outputting -monitor option to log file
 		//String[] runCommand = new String[] {"sh", "-c","montage -monitor -background \""+DEFAULT_BG+"\" -tile "+DEFAULT_TILE+" -title "+TITLE+" -size x"+DEFAULT_HEIGHT+" @pathsVis.txt "+RESULT_FILE_PATH+" >& montage_vislog.txt"};
 		
