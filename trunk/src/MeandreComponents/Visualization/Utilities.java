@@ -8,7 +8,9 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.net.Socket;
@@ -102,12 +104,14 @@ public class Utilities {
 		} catch (Exception e) {System.err.println(buffer); e.printStackTrace(); }
 	}
 	
-	public static void sendFile(File file)
+	public static String sendFile(File file)
 	{
 		byte[] buf = new byte[1024];
+		String MeandreFilePath = "";
 		try{
 			Socket fileSocket = new Socket("oec0232.ad.ucsd.edu", 10000);
 			OutputStream os = fileSocket.getOutputStream();
+			ObjectInputStream is = new ObjectInputStream(fileSocket.getInputStream());
 			BufferedOutputStream out = new BufferedOutputStream(os, 1024);
 			FileInputStream in = new FileInputStream(file.getAbsolutePath());
 		    int i = 0;
@@ -117,11 +121,15 @@ public class Utilities {
 		      out.write(buf, 0, i);
 		      out.flush();
 		    }
+		    //wait for meandre server(neen) file location to be sent back
+		    MeandreFilePath = (String) is.readObject();
 		    fileSocket.shutdownOutput();
 		    System.out.println("Bytes Sent :" + bytecount);
-		
+		    System.out.println("File Created on Meandre: "+MeandreFilePath);
+		    return MeandreFilePath;
 		
 		} catch(Exception e){e.printStackTrace();}
+	    return "Error";
 	}
 	
 	/**

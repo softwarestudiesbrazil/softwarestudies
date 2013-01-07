@@ -125,6 +125,19 @@ public class UnixCommands {
 		this.feedbackMessage = "FeatureExtractor Executed with code: "+p.exitValue();
 	}
 
+	public void updateMeandreFilePath(String MeandreFilePath){
+		Runtime rt = Runtime.getRuntime();
+		Process p = null;
+	       String awkCommand = "TMPFILE=`mktemp numbers.tmpXXX`;awk -F, -v OFS=',' '($1+0) == "+this.JobID+" { $6 = "+MeandreFilePath+" } 1' PIDlog.csv > $TMPFILE;rm PIDlog.csv;mv $TMPFILE PIDlog.csv";
+	       String[] runCommand = new String[] {"sh","-c",awkCommand};
+	       try {
+				p = rt.exec(runCommand);
+				p.waitFor();
+	       } catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+	       }
+	}
 	
 	public void RunImageMontage(String imgFilePaths,String imgDirPath,String userMontageCommand){
 		final String DEFAULT_HEIGHT = "100"; //height of each tile image, aspect ratio is kept
@@ -277,6 +290,9 @@ public class UnixCommands {
 		return this.result_montage;
 	}
 	
+	public int getJobID(){
+		return this.JobID;
+	}
 }
 
 /* awk code: make NaNs into zero. Fill missing cells in columns with zeros
