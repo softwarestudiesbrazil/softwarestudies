@@ -96,6 +96,11 @@ public class ClientImageAnalyze{
 					      inFile.write(b, 0, len);
 					    }
 					    inFile.close();
+					    
+					    //open output stream to send file path name to image server
+					    ObjectOutputStream os = new ObjectOutputStream(connection.getOutputStream());
+					    os.writeObject(tmpFilePath);
+					    
 					}
 					
 					/*filestreams

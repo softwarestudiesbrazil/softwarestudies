@@ -96,7 +96,8 @@ public class ImageVisualizeComponent extends AbstractExecutableComponent {
 		boolean flag = false;
 		ArrayList<String> sortargs = new ArrayList<String>();
 		String[] commandToken = InputCommand[0].split("\\s");
-		String filename = "";
+		//String filename = "";
+		String filename = InputFilePath[0]; //MUST BE AN IMAGEANALYSIS RESULT FILE
 		for(int i=0;i<commandToken.length;i++){
 			if(commandToken[i].equals("-sort")){
 				flag = true;
