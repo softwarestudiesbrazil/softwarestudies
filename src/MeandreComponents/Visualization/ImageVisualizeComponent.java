@@ -93,6 +93,7 @@ public class ImageVisualizeComponent extends AbstractExecutableComponent {
 		//see if sorting needs to be done first
 		//int sortIndex = InputCommand[0].lastIndexOf("sort");
 		//only sort if user has entered sort command
+		boolean sort = false;
 		boolean flag = false;
 		ArrayList<String> sortargs = new ArrayList<String>();
 		String[] commandToken = InputCommand[0].split("\\s");
@@ -114,6 +115,7 @@ public class ImageVisualizeComponent extends AbstractExecutableComponent {
 		}
 		
 		if(sortargs.size() > 0){
+			sort = true;
 			String args = "";
 			for(int i=0;i<sortargs.size();i++)
 				args+=sortargs.get(i)+" ";
@@ -133,11 +135,11 @@ public class ImageVisualizeComponent extends AbstractExecutableComponent {
 				p.waitFor();
 			} catch(Exception e){e.printStackTrace();}
 	    
-		} 
+		}
 		
 		String montageArgs = InputCommand[0].replaceAll("-sort[^.]*", "");
 		
-		ClientImageVisualize client = new ClientImageVisualize(InputFilePath[0],montageArgs);
+		ClientImageVisualize client = new ClientImageVisualize(InputFilePath[0],montageArgs,sort);
 		client.run();
 		cc.pushDataComponentToOutput(OUT_RESULT_PATH,BasicDataTypesTools.stringToStrings(client.OutputResultPath));
 		//cc.pushDataComponentToOutput(OUT_LOG_PATH,BasicDataTypesTools.stringToStrings(client.OutputLogPath));

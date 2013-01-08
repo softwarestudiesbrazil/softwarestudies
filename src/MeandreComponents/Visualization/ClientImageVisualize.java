@@ -1,10 +1,13 @@
 import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.Vector;
@@ -21,6 +24,7 @@ public class ClientImageVisualize{
  	JTextArea ClientLog;
  	String DirectoryPath;
  	String MontageCommand;
+ 	boolean FileWriteback;
  	
  	String OutputLogPath;
  	String OutputResultPath;
@@ -28,9 +32,10 @@ public class ClientImageVisualize{
  	
  	File tmpFile;
  	
- 	ClientImageVisualize(String dirPath,String montageCommand){
+ 	ClientImageVisualize(String dirPath,String montageCommand, boolean sort){
  		DirectoryPath = dirPath;
  		MontageCommand = montageCommand;
+ 		FileWriteback = sort;
  	}
  	
 	void run()
@@ -44,8 +49,18 @@ public class ClientImageVisualize{
 			out.flush();
 			in = new ObjectInputStream(requestSocket.getInputStream());
 			try{
-			message = in.readObject();
-			sendMessage(DirectoryPath+ "|"+MontageCommand);
+			//message = in.readObject();
+				
+			//Open file socket if a sorted file needs to be written to Vis Server
+			if(FileWriteback){
+				sendMessage("SortedFile-->"+DirectoryPath+ "|"+MontageCommand);
+				message = in.readObject(); //wait for acknowledgment from Vis Server
+				if(((String) message).equals("Waiting For File..."))
+						WriteFileToVisServer(); //write file to Vis Server
+			}
+			else
+				sendMessage(DirectoryPath+ "|"+MontageCommand);
+			
 			//ClientLog.append("Connection to Server Successful\n");
 			//3: Communicating with the server
 				do{
@@ -100,5 +115,25 @@ public class ClientImageVisualize{
 		catch(IOException ioException){
 			ioException.printStackTrace();
 		}
+	}
+	
+	void WriteFileToVisServer(){
+		byte[] buf = new byte[1024];
+		try{
+			Socket fileSocket = new Socket("jeju.ucsd.edu", 10000);
+			OutputStream os = fileSocket.getOutputStream();
+			ObjectInputStream is = new ObjectInputStream(fileSocket.getInputStream());
+			BufferedOutputStream out = new BufferedOutputStream(os, 1024);
+			FileInputStream in = new FileInputStream(this.DirectoryPath);
+		    int i = 0;
+		    int bytecount = 1024;
+		    while ((i = in.read(buf, 0, 1024)) != -1) {
+		      bytecount = bytecount + 1024;
+		      out.write(buf, 0, i);
+		      out.flush();
+		    }
+		    fileSocket.shutdownOutput();
+		
+		} catch(Exception e){e.printStackTrace();}
 	}
 }
