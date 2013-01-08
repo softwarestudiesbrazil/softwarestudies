@@ -121,8 +121,8 @@ public class ImageVisualizeComponent extends AbstractExecutableComponent {
 				args+=sortargs.get(i)+" ";
 			String[]headCommand = {"sh", "-c", "head -n +2 "+filename+" > "+filename+".head.csv"};
 			String[]tailCommand = {"sh", "-c", "tail -n +3 "+filename+" > "+filename+".tail.csv"};
-			String[]sortCommand = {"sh", "-c","java -jar csvsort.jar "+filename+".tail.csv "+args.trim()};
-			String[]joinCommand = {"sh", "-c","cat "+filename+".head.csv "+filename+".tail.csv > "+filename}; //+";rm "+filename+".tail.csv;rm "+filename+".head.csv"
+			String[]sortCommand = {"sh", "-c","java -jar /Users/culturevis/Desktop/Meandre-1.4.11/meandre-instance/published_resources/csvsort.jar "+filename+".tail.csv "+args.trim()};
+			String[]joinCommand = {"sh", "-c","cat "+filename+".head.csv "+filename+".tail.csv > "+filename+";rm "+filename+".tail.csv;rm "+filename+".head.csv"};
 
 			try {
 				p = rt.exec(headCommand);
@@ -142,6 +142,7 @@ public class ImageVisualizeComponent extends AbstractExecutableComponent {
 		ClientImageVisualize client = new ClientImageVisualize(InputFilePath[0],montageArgs,sort);
 		client.run();
 		cc.pushDataComponentToOutput(OUT_RESULT_PATH,BasicDataTypesTools.stringToStrings(client.OutputResultPath));
+		//should output just montage args: cc.pushDataComponentToOutput(OUT_RESULT_PATH,BasicDataTypesTools.stringToStrings(montageArgs));
 		//cc.pushDataComponentToOutput(OUT_LOG_PATH,BasicDataTypesTools.stringToStrings(client.OutputLogPath));
 	}
 
