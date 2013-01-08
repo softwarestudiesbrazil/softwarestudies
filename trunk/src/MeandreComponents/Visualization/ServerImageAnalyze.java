@@ -59,12 +59,12 @@ public class ServerImageAnalyze{
 						sendMessage(u.result_file.getAbsolutePath());
 						//Utilities.sendFileVector(out,u.result_file);
 						sendMessage("file");
-						String MeandreFilePath = Utilities.sendFile(u.result_file);
+						Utilities.sendFile(u.result_file);
+						String MeandreFilePath = (String)in.readObject();
 						u.updateMeandreFilePath(MeandreFilePath);
 						//sendMessage(f.getFEImageDirPath());
 						
-						sendMessage("bye");
-						break;
+						//sendMessage("bye");
 					
 					}
 					if (message.equals("bye"))

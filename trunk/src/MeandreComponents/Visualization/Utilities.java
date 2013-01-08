@@ -104,14 +104,14 @@ public class Utilities {
 		} catch (Exception e) {System.err.println(buffer); e.printStackTrace(); }
 	}
 	
-	public static String sendFile(File file)
+	public static void sendFile(File file)
 	{
 		byte[] buf = new byte[1024];
 		String MeandreFilePath = "";
 		try{
-			Socket fileSocket = new Socket("oec0232.ad.ucsd.edu", 10000);
+			Socket fileSocket = new Socket("neen.ucsd.edu", 10000);
 			OutputStream os = fileSocket.getOutputStream();
-			ObjectInputStream is = new ObjectInputStream(fileSocket.getInputStream());
+			//ObjectInputStream is = new ObjectInputStream(fileSocket.getInputStream());
 			BufferedOutputStream out = new BufferedOutputStream(os, 1024);
 			FileInputStream in = new FileInputStream(file.getAbsolutePath());
 		    int i = 0;
@@ -122,14 +122,12 @@ public class Utilities {
 		      out.flush();
 		    }
 		    //wait for meandre server(neen) file location to be sent back
-		    MeandreFilePath = (String) is.readObject();
+		    //MeandreFilePath = (String) ois.readObject();
 		    fileSocket.shutdownOutput();
 		    System.out.println("Bytes Sent :" + bytecount);
 		    System.out.println("File Created on Meandre: "+MeandreFilePath);
-		    return MeandreFilePath;
 		
 		} catch(Exception e){e.printStackTrace();}
-	    return "Error";
 	}
 	
 	/**
