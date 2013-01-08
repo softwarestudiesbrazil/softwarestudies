@@ -53,7 +53,7 @@ public class ClientImageVisualize{
 				
 			//Open file socket if a sorted file needs to be written to Vis Server
 			if(FileWriteback){
-				sendMessage("SortedFile-->"+DirectoryPath+ "|"+MontageCommand);
+				sendMessage(DirectoryPath+ "|"+MontageCommand);
 				message = in.readObject(); //wait for acknowledgment from Vis Server
 				if(((String) message).equals("Waiting For File..."))
 						WriteFileToVisServer(); //write file to Vis Server
