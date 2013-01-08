@@ -79,11 +79,10 @@ public class ClientImageAnalyze{
 						OutputResultPath = (String)message;
 					
 					else if(((String) message).equals("file")){ //is a file
-						
 						fileSocket = new ServerSocket(10000,10);
 						System.out.println("file socket open on port 10000");
 						connection = fileSocket.accept();
-						tmpFile = File.createTempFile("ImageAnalyze_",".txt",new File("C:\\Users\\ommirbod\\Desktop\\Meandre\\Meandre-1.4.11\\Meandre-1.4.11\\meandre-instance\\published_resources\\"));
+						tmpFile = File.createTempFile("ImageAnalyze_",".txt",new File("/Users/culturevis/Desktop/Meandre-1.4.11/meandre-instance/published_resources/"));
 						tmpFilePath = tmpFile.getAbsolutePath();
 						byte[] b = new byte[1024];
 					    int len = 0;
@@ -98,8 +97,9 @@ public class ClientImageAnalyze{
 					    inFile.close();
 					    
 					    //open output stream to send file path name to image server
-					    ObjectOutputStream os = new ObjectOutputStream(connection.getOutputStream());
-					    os.writeObject(tmpFilePath);
+					    //ObjectOutputStream os = new ObjectOutputStream(connection.getOutputStream());
+					    sendMessage(tmpFilePath);
+					    sendMessage("bye");
 					    
 					}
 					

@@ -81,7 +81,7 @@ public class UnixCommands {
 		} catch (Exception e){e.printStackTrace();}
 		//String imgFilePaths = "/Users/culturevis/Documents/MeandreTesting/ImageAnalyze/images";
 		//String[] runCommand = new String[] {"sh", "-c","matlab -nodisplay -r \"path(path,'/Applications/Programming/softwarestudies/matlab/FeatureExtractor'); FeatureExtractor('"+imgFilePaths+"', '"+newdir+"/results'); exit;\" & PID=$!; echo "+id+",$PID,started,$(date +'%F %T'),"+imgFilePaths+" >> PIDlog.csv"};
-		String[] runCommand = new String[] {"sh", "-c","matlab -nodisplay -r \"path(path,'/Users/culturevis/Documents/MeandreTesting/FeatureExtractor'); FeatureExtractor('"+imgFilePaths+"', '"+newdir+"/results'); exit;\" & PID=$!; echo "+id+",$PID,started,$(date +'%F %T'),"+imgFilePaths+" >> PIDlog.csv"};
+		String[] runCommand = new String[] {"sh", "-c","matlab -nodisplay -r \"path(path,'/Users/culturevis/Documents/MeandreTesting/FeatureExtractor'); FeatureExtractor('"+imgFilePaths+"', '"+newdir+"/results'); exit;\" & PID=$!; echo "+id+",$PID,started,$(date +'%F %T'),"+imgFilePaths+",none >> PIDlog.csv"};
 		String line;
 		//execute command
 		Runtime rt = Runtime.getRuntime();
@@ -126,17 +126,20 @@ public class UnixCommands {
 	}
 
 	public void updateMeandreFilePath(String MeandreFilePath){
+		System.out.println("Updating log file with meandre file path");
 		Runtime rt = Runtime.getRuntime();
 		Process p = null;
-	       String awkCommand = "TMPFILE=`mktemp numbers.tmpXXX`;awk -F, -v OFS=',' '($1+0) == "+this.JobID+" { $6 = "+MeandreFilePath+" } 1' PIDlog.csv > $TMPFILE;rm PIDlog.csv;mv $TMPFILE PIDlog.csv";
+	       String awkCommand = "TMPFILE=`mktemp numbers.tmpXXX`;awk -F, -v OFS=',' '($1+0) == "+this.JobID+" { $6 = \""+MeandreFilePath+"\" } 1' PIDlog.csv > $TMPFILE;rm PIDlog.csv;mv $TMPFILE PIDlog.csv";
+	       System.out.println("update command: "+awkCommand);
 	       String[] runCommand = new String[] {"sh","-c",awkCommand};
-	       try {
+	      try {
 				p = rt.exec(runCommand);
 				p.waitFor();
 	       } catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 	       }
+	       
 	}
 	
 	public void RunImageMontage(String imgFilePaths,String imgDirPath,String userMontageCommand){
