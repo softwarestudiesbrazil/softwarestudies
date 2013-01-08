@@ -1,9 +1,12 @@
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+
+import au.com.bytecode.opencsv.CSVReader;
 
 
 public class ServerImageVisualize {
@@ -58,9 +61,27 @@ public class ServerImageVisualize {
 							}
 						}
 						else{
-							//call ImageMagic class to prepare images and files
-							ImageMagick im = new ImageMagick(message_array[0]);
 							
+							//file is being transferred from Meandre Server
+							if(message_array[1].indexOf("-sort") != -1){
+								
+							}
+							//check to see if file path is in log file, if so find it on jeju
+							CSVReader reader = new CSVReader(new FileReader("PIDlog.csv"));
+							String [] nextLine;
+							String VisServerFilePath = "";
+						    while ((nextLine = reader.readNext()) != null) {
+						        if(nextLine[5].equals(message_array[0])){
+						        	VisServerFilePath = nextLine[4];
+						        	break;
+						        }
+						    }
+							//call ImageMagic class to prepare images and files
+						    ImageMagick im = null;
+						    if(VisServerFilePath.equals(""))
+						    	im = new ImageMagick(message_array[0]);
+						    else
+						    	im = new ImageMagick(VisServerFilePath);
 							im.GenerateImgPathsFile();
 							sendMessage(im.getMessage());
 							//Now call montage command using UNIX class

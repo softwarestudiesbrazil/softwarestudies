@@ -27,7 +27,8 @@ public class ImageMagick {
 		this.clientDirectoryPath = clientFilePath.substring(0,clientFilePath.lastIndexOf("/"));
 		//File configFile = new File(clientDirectoryPath+"/pathsVis.txt"); // see UnixCommands
 		File configFile = new File("pathsVis.txt");
-		txtImagePaths = configFile.getAbsolutePath();
+		//txtImagePaths = configFile.getAbsolutePath(); can't give absoluate path to montage for image file list using @ command
+		txtImagePaths = configFile.getName();
 		BufferedReader readbuffer = null; //Reader for file uploaded by client
 		String strRead; //reads in each line in Reader
 		
