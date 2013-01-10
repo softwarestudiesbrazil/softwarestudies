@@ -6,6 +6,7 @@ import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.io.Writer;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -142,7 +143,7 @@ public class UnixCommands {
 	       
 	}
 	
-	public void RunImageMontage(String imgFilePaths,String imgDirPath,String userMontageCommand, int batchNum){
+	public void RunImageMontage(String imgFilePaths,String imgDirPath,String userMontageCommand, int batchNum,PrintWriter progressFile){
 		final String DEFAULT_HEIGHT = "100"; //height of each tile image, aspect ratio is kept
 		final String DEFAULT_BG = "#808080"; //gray background
 		final String DEFAULT_TILE = "40x40"; //40 rows and 40 columns of images
@@ -163,26 +164,79 @@ public class UnixCommands {
 			
 			//runCommand = new String[] {"sh", "-c",userMontageCommand+" "+imgDirPath+"/@pathsVis.txt "+RESULT_FILE_PATH};
 			//'@' cannot take an absolute path, when giving list of images to montage, file must be in same directory as running montage
-			runCommand = new String[] {"sh", "-c",userMontageCommand+" @pathsVis.txt "+RESULT_FILE_PATH};
+			runCommand = new String[] {"bash", "-c",userMontageCommand+" -monitor @pathsVis.txt "+RESULT_FILE_PATH};
+			//runCommand = new String[] {"bash","-c","montage -monitor -background \"#808080\" -tile \"40x\" -resize x100 -geometry +0+0 @pathsVis.txt /Users/culturevis/Documents/MeandreTesting/resultMontage1.jpg"};
 		}
 		//command reading image paths from file and outputting -monitor option to log file
 		//String[] runCommand = new String[] {"sh", "-c","montage -monitor -background \""+DEFAULT_BG+"\" -tile "+DEFAULT_TILE+" -title "+TITLE+" -size x"+DEFAULT_HEIGHT+" @pathsVis.txt "+RESULT_FILE_PATH+" >& montage_vislog.txt"};
 		
 		//System.out.println(Arrays.toString(runCommand));
 		String line;
+		String newline = "";
 		//execute command
 		Runtime rt = Runtime.getRuntime();
 		Process p = null;
 		try {
 			p = rt.exec(runCommand);
-			p.waitFor();
 			
 			BufferedReader in = new BufferedReader(
-		               new InputStreamReader(p.getInputStream()) ); //interesting...must open input stream on java end or else matlab can't export to files
+		               new InputStreamReader(p.getErrorStream()) ); //interesting...must open input stream on java end or else matlab can't export to files
 		       while ((line = in.readLine()) != null) {
-		         //System.out.println(line); //don't output to screen, just write the files 
+		    	   
+		    	   if(line.indexOf("Load") == 0){
+		    		   if(!newline.equals("Load")){
+		    			   progressFile.println();
+		    			   progressFile.flush();
+		    			   newline = "Load";
+		    		   }
+		    		   progressFile.print("Loading..."+line.substring(line.indexOf("%")-3,line.indexOf("%"))+"%\r"); //don't output to screen, just write the files
+		    		   progressFile.flush();
+		    		   continue;
+		    	   }
+		    	   if(line.indexOf("Resize") == 0){
+		    		   if(!newline.equals("Resize")){
+		    			   progressFile.println();
+		    			   progressFile.flush();
+		    			   newline = "Resize";
+		    		   }
+		    		   progressFile.print("Resizing..."+line.substring(line.indexOf("%")-3,line.indexOf("%"))+"%\r"); //don't output to screen, just write the files
+		    		   continue;
+		    	   }
+		    	   if(line.indexOf("Tile") == 0){
+		    		   if(!newline.equals("Tile")){
+		    			   progressFile.println();
+		    			   progressFile.flush();
+		    			   newline = "Tile";
+		    		   }
+		    		   progressFile.print("Tiling..."+line.substring(line.indexOf("%")-3,line.indexOf("%"))+"%\r"); //don't output to screen, just write the files
+		    		   progressFile.flush();
+		    		   continue;
+		    	   }
+		    	   if(line.indexOf("Composite") == 0){
+		    		   if(!newline.equals("Composite")){
+		    			   progressFile.println();
+		    			   progressFile.flush();
+		    			   newline = "Composite";
+		    		   }
+		    		   progressFile.print("Compositing..."+line.substring(line.indexOf("%")-3,line.indexOf("%"))+"%\r"); //don't output to screen, just write the files
+		    		   progressFile.flush();
+		    		   continue;
+		    	   }
+		    	   if(line.indexOf("save") == 0){
+		    		   if(!newline.equals("save")){
+		    			   progressFile.println();
+		    			   progressFile.flush();
+		    			   newline = "save";
+		    		   }
+		    		   progressFile.print("Saving..."+line.substring(line.indexOf("%")-3,line.indexOf("%"))+"%\r"); //don't output to screen, just write the files
+		    		   progressFile.flush();
+		    		   continue;
+		    	   }
 		       }
+			   progressFile.println();
+			   progressFile.flush();
 		       in.close();
+		       p.waitFor();
 		       this.result_montage = RESULT_FILE_PATH;
 		} catch(Exception e){e.printStackTrace();}
 		

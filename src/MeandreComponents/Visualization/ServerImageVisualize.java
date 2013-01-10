@@ -112,7 +112,7 @@ public class ServerImageVisualize {
 								ImageMagick im = new ImageMagick(VisServerFilePath);
 								im.GenerateImgPathsFile();
 								u = new UnixCommands();
-								u.RunImageMontage(im.getIMImageFilePath(),im.getIMImageDirPath(),montageCommand,(i+1));
+								u.RunImageMontage(im.getIMImageFilePath(),im.getIMImageDirPath(),montageCommand,(i+1),progressFile);
 								System.out.println("DONE");
 								progressFile.println("DONE");
 								progressFile.flush();
@@ -166,7 +166,7 @@ public class ServerImageVisualize {
 							//Now call montage command using UNIX class
 							u = new UnixCommands();
 							String montageArgs = message_array[1].replaceAll("-sort[^.]*", "");
-							u.RunImageMontage(im.getIMImageFilePath(),im.getIMImageDirPath(),montageArgs,-1);
+							u.RunImageMontage(im.getIMImageFilePath(),im.getIMImageDirPath(),montageArgs,-1,progressFile);
 						}
 						//end loop for batch
 						
