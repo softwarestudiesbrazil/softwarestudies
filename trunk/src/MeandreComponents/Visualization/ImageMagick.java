@@ -23,7 +23,7 @@ public class ImageMagick {
 	
 	public void GenerateImgPathsFile(){
 		Writer output = null;
-		System.out.println("client path is: "+clientFilePath);
+		//System.out.println("client path is: "+clientFilePath);
 		this.clientDirectoryPath = clientFilePath.substring(0,clientFilePath.lastIndexOf("/"));
 		//File configFile = new File(clientDirectoryPath+"/pathsVis.txt"); // see UnixCommands
 		File configFile = new File("pathsVis.txt");
@@ -44,8 +44,8 @@ public class ImageMagick {
 				if(headers[i].toLowerCase().replaceAll("\t", "").equals("path"))
 					imagedirindex = i;
 			}
-			System.out.println(clientFilePath);
-			System.out.println(imagefileindex);
+			//System.out.println(clientFilePath);
+			//System.out.println(imagefileindex);
 			
 			strRead=readbuffer.readLine(); //second line is also not of interest as it contains data types, not values
 			while ((strRead=readbuffer.readLine())!=null){

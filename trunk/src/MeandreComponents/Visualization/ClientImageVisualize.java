@@ -40,7 +40,7 @@ public class ClientImageVisualize{
  	
 	void run()
 	{
-		WriteFileToVisServer();
+		//WriteFileToVisServer();
 		try{
 			//1. creating a socket to connect to the server
 			requestSocket = new Socket("jeju.ucsd.edu", 2001); //2001
@@ -119,6 +119,7 @@ public class ClientImageVisualize{
 	}
 	
 	void WriteFileToVisServer(){
+		/*
         long t0, t1;
         int n=5;
         t0 =  System.currentTimeMillis();
@@ -127,6 +128,7 @@ public class ClientImageVisualize{
             t1 = System.currentTimeMillis();
         }
         while ((t1 - t0) < (n * 1000));
+        */
 		byte[] buf = new byte[1024];
 		try{
 			Socket fileSocket = new Socket("jeju.ucsd.edu", 10000);
