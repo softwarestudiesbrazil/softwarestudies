@@ -81,7 +81,7 @@ public class UnixCommands {
 		} catch (Exception e){e.printStackTrace();}
 		//String imgFilePaths = "/Users/culturevis/Documents/MeandreTesting/ImageAnalyze/images";
 		//String[] runCommand = new String[] {"sh", "-c","matlab -nodisplay -r \"path(path,'/Applications/Programming/softwarestudies/matlab/FeatureExtractor'); FeatureExtractor('"+imgFilePaths+"', '"+newdir+"/results'); exit;\" & PID=$!; echo "+id+",$PID,started,$(date +'%F %T'),"+imgFilePaths+" >> PIDlog.csv"};
-		String[] runCommand = new String[] {"sh", "-c","matlab -nodisplay -r \"path(path,'/Users/culturevis/Documents/MeandreTesting/FeatureExtractor'); FeatureExtractor('"+imgFilePaths+"', '"+newdir+"/results'); exit;\" & PID=$!; echo "+id+",$PID,started,$(date +'%F %T'),"+imgFilePaths+",none >> PIDlog.csv"};
+		String[] runCommand = new String[] {"sh", "-c","matlab -nodisplay -r \"path(path,'/Users/culturevis/Documents/MeandreTesting/FeatureExtractor'); FeatureExtractor('"+imgFilePaths+"', '"+newdir+"/results'); exit;\" & PID=$!; echo "+id+",$PID,started,$(date +'%F %T'),"+newdir+"/resultsCollection.txt"+",none >> PIDlog.csv"}; //last was imgFilePaths, if time resultsCollection be an awk command as an update
 		String line;
 		//execute command
 		Runtime rt = Runtime.getRuntime();
@@ -142,12 +142,14 @@ public class UnixCommands {
 	       
 	}
 	
-	public void RunImageMontage(String imgFilePaths,String imgDirPath,String userMontageCommand){
+	public void RunImageMontage(String imgFilePaths,String imgDirPath,String userMontageCommand, int batchNum){
 		final String DEFAULT_HEIGHT = "100"; //height of each tile image, aspect ratio is kept
 		final String DEFAULT_BG = "#808080"; //gray background
 		final String DEFAULT_TILE = "40x40"; //40 rows and 40 columns of images
 		final String TITLE = "Title";
-		final String RESULT_FILE_PATH = imgDirPath+"/resultMontage.jpg";
+		String RESULT_FILE_PATH = imgDirPath+"/resultMontage.jpg";
+		if(batchNum != -1)
+			RESULT_FILE_PATH = imgDirPath+"/resultMontage"+batchNum+".jpg";
 		String[] runCommand;
 		
 		//Original command

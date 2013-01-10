@@ -40,9 +40,10 @@ public class ClientImageVisualize{
  	
 	void run()
 	{
+		WriteFileToVisServer();
 		try{
 			//1. creating a socket to connect to the server
-			requestSocket = new Socket("jeju.ucsd.edu", 2001);
+			requestSocket = new Socket("jeju.ucsd.edu", 2001); //2001
 			System.out.println("Connected to jeju in port 2001");
 			//2. get Input and Output streams
 			out = new ObjectOutputStream(requestSocket.getOutputStream());
@@ -54,8 +55,8 @@ public class ClientImageVisualize{
 			//Open file socket if a sorted file needs to be written to Vis Server
 			if(FileWriteback){
 				sendMessage(DirectoryPath+ "|"+MontageCommand);
-				message = in.readObject(); //wait for acknowledgment from Vis Server
-				if(((String) message).equals("Waiting For File..."))
+				//message = in.readObject(); //wait for acknowledgment from Vis Server
+				//if(((String) message).equals("Waiting For File..."))
 						WriteFileToVisServer(); //write file to Vis Server
 			}
 			else
@@ -118,11 +119,20 @@ public class ClientImageVisualize{
 	}
 	
 	void WriteFileToVisServer(){
+        long t0, t1;
+        int n=5;
+        t0 =  System.currentTimeMillis();
+
+        do{
+            t1 = System.currentTimeMillis();
+        }
+        while ((t1 - t0) < (n * 1000));
 		byte[] buf = new byte[1024];
 		try{
 			Socket fileSocket = new Socket("jeju.ucsd.edu", 10000);
 			OutputStream os = fileSocket.getOutputStream();
-			ObjectInputStream is = new ObjectInputStream(fileSocket.getInputStream());
+			//os.flush();
+			//ObjectInputStream is = new ObjectInputStream(fileSocket.getInputStream());
 			BufferedOutputStream out = new BufferedOutputStream(os, 1024);
 			FileInputStream in = new FileInputStream(this.DirectoryPath);
 		    int i = 0;
@@ -133,7 +143,6 @@ public class ClientImageVisualize{
 		      out.flush();
 		    }
 		    fileSocket.shutdownOutput();
-		
 		} catch(Exception e){e.printStackTrace();}
 	}
 }

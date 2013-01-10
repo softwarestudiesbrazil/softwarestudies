@@ -157,11 +157,21 @@ public class test {
 		for(int i=0;i<sortargs.size();i++)
 			System.out.println(sortargs.get(i));
 */		
+		/*
 		String[] montageArgs = command.split("-sort");
 		System.out.println(montageArgs[0]);
-		
+		*/
 		
 		//java -jar csvsort.jar /Users/culturevis/Documents/MeandreTesting/ImageAnalyze/images/25_2013-01-02_12-36-37/resultsCollection.txt.tail.csv 0i+ 2d+
 		//head -n +2 /Users/culturevis/Documents/MeandreTesting/ImageAnalyze/images/25_2013-01-02_12-36-37/resultsCollection.txt > /Users/culturevis/Documents/MeandreTesting/ImageAnalyze/images/25_2013-01-02_12-36-37/resultsCollection.txt.head.csv
+		
+		String montageCommand = "batch---/Document/folder1/folder2/test.txt";
+		if(montageCommand.indexOf("batch---")!= -1){
+			String[] stringarray = montageCommand.split("---");
+			System.out.println(stringarray.length);
+			System.out.println(stringarray[0]);
+			System.out.println(stringarray[1]);
+		}
 	}
+	
 }

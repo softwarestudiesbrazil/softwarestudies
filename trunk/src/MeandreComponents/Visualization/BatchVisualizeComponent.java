@@ -18,10 +18,16 @@ public class BatchVisualizeComponent extends AbstractExecutableComponent {
 	//Component input port (uncomment if needed)
     @ComponentInput(
             name = Names.PORT_TEXT,
-            description="Path to file containing list of montage commands"
+            description="Path to result data file from ImageAnalyze(from Meandre Server)"
     )
     protected static final String IN_FILE_PATH = Names.PORT_TEXT;
-	
+    
+    @ComponentInput(
+            name = "PORT_TEXT_3",
+            description="Path to file with montage commands list(from Visualize Server)"
+    )
+    protected static final String IN_COMMAND = "PORT_TEXT_3";
+    
     @ComponentOutput(
             name = Names.PORT_TEXT_2,
             description = "Result File Path"
@@ -50,10 +56,12 @@ public class BatchVisualizeComponent extends AbstractExecutableComponent {
 	public void executeCallBack(ComponentContext cc) throws Exception {
 		//send to output, could also replace _text with a String
 		Object input = cc.getDataComponentFromInput(IN_FILE_PATH);
+		Object input2 = cc.getDataComponentFromInput(IN_COMMAND);
 		String InputFilePath[] = DataTypeParser.parseAsString(input);
+		String InputCommands[] = DataTypeParser.parseAsString(input2);
 		
 		//need to let ClientImageVisualize know this is a file containing montage commands, not a file path to ImageAnalysis data
-		ClientImageVisualize client = new ClientImageVisualize(InputFilePath[0],"batch");
+		ClientImageVisualize client = new ClientImageVisualize(InputFilePath[0],"batch---"+InputCommands[0],true);
 		client.run();
 		
 		//end loop

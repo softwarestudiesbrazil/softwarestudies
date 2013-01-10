@@ -139,7 +139,7 @@ public class Utilities {
 	 * 
 	 * returns - An arraylist containing montage commands or an empty array(if not batch visualize)  
 	 */
-	public static ArrayList<String> CheckIfBatch(String filepath){
+	public static ArrayList<String> GetMontageCommands(String filepath){
 		ArrayList<String> montages = new ArrayList<String>();
 		try{
 			FileInputStream fstream = new FileInputStream(filepath);
@@ -147,7 +147,7 @@ public class Utilities {
 			BufferedReader br = new BufferedReader(new InputStreamReader(in));
 			String linetext;
 			while((linetext = br.readLine()) != null){
-				if(linetext.toLowerCase().indexOf("montage") == -1){
+				if(linetext.toLowerCase().indexOf("montage") != -1){
 					montages.add(linetext);
 				}
 			}
@@ -156,5 +156,54 @@ public class Utilities {
 			return montages;
 		} catch(Exception e){e.printStackTrace();}
 		return montages;
+	}
+	
+	public static String SortFile(String FullMontageCommand,String filename){
+		String montageCommand = "";
+		System.out.println("Full montage command is: "+FullMontageCommand);
+		boolean flag = false;
+		Runtime rt = Runtime.getRuntime();
+		Process p = null;
+		
+		ArrayList<String> sortargs = new ArrayList<String>();
+		String[] commandToken = FullMontageCommand.split("\\s");
+		for(int i=0;i<commandToken.length;i++){
+			if(commandToken[i].equals("-sort")){
+				flag = true;
+				continue;
+			}
+			if(flag){
+				if(!(commandToken[i].charAt(0) == ('-')))
+					sortargs.add(commandToken[i]);
+				else
+					flag = false;
+			}
+		}
+		
+		if(sortargs.size() > 0){
+			String args = "";
+			for(int i=0;i<sortargs.size();i++)
+				args+=sortargs.get(i)+" ";
+			String[]headCommand = {"sh", "-c", "head -n +2 "+filename+" > "+filename+".head.csv"};
+			String[]tailCommand = {"sh", "-c", "tail -n +3 "+filename+" > "+filename+".tail.csv"};
+			String[]sortCommand = {"sh", "-c","java -jar /Users/culturevis/Documents/MeandreTesting/csvsort.jar "+filename+".tail.csv "+args.trim()};
+			String[]joinCommand = {"sh", "-c","cat "+filename+".head.csv "+filename+".tail.csv > "+filename+";rm "+filename+".tail.csv;rm "+filename+".head.csv"};
+
+			try {
+				p = rt.exec(headCommand);
+				p.waitFor();
+				p = rt.exec(tailCommand);
+				p.waitFor();
+				p = rt.exec(sortCommand);
+				p.waitFor();
+				p = rt.exec(joinCommand);
+				p.waitFor();
+			} catch(Exception e){e.printStackTrace();}
+			montageCommand = FullMontageCommand.replaceAll("-sort[^.]*", "");
+		}
+		else
+			montageCommand = FullMontageCommand;
+		return montageCommand;
+		
 	}
 }
