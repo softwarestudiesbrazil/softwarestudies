@@ -160,7 +160,7 @@ public class Utilities {
 	
 	public static String SortFile(String FullMontageCommand,String filename){
 		String montageCommand = "";
-		System.out.println("Full montage command is: "+FullMontageCommand);
+		//System.out.println("Full montage command is: "+FullMontageCommand);
 		boolean flag = false;
 		Runtime rt = Runtime.getRuntime();
 		Process p = null;
