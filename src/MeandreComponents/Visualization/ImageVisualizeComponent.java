@@ -137,9 +137,9 @@ public class ImageVisualizeComponent extends AbstractExecutableComponent {
 	    
 		}
 		
-		String montageArgs = InputCommand[0].replaceAll("-sort[^.]*", "");
+		//String montageArgs = InputCommand[0].replaceAll("-sort[^.]*", "");
 		
-		ClientImageVisualize client = new ClientImageVisualize(InputFilePath[0],montageArgs,sort);
+		ClientImageVisualize client = new ClientImageVisualize(InputFilePath[0],InputCommand[0],sort);
 		client.run();
 		cc.pushDataComponentToOutput(OUT_RESULT_PATH,BasicDataTypesTools.stringToStrings(client.OutputResultPath));
 		//should output just montage args: cc.pushDataComponentToOutput(OUT_RESULT_PATH,BasicDataTypesTools.stringToStrings(montageArgs));
