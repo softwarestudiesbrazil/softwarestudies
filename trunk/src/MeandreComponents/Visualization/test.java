@@ -1,3 +1,4 @@
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -165,6 +166,7 @@ public class test {
 		//java -jar csvsort.jar /Users/culturevis/Documents/MeandreTesting/ImageAnalyze/images/25_2013-01-02_12-36-37/resultsCollection.txt.tail.csv 0i+ 2d+
 		//head -n +2 /Users/culturevis/Documents/MeandreTesting/ImageAnalyze/images/25_2013-01-02_12-36-37/resultsCollection.txt > /Users/culturevis/Documents/MeandreTesting/ImageAnalyze/images/25_2013-01-02_12-36-37/resultsCollection.txt.head.csv
 		
+		/*
 		String montageCommand = "batch---/Document/folder1/folder2/test.txt";
 		if(montageCommand.indexOf("batch---")!= -1){
 			String[] stringarray = montageCommand.split("---");
@@ -172,6 +174,68 @@ public class test {
 			System.out.println(stringarray[0]);
 			System.out.println(stringarray[1]);
 		}
+		*/
+		
+		//test log system for montage -monitor option
+		String[] runCommand = new String[] {"bash", "-c","montage -monitor -background \"#808080\" -tile \"40x\" -resize x100 -geometry +0+0 @pathsVis.txt resultmontage.jpg"};
+		String line;
+		//execute command
+		Runtime rt = Runtime.getRuntime();
+		Process p = null;
+		String newline = "";
+		try {
+			p = rt.exec(runCommand);
+			
+			BufferedReader in = new BufferedReader(
+		               new InputStreamReader(p.getErrorStream()) ); //interesting...must open input stream on java end or else matlab can't export to files
+		       while ((line = in.readLine()) != null) {
+		    	   //System.out.println(line.substring(0,line.indexOf("/"))+"..."+line.substring(line.indexOf("%")-3,line.indexOf("%")));
+		    	   
+		    	   if(line.indexOf("Load") == 0){
+		    		   if(!newline.equals("Load")){
+		    			   System.out.println();
+		    			   newline = "Load";
+		    		   }
+		    		   System.out.print("Loading..."+line.substring(line.indexOf("%")-3,line.indexOf("%"))+"%\r"); //don't output to screen, just write the files
+		    		   continue;
+		    	   }
+		    	   if(line.indexOf("Resize") == 0){
+		    		   if(!newline.equals("Resize")){
+		    			   System.out.println();
+		    			   newline = "Resize";
+		    		   }
+		    		   System.out.print("Resizing..."+line.substring(line.indexOf("%")-3,line.indexOf("%"))+"%\r"); //don't output to screen, just write the files
+		    		   continue;
+		    	   }
+		    	   if(line.indexOf("Tile") == 0){
+		    		   if(!newline.equals("Tile")){
+		    			   System.out.println();
+		    			   newline = "Tile";
+		    		   }
+		    		   System.out.print("Tiling..."+line.substring(line.indexOf("%")-3,line.indexOf("%"))+"%\r"); //don't output to screen, just write the files
+		    		   continue;
+		    	   }
+		    	   if(line.indexOf("Composite") == 0){
+		    		   if(!newline.equals("Composite")){
+		    			   System.out.println();
+		    			   newline = "Composite";
+		    		   }
+		    		   System.out.print("Compositing..."+line.substring(line.indexOf("%")-3,line.indexOf("%"))+"%\r"); //don't output to screen, just write the files
+		    		   continue;
+		    	   }
+		    	   if(line.indexOf("save") == 0){
+		    		   if(!newline.equals("save")){
+		    			   System.out.println();
+		    			   newline = "save";
+		    		   }
+		    		   System.out.print("Saving..."+line.substring(line.indexOf("%")-3,line.indexOf("%"))+"%\r"); //don't output to screen, just write the files
+		    		   continue;
+		    	   }
+		    	   
+		       }
+		       in.close();
+		       p.waitFor();
+		} catch(Exception e){e.printStackTrace();}
 	}
 	
 }
