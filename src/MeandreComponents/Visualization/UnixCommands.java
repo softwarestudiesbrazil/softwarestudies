@@ -51,7 +51,7 @@ public class UnixCommands {
 	 * 		comparing it to list of imgFilePaths could be one method.
 	 */
 	
-	public void RunFeatureExtractor(String imgFilePaths,String imgDirPath,String clientFilePath){
+	public void RunFeatureExtractor(String imgFilePaths,String imgDirPath,String clientFilePath,int numImages,PrintWriter progressFile){
 		int id=0;
 		File newdir = null;
 		try{
@@ -84,6 +84,7 @@ public class UnixCommands {
 		//String[] runCommand = new String[] {"sh", "-c","matlab -nodisplay -r \"path(path,'/Applications/Programming/softwarestudies/matlab/FeatureExtractor'); FeatureExtractor('"+imgFilePaths+"', '"+newdir+"/results'); exit;\" & PID=$!; echo "+id+",$PID,started,$(date +'%F %T'),"+imgFilePaths+" >> PIDlog.csv"};
 		String[] runCommand = new String[] {"sh", "-c","matlab -nodisplay -r \"path(path,'/Users/culturevis/Documents/MeandreTesting/FeatureExtractor'); FeatureExtractor('"+imgFilePaths+"', '"+newdir+"/results'); exit;\" & PID=$!; echo "+id+",$PID,started,$(date +'%F %T'),"+newdir+"/resultsCollection.txt"+",none >> PIDlog.csv"}; //last was imgFilePaths, if time resultsCollection be an awk command as an update
 		String line;
+		int imagecount = 1;
 		//execute command
 		Runtime rt = Runtime.getRuntime();
 		Process p = null;
@@ -94,8 +95,13 @@ public class UnixCommands {
 			BufferedReader in = new BufferedReader(
 		               new InputStreamReader(p.getInputStream()) ); //interesting...must open input stream on java end or else matlab can't export to files
 		       while ((line = in.readLine()) != null) {
-		         //System.out.println(line); //don't output to screen, just write the files 
+		    	 if(line.indexOf("/") == 0){
+		    		 progressFile.println("Processing image("+imagecount+"/"+numImages+"): "+line);
+		    		 progressFile.flush();
+		    		 imagecount+=1;
+		    	 } 
 		       }
+		       progressFile.println("DONE");
 		       in.close();
 			
 		       //Use Unix Cut to delete first column of each file(contains image file paths)

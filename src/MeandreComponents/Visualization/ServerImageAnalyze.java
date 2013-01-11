@@ -20,10 +20,16 @@ public class ServerImageAnalyze{
 	void run()
 	{
 		try{
+			FileWriter outFile = new FileWriter("/Users/culturevis/Documents/MeandreTesting/progress.txt");
+			PrintWriter progressFile = new PrintWriter(outFile);
+			
 			//1. creating a server socket
 			providerSocket = new ServerSocket(2000, 10);
 			//2. Wait for connection
 			System.out.println("Waiting for connection");
+			progressFile.print("Waiting for connection...");
+			progressFile.flush();
+			
 			connection = providerSocket.accept();
 			System.out.println("Connection received from " + connection.getInetAddress().getHostName());
 			//3. get Input and Output streams
@@ -31,6 +37,9 @@ public class ServerImageAnalyze{
 			out.flush();
 			in = new ObjectInputStream(connection.getInputStream());
 			sendMessage("Connection successful");
+			progressFile.println("OK");
+			progressFile.println("Performing Image Analysis");
+			progressFile.flush();
 			//4. The two parts communicate via the input and output streams
 			do{
 				try{
@@ -49,7 +58,7 @@ public class ServerImageAnalyze{
 						
 						//Now call FeatureExtractor command using UNIX class
 						UnixCommands u = new UnixCommands();
-						u.RunFeatureExtractor(f.getFEImageFilePath(),f.getFEImageDirPath(),f.getClientFilePath());
+						u.RunFeatureExtractor(f.getFEImageFilePath(),f.getFEImageDirPath(),f.getClientFilePath(),f.getNumImages(),progressFile);
 						sendMessage(u.getMessage());
 						
 						//Now compile files(logPath,logFile,resultPath,resultFile) and send back to Meandre Server
@@ -61,6 +70,7 @@ public class ServerImageAnalyze{
 						sendMessage("file");
 						Utilities.sendFile(u.result_file);
 						String MeandreFilePath = (String)in.readObject();
+					    System.out.println("File Created on Meandre: "+MeandreFilePath);
 						u.updateMeandreFilePath(MeandreFilePath);
 						//sendMessage(f.getFEImageDirPath());
 						
@@ -74,6 +84,7 @@ public class ServerImageAnalyze{
 					System.err.println("Data received in unknown format");
 				}
 			}while(!message.equals("bye"));
+			progressFile.close();
 		}
 		catch(IOException ioException){
 			ioException.printStackTrace();
@@ -83,6 +94,7 @@ public class ServerImageAnalyze{
 			try{
 				in.close();
 				out.close();
+
 				providerSocket.close();
 			}
 			catch(IOException ioException){
