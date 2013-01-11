@@ -133,6 +133,8 @@ public class ClientImageAnalyze{
 				in.close();
 				out.close();
 				requestSocket.close();
+				connection.close();
+				fileSocket.close();
 			}
 			catch(IOException ioException){
 				ioException.printStackTrace();

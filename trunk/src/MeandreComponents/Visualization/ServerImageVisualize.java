@@ -44,17 +44,18 @@ public class ServerImageVisualize {
 			//fileSocket = new ServerSocket(10000,10);
 			//2. Wait for connection
 			System.out.println("Waiting for connection");
-			progressFile.println("Waiting for connection");
+			progressFile.print("Waiting for connection...");
 			progressFile.flush();
 			connection = providerSocket.accept();
 			System.out.println("Connection received from " + connection.getInetAddress().getHostName());
-			progressFile.println("Connection received from " + connection.getInetAddress().getHostName());
-			progressFile.flush();
 			//3. get Input and Output streams
 			out = new ObjectOutputStream(connection.getOutputStream());
 			out.flush();
 			in = new ObjectInputStream(connection.getInputStream());
 			sendMessage("Connection successful");
+			progressFile.println("OK");
+			progressFile.println("Performing Image Visualization");
+			progressFile.flush();
 			//4. The two parts communicate via the input and output streams
 			do{
 				try{

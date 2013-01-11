@@ -26,12 +26,13 @@ public class FeatureExtractor {
 	private String clientFilePath;		//file path uploaded by user
 	private String clientDirectoryPath; //Directory of file uploaded by user
 	private String feedbackMessage;		//feedback message to pass back to user
-	
+	private int numImages;
 	public FeatureExtractor(String filepath){
 		clientFilePath = filepath;
 		clientDirectoryPath = new String();
 		feedbackMessage = new String();
 		txtImagePaths = new String();
+		numImages = 0;
 	}
 	
 	public void GenerateImgPathsFile(){ //also generates file for meta data segment to be later concatenated
@@ -78,6 +79,7 @@ public class FeatureExtractor {
 				if((new File(filepath+filename)).exists()){
 					output.write(filepath + filename+"\n"); //write one line to file
 					outputMeta.write(strRead+"\n");
+					this.numImages+=1;
 				}
 ///				outputMeta.write(StringUtils.join(ArrayUtils.subarray(splitarray,0,imagefileindex),",")); //write meta data to a file
 ///				outputMeta.write(",\n");
@@ -86,7 +88,7 @@ public class FeatureExtractor {
 			outputMeta.close();
 			
 			this.feedbackMessage = "FeatureExtractor Image Path File Created"; 
-		
+			
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -125,5 +127,8 @@ public class FeatureExtractor {
 	public String getClientFilePath(){
 		return this.clientFilePath;
 	}
-
+	
+	public int getNumImages(){
+		return this.numImages;
+	}
 }

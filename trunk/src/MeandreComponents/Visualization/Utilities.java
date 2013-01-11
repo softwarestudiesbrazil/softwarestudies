@@ -125,7 +125,6 @@ public class Utilities {
 		    //MeandreFilePath = (String) ois.readObject();
 		    fileSocket.shutdownOutput();
 		    System.out.println("Bytes Sent :" + bytecount);
-		    System.out.println("File Created on Meandre: "+MeandreFilePath);
 		
 		} catch(Exception e){e.printStackTrace();}
 	}
