@@ -196,7 +196,7 @@ public class ServerImageVisualize {
 				out.close();
 				//close sockets
 				connection.close();
-				connectionfile.close();
+				//connectionfile.close();
 			}
 			catch(IOException ioException){
 				ioException.printStackTrace();
