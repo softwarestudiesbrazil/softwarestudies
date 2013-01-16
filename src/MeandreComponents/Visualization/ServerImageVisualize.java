@@ -24,6 +24,7 @@ public class ServerImageVisualize {
 	ObjectOutputStream out;
 	ObjectInputStream in;
 	String message;
+	boolean stopServer = false;
 	ServerImageVisualize(){
 		try {
 			providerSocket = new ServerSocket(2001, 10);
@@ -31,6 +32,8 @@ public class ServerImageVisualize {
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			stopServer = true;
+			System.err.println("Error: Stopping Server");
 		}
 		
 	}
@@ -180,13 +183,21 @@ public class ServerImageVisualize {
 					
 					
 					
-				} catch(Exception e){e.printStackTrace();}
+				} catch(Exception e){
+					e.printStackTrace();
+					stopServer = true;
+					System.err.println("Error: Stopping Server");
+				}
 				
 				
 			} while(!message.equals("bye"));
 			
 			
-		} catch(Exception e){e.printStackTrace();}
+		} catch(Exception e){
+			e.printStackTrace();
+			stopServer = true;
+			System.err.println("Error: Stopping Server");
+			}
 		
 		finally{
 			//4: Closing connection
@@ -200,6 +211,8 @@ public class ServerImageVisualize {
 			}
 			catch(IOException ioException){
 				ioException.printStackTrace();
+				stopServer = true;
+				System.err.println("Error: Stopping Server");
 			}
 		}
 	}
@@ -218,11 +231,17 @@ public class ServerImageVisualize {
 	public static void main(String args[])
 	{
 		ServerImageVisualize server = new ServerImageVisualize();
-		while(true){
+		while(!server.stopServer){
 			server.run();
 		}
 		//So it seems like port is always open until program ends...which in practice should be never
-		//providerSocket.close();
-		//fileSocket.close();
+
+		try {
+			server.providerSocket.close();
+			server.fileSocket.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 }
