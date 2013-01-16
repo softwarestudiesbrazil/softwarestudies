@@ -95,6 +95,7 @@ public class UnixCommands {
 			BufferedReader in = new BufferedReader(
 		               new InputStreamReader(p.getInputStream()) ); //interesting...must open input stream on java end or else matlab can't export to files
 		       while ((line = in.readLine()) != null) {
+		    	   System.err.println(line);
 		    	 if(line.indexOf("/") == 0){
 		    		 progressFile.println("Processing image("+imagecount+"/"+numImages+"): "+line);
 		    		 progressFile.flush();

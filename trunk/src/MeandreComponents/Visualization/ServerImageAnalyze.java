@@ -16,7 +16,17 @@ public class ServerImageAnalyze{
 	ObjectOutputStream out;
 	ObjectInputStream in;
 	String message;
-	ServerImageAnalyze(){}
+	boolean stopServer = false;
+	ServerImageAnalyze(){
+		try {
+			providerSocket = new ServerSocket(2000, 10);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			stopServer = true;
+			System.err.println("Error: Stopping Server");
+		}
+	}
 	void run()
 	{
 		try{
@@ -24,7 +34,7 @@ public class ServerImageAnalyze{
 			PrintWriter progressFile = new PrintWriter(outFile);
 			
 			//1. creating a server socket
-			providerSocket = new ServerSocket(2000, 10);
+
 			//2. Wait for connection
 			System.out.println("Waiting for connection");
 			progressFile.print("Waiting for connection...");
@@ -53,7 +63,7 @@ public class ServerImageAnalyze{
 						
 						//call FeatureExtractor class to prepare images and files
 						FeatureExtractor f = new FeatureExtractor(message);
-						f.GenerateImgPathsFile();
+						f.GenerateImgPathsFile(progressFile);
 						sendMessage(f.getMessage());
 						
 						//Now call FeatureExtractor command using UNIX class
@@ -88,17 +98,19 @@ public class ServerImageAnalyze{
 		}
 		catch(IOException ioException){
 			ioException.printStackTrace();
+			System.err.println("Error: Stopping Server");
+			stopServer = true;
 		}
 		finally{
 			//4: Closing connection
 			try{
 				in.close();
 				out.close();
-
-				providerSocket.close();
 			}
 			catch(IOException ioException){
 				ioException.printStackTrace();
+				System.err.println("Error: Stopping Server");
+				stopServer = true;
 			}
 		}
 	}
@@ -116,8 +128,14 @@ public class ServerImageAnalyze{
 	public static void main(String args[])
 	{
 		ServerImageAnalyze server = new ServerImageAnalyze();
-		while(true){
+		while(!server.stopServer){
 			server.run();
+		}
+		try {
+			server.providerSocket.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 }

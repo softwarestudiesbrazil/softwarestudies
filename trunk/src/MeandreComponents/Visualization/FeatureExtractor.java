@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.io.Writer;
 
 import org.apache.commons.lang3.ArrayUtils;
@@ -35,7 +36,7 @@ public class FeatureExtractor {
 		numImages = 0;
 	}
 	
-	public void GenerateImgPathsFile(){ //also generates file for meta data segment to be later concatenated
+	public void GenerateImgPathsFile(PrintWriter progressFile){ //also generates file for meta data segment to be later concatenated
 		Writer output = null; //writer for FeatureExtractor TXT file
 		Writer outputMeta = null;
 		this.clientDirectoryPath = clientFilePath.substring(0,clientFilePath.lastIndexOf("/"));
@@ -71,7 +72,9 @@ public class FeatureExtractor {
 			//prepare meta data file
 			outputMeta.write(metaheader+"\n");
 			outputMeta.write(metaheader+"\n"); 
-			
+			int totalfiles = 0;
+			progressFile.println("Creating image file list...");
+			progressFile.flush();
 			while ((strRead=readbuffer.readLine())!=null){
 				String splitarray[] = strRead.split("\t");
 				String filename = splitarray[imagefileindex];
@@ -80,10 +83,19 @@ public class FeatureExtractor {
 					output.write(filepath + filename+"\n"); //write one line to file
 					outputMeta.write(strRead+"\n");
 					this.numImages+=1;
+					progressFile.print(this.numImages+"\r");
+					progressFile.flush();
 				}
+				else{
+					progressFile.println(filepath+filename+" not found");
+					progressFile.flush();
+				}
+				totalfiles+=1;
 ///				outputMeta.write(StringUtils.join(ArrayUtils.subarray(splitarray,0,imagefileindex),",")); //write meta data to a file
 ///				outputMeta.write(",\n");
 			}
+			progressFile.println(this.numImages+" images found from given "+totalfiles+" in datafile");
+			progressFile.flush();
 			output.close();
 			outputMeta.close();
 			
