@@ -81,6 +81,7 @@ public class ServerImageAnalyze{
 						Utilities.sendFile(u.result_file);
 						String MeandreFilePath = (String)in.readObject();
 					    System.out.println("File Created on Meandre: "+MeandreFilePath);
+					    progressFile.println("Meandre File Path: "+MeandreFilePath);
 						u.updateMeandreFilePath(MeandreFilePath);
 						//sendMessage(f.getFEImageDirPath());
 						
