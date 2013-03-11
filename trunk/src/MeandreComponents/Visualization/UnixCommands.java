@@ -1,16 +1,16 @@
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
+//import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
-import java.io.FileWriter;
+//import java.io.FileWriter;
 import java.io.FilenameFilter;
-import java.io.IOException;
+//import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.io.Writer;
+//import java.io.Writer;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
+//import java.util.Arrays;
 import java.util.Date;
 
 import au.com.bytecode.opencsv.CSVReader;
@@ -67,7 +67,8 @@ public class UnixCommands {
 		    //create new directory for job
 			DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
 			Date date = new Date();
-		    newdir =  new File(imgDirPath+"/"+id+"_"+dateFormat.format(date));
+		    //newdir =  new File(imgDirPath+"/"+id+"_"+dateFormat.format(date));
+			newdir = new File("Analysis/"+dateFormat.format(date));
 			if(!newdir.exists()){
 				if (newdir.mkdir()) {
 					System.out.println("Directory created");
@@ -82,7 +83,7 @@ public class UnixCommands {
 		} catch (Exception e){e.printStackTrace();}
 		//String imgFilePaths = "/Users/culturevis/Documents/MeandreTesting/ImageAnalyze/images";
 		//String[] runCommand = new String[] {"sh", "-c","matlab -nodisplay -r \"path(path,'/Applications/Programming/softwarestudies/matlab/FeatureExtractor'); FeatureExtractor('"+imgFilePaths+"', '"+newdir+"/results'); exit;\" & PID=$!; echo "+id+",$PID,started,$(date +'%F %T'),"+imgFilePaths+" >> PIDlog.csv"};
-		String[] runCommand = new String[] {"sh", "-c","matlab -nodisplay -r \"path(path,'/Users/culturevis/Documents/MeandreTesting/FeatureExtractor'); FeatureExtractor('"+imgFilePaths+"', '"+newdir+"/results'); exit;\" & PID=$!; echo "+id+",$PID,started,$(date +'%F %T'),"+newdir+"/resultsCollection.txt"+",none >> PIDlog.csv"}; //last was imgFilePaths, if time resultsCollection be an awk command as an update
+		String[] runCommand = new String[] {"sh", "-c","matlab -nodisplay -r \"path(path,'FeatureExtractor'); FeatureExtractorFast('"+imgFilePaths+"', '"+newdir+"/"+id+"_results'); exit;\" & PID=$!; echo "+id+",$PID,started,$(date +'%F %T'),"+newdir+"/"+id+"_resultsCollection.txt"+",none >> PIDlog.csv"}; //last was imgFilePaths, if time resultsCollection be an awk command as an update
 		String line;
 		int imagecount = 1;
 		//execute command
@@ -150,28 +151,41 @@ public class UnixCommands {
 	       
 	}
 	
-	public void RunImageMontage(String imgFilePaths,String imgDirPath,String userMontageCommand, int batchNum,PrintWriter progressFile){
+	public void RunImageMontage(String imgFilePaths,String imgDirPath,String userMontageCommand, int batchNum,PrintWriter progressFile,String fileString){
 		final String DEFAULT_HEIGHT = "100"; //height of each tile image, aspect ratio is kept
 		final String DEFAULT_BG = "#808080"; //gray background
 		final String DEFAULT_TILE = "40x40"; //40 rows and 40 columns of images
 		final String TITLE = "Title";
-		String RESULT_FILE_PATH = imgDirPath+"/resultMontage.jpg";
-		if(batchNum != -1)
-			RESULT_FILE_PATH = imgDirPath+"/resultMontage"+batchNum+".jpg";
+
 		String[] runCommand;
 		
 		//Original command
 		//String[] runCommand = new String[] {"sh", "-c","montage -background \""+DEFAULT_BG+"\" -tile "+DEFAULT_TILE+" -title "+TITLE+" -size x"+DEFAULT_HEIGHT+" "+imgDirPath+"/* "+RESULT_FILE_PATH};
 		
+		//Get ID for this job
+		int id = 0;
+		try{
+			CSVReader reader = new CSVReader(new FileReader("PIDlog.csv"));
+		    String [] nextLine;
+		    int prev=0;
+		    while ((nextLine = reader.readNext()) != null) {
+		    	prev=Integer.parseInt(nextLine[0]);
+		    }
+		    id = (prev != 0) ? (prev+1) : 1;
+		} catch(Exception e){e.printStackTrace();}
+		String RESULT_FILE_PATH = imgDirPath+"/"+id+"_montage_"+fileString+".jpg";
+		if(batchNum != -1)
+			RESULT_FILE_PATH = imgDirPath+"/"+id+"_montage_"+batchNum+"_"+fileString+".jpg";
+		String LOG_COMMAND =  " & PID=$!; echo "+id+",$PID,started,$(date +'%F %T'),"+RESULT_FILE_PATH+",none >> PIDlog.csv";
 		//command reading image paths from file
 		if(userMontageCommand.equals(""))
-			runCommand = new String[] {"sh", "-c","montage -background \""+DEFAULT_BG+"\" -tile "+DEFAULT_TILE+" -title "+TITLE+" -size x"+DEFAULT_HEIGHT+" @pathsVis.txt "+RESULT_FILE_PATH};
+			runCommand = new String[] {"sh", "-c","montage -background \""+DEFAULT_BG+"\" -tile "+DEFAULT_TILE+" -title "+TITLE+" -size x"+DEFAULT_HEIGHT+" @pathsVis.txt "+id+"_"+RESULT_FILE_PATH+LOG_COMMAND};
 		else{
 			//System.out.println("montage command is: "+userMontageCommand+" "+imgDirPath+"/@pathsVis.txt "+RESULT_FILE_PATH);
 			
 			//runCommand = new String[] {"sh", "-c",userMontageCommand+" "+imgDirPath+"/@pathsVis.txt "+RESULT_FILE_PATH};
 			//'@' cannot take an absolute path, when giving list of images to montage, file must be in same directory as running montage
-			runCommand = new String[] {"bash", "-c",userMontageCommand+" -monitor @pathsVis.txt "+RESULT_FILE_PATH};
+			runCommand = new String[] {"bash", "-c",userMontageCommand+" -monitor @pathsVis.txt "+RESULT_FILE_PATH+LOG_COMMAND};
 			//runCommand = new String[] {"bash","-c","montage -monitor -background \"#808080\" -tile \"40x\" -resize x100 -geometry +0+0 @pathsVis.txt /Users/culturevis/Documents/MeandreTesting/resultMontage1.jpg"};
 		}
 		//command reading image paths from file and outputting -monitor option to log file
@@ -247,6 +261,13 @@ public class UnixCommands {
 		       this.result_montage = RESULT_FILE_PATH;
 		} catch(Exception e){e.printStackTrace();}
 		
+		//update log file using UNIX AWK command
+	       String awkCommand = "TMPFILE=`mktemp numbers.tmpXXX`;awk -F, -v OFS=',' '($1+0) == "+id+" { $3 = \"Finished\" } 1' PIDlog.csv > $TMPFILE;rm PIDlog.csv;mv $TMPFILE PIDlog.csv";
+	       runCommand = new String[] {"sh","-c",awkCommand};
+	       try{
+		       p = rt.exec(runCommand);
+		       p.waitFor();
+	       }catch(Exception e){e.printStackTrace();}
 	}
 	
 	/*

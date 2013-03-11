@@ -10,7 +10,10 @@ import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 import au.com.bytecode.opencsv.CSVReader;
 
@@ -40,7 +43,7 @@ public class ServerImageVisualize {
 	void run()
 	{
 		try{
-			FileWriter outFile = new FileWriter("/Users/culturevis/Documents/MeandreTesting/progress.txt");
+			FileWriter outFile = new FileWriter("progress.txt");
 			PrintWriter progressFile = new PrintWriter(outFile);
 			//1. creating a server socket
 			//providerSocket = new ServerSocket(2001, 10); //2001
@@ -64,7 +67,7 @@ public class ServerImageVisualize {
 				try{
 					//message could be in 3 formats: InputFile | MontageCommand, InputFile | "", InputFile | "batch"
 					message = (String)in.readObject(); //Directory path from client
-					
+					System.err.println("message is: "+message);
 					if(message.charAt(0) == '/'){ //if it is a directory
 						String[] message_array = message.split("[\\|]");
 						//System.out.println("first part is: "+message_array[0]);
@@ -84,7 +87,7 @@ public class ServerImageVisualize {
 							progressFile.flush();
 							//fileSocket = new ServerSocket(10000,10);
 							connectionfile = fileSocket.accept();
-							File tmpFile = new File("/Users/culturevis/Documents/MeandreTesting/sortedVisFile.csv");
+							File tmpFile = new File("sortedVisFile.csv");
 							//System.out.println("Got connection from Meandre for Batch Visualize");
 							VisServerFilePath = tmpFile.getAbsolutePath();
 							byte[] b = new byte[1024];
@@ -102,6 +105,19 @@ public class ServerImageVisualize {
 						    System.out.println("DONE");
 						    progressFile.println("DONE");
 						    progressFile.flush();
+						    
+						    //create new directory for job
+							DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
+							Date date = new Date();
+						    File newdir =  new File("Visualizations/"+dateFormat.format(date));
+							if(!newdir.exists()){
+								if (newdir.mkdir()) {
+									System.out.println("Directory created");
+								} else {
+									System.out.println("Failed to create directory");
+								}
+							}
+						    
 						    //loop through each montage command and generate file
 							for(int i=0;i<batch.size();i++){
 								System.out.print("Processing ("+(i+1)+"/"+batch.size()+"): "+batch.get(i)+"...");
@@ -116,7 +132,7 @@ public class ServerImageVisualize {
 								ImageMagick im = new ImageMagick(VisServerFilePath);
 								im.GenerateImgPathsFile();
 								u = new UnixCommands();
-								u.RunImageMontage(im.getIMImageFilePath(),im.getIMImageDirPath(),montageCommand,(i+1),progressFile);
+								u.RunImageMontage(im.getIMImageFilePath(),im.getIMImageDirPath()+"/"+newdir,montageCommand,(i+1),progressFile,message_array[2]);
 								System.out.println("DONE");
 								progressFile.println("DONE");
 								progressFile.flush();
@@ -126,12 +142,12 @@ public class ServerImageVisualize {
 							
 							//file is being transferred from Meandre Server
 							String VisServerFilePath = "";
-							if(message_array[1].indexOf("-sort") != -1){
+///							if(message_array[1].indexOf("-sort") != -1){
 								System.out.println("About to open socket for file transfer...");
 								///fileSocket = new ServerSocket(10000,10);
 								
 								connectionfile = fileSocket.accept();
-								File tmpFile = new File("/Users/culturevis/Documents/MeandreTesting/sortedVisFile.csv");
+								File tmpFile = new File("sortedVisFile.csv");
 								System.out.println("Got connection from Meandre for Visualize");
 								VisServerFilePath = tmpFile.getAbsolutePath();
 								byte[] b = new byte[1024];
@@ -146,19 +162,32 @@ public class ServerImageVisualize {
 							    }
 							    inFile.close();
 							    //connectionfile.close();
-							}
-							else{
-								//check to see if file path is in log file, if so find it on jeju
-								CSVReader reader = new CSVReader(new FileReader("PIDlog.csv"));
-								String [] nextLine;
-								
-							    while ((nextLine = reader.readNext()) != null) {
-							        if(nextLine[5].equals(message_array[0])){
-							        	VisServerFilePath = nextLine[4];
-							        	break;
-							        }
-							    }
-							}
+///							}
+///							else{
+///								//check to see if file path is in log file, if so find it on jeju
+///								CSVReader reader = new CSVReader(new FileReader("PIDlog.csv"));
+///								String [] nextLine;
+///								
+///							    while ((nextLine = reader.readNext()) != null) {
+///							        if(nextLine[5].equals(message_array[0])){
+///							        	VisServerFilePath = nextLine[4];
+///							        	break;
+///							        }
+///							    }
+///							}
+							    
+							//create new directory for job
+							DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
+							Date date = new Date();
+							File newdir =  new File("Visualizations/"+dateFormat.format(date));
+							if(!newdir.exists()){
+								if (newdir.mkdir()) {
+									System.out.println("Directory created: "+newdir.getAbsolutePath());
+								} else {
+									System.out.println("Failed to create directory");
+								}
+							}    
+							    
 							//call ImageMagic class to prepare images and files
 						    ImageMagick im = null;
 						    if(VisServerFilePath.equals(""))
@@ -170,7 +199,7 @@ public class ServerImageVisualize {
 							//Now call montage command using UNIX class
 							u = new UnixCommands();
 							String montageArgs = message_array[1].replaceAll("-sort[^.]*", "");
-							u.RunImageMontage(im.getIMImageFilePath(),im.getIMImageDirPath(),montageArgs,-1,progressFile);
+							u.RunImageMontage(im.getIMImageFilePath(),/*im.getIMImageDirPath()+"/"+*/newdir.getAbsolutePath(),montageArgs,-1,progressFile,message_array[2]);
 						}
 						//end loop for batch
 						

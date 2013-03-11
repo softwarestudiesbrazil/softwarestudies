@@ -1,5 +1,6 @@
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.Writer;
@@ -86,9 +87,65 @@ public class ImageVisualizeComponent extends AbstractExecutableComponent {
 		Object input_2 = cc.getDataComponentFromInput(IN_COMMAND);
 		String InputFilePath[] = DataTypeParser.parseAsString(input);
 		String InputCommand[] = DataTypeParser.parseAsString(input_2);
-		
+/***		
 		Runtime rt = Runtime.getRuntime();
 		Process p = null;
+		
+		//check if file is in correct format(comma separated and with subheader)
+		String filename = InputFilePath[0];
+		String filenametmp = null;
+		BufferedReader reader = new BufferedReader(new FileReader(filename));
+		String line = reader.readLine().trim();
+		
+		if(line.split("\t").length > 1){ //if not csv, then convert to csv
+			filenametmp = filename+".tmp";
+			reader.close();
+			String[] csvcommand = {"sh","-c","tr '\\t' ',' < "+filename+" > "+filenametmp+";"};
+			try{
+				p = rt.exec(csvcommand);
+				p.waitFor();
+			} catch(Exception e){e.printStackTrace();}
+			
+		}
+		
+		//at this point datafile is a csv
+		if(filenametmp == null)
+			reader = new BufferedReader(new FileReader(filename));
+		else
+			reader = new BufferedReader(new FileReader(filenametmp));
+		line = reader.readLine();
+		int fileindex=0;
+		String[] header = line.split(",");
+		for(int i=0;i<header.length;i++){ //see where index of filename is
+			if(header[i].equals("filename"))
+				fileindex = i;
+		}
+		
+		line = reader.readLine();
+		String[] subheader = line.split(",");
+		if(!subheader[fileindex].equals("string")){ //if string is not present then there is no subheader
+			//insert second row using awk
+			if(filenametmp == null){
+				filenametmp = filename+".tmp";
+				String[] awkcommand = {"sh","-c","awk -v \"s=,,\" '(NR==2) { print s } 1' "+filename+" > "+filenametmp+";"};
+				try{
+					p = rt.exec(awkcommand);
+					p.waitFor();
+				} catch(Exception e){e.printStackTrace();}
+			}
+			else{
+				String[] awkcommand = {"sh","-c","awk -v \"s=,,\" '(NR==2) { print s } 1' "+filenametmp+" > "+filenametmp+".row;mv "+filenametmp+".row "+filenametmp+";"};
+				try{
+					p = rt.exec(awkcommand);
+					p.waitFor();
+				} catch(Exception e){e.printStackTrace();}
+			}		
+			
+		}
+		
+		//leave original file untouched, filenametmp is created if modifications were needed
+		if(filenametmp != null)
+			filename = filenametmp;
 		
 		//see if sorting needs to be done first
 		//int sortIndex = InputCommand[0].lastIndexOf("sort");
@@ -98,14 +155,14 @@ public class ImageVisualizeComponent extends AbstractExecutableComponent {
 		ArrayList<String> sortargs = new ArrayList<String>();
 		String[] commandToken = InputCommand[0].split("\\s");
 		//String filename = "";
-		String filename = InputFilePath[0]; //MUST BE AN IMAGEANALYSIS RESULT FILE
+		//String filename = InputFilePath[0]; //MUST BE AN IMAGEANALYSIS RESULT FILE
 		for(int i=0;i<commandToken.length;i++){
 			if(commandToken[i].equals("-sort")){
 				flag = true;
 				continue;
 			}
 			if(flag){
-				if(!(/*commandToken[i].charAt(0) == ('/') || */commandToken[i].charAt(0) == ('-')))
+				if(!(commandToken[i].charAt(0) == ('-')))
 					sortargs.add(commandToken[i]);
 				//if(commandToken[i].charAt(0) == ('/'))
 				//	filename = commandToken[i];
@@ -136,11 +193,18 @@ public class ImageVisualizeComponent extends AbstractExecutableComponent {
 			} catch(Exception e){e.printStackTrace();}
 	    
 		}
-		
+***/		
 		//String montageArgs = InputCommand[0].replaceAll("-sort[^.]*", "");
 		
-		ClientImageVisualize client = new ClientImageVisualize(InputFilePath[0],InputCommand[0],sort);
+		ClientImageVisualize client = new ClientImageVisualize(InputFilePath[0],InputCommand[0],false);
 		client.run();
+/***
+		//delete temporary created file if exists
+		if(filenametmp != null){
+			File file = new File(filenametmp);
+			file.delete();
+		}
+***/
 		cc.pushDataComponentToOutput(OUT_RESULT_PATH,BasicDataTypesTools.stringToStrings(client.OutputResultPath));
 		//should output just montage args: cc.pushDataComponentToOutput(OUT_RESULT_PATH,BasicDataTypesTools.stringToStrings(montageArgs));
 		//cc.pushDataComponentToOutput(OUT_LOG_PATH,BasicDataTypesTools.stringToStrings(client.OutputLogPath));

@@ -82,7 +82,7 @@ public class ClientImageAnalyze{
 						fileSocket = new ServerSocket(10000,10);
 						System.out.println("file socket open on port 10000");
 						connection = fileSocket.accept();
-						tmpFile = File.createTempFile("ImageAnalyze_",".txt",new File("/Users/culturevis/Desktop/Meandre-1.4.11/meandre-instance/published_resources/"));
+						tmpFile = File.createTempFile("ImageAnalyze_",".txt",new File("published_resources/"));
 						tmpFilePath = tmpFile.getAbsolutePath();
 						byte[] b = new byte[1024];
 					    int len = 0;
