@@ -1,23 +1,23 @@
-import java.io.BufferedInputStream;
+//import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
+//import java.io.FileNotFoundException;
+//import java.io.FileOutputStream;
 import java.io.FileReader;
-import java.io.IOException;
-import java.io.InputStream;
+//import java.io.IOException;
+//import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.ObjectInputStream;
+//import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Vector;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
+//import java.util.zip.ZipEntry;
+//import java.util.zip.ZipOutputStream;
 
 /*
 import org.apache.commons.compress.archivers.ArchiveOutputStream;
@@ -104,12 +104,12 @@ public class Utilities {
 		} catch (Exception e) {System.err.println(buffer); e.printStackTrace(); }
 	}
 	
-	public static void sendFile(File file)
+	public static void sendFile(File file, String server)
 	{
 		byte[] buf = new byte[1024];
 		String MeandreFilePath = "";
 		try{
-			Socket fileSocket = new Socket("neen.ucsd.edu", 10000);
+			Socket fileSocket = new Socket(server, 10000);
 			OutputStream os = fileSocket.getOutputStream();
 			//ObjectInputStream is = new ObjectInputStream(fileSocket.getInputStream());
 			BufferedOutputStream out = new BufferedOutputStream(os, 1024);

@@ -30,7 +30,7 @@ public class ServerImageAnalyze{
 	void run()
 	{
 		try{
-			FileWriter outFile = new FileWriter("/Users/culturevis/Documents/MeandreTesting/progress.txt");
+			FileWriter outFile = new FileWriter("progress.txt");
 			PrintWriter progressFile = new PrintWriter(outFile);
 			
 			//1. creating a server socket
@@ -78,7 +78,7 @@ public class ServerImageAnalyze{
 						sendMessage(u.result_file.getAbsolutePath());
 						//Utilities.sendFileVector(out,u.result_file);
 						sendMessage("file");
-						Utilities.sendFile(u.result_file);
+						Utilities.sendFile(u.result_file,connection.getInetAddress().getHostName());
 						String MeandreFilePath = (String)in.readObject();
 					    System.out.println("File Created on Meandre: "+MeandreFilePath);
 					    progressFile.println("Meandre File Path: "+MeandreFilePath);

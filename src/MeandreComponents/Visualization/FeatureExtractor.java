@@ -8,8 +8,8 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Writer;
 
-import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.StringUtils;
+//import org.apache.commons.lang3.ArrayUtils;
+//import org.apache.commons.lang3.StringUtils;
 
 /**
  * 
@@ -55,11 +55,19 @@ public class FeatureExtractor {
 			String headers[] = metaheader.split("\t"); //first line is header, don't write it to file
 			int imagefileindex = 0;
 			int imagedirindex = 0;
+			String metasubheader = "";
 			for(int i=0;i<headers.length;i++){
-				if(headers[i].toLowerCase().equals("filename")) //filename is the header of all image filenames
+				if(headers[i].toLowerCase().equals("filename")){ //filename is the header of all image filenames
 					imagefileindex = i;
-				else if(headers[i].toLowerCase().equals("path")) //path is the header of all image file paths
+					metasubheader+="string\t";
+				}
+				else if(headers[i].toLowerCase().equals("path")){ //path is the header of all image file paths
 					imagedirindex = i;
+					metasubheader+="string\t";
+				}
+				else{
+					metasubheader+="data\t";
+				}
 ///				else
 ///					outputMeta.write(headers[i]+",");
 			}
@@ -70,8 +78,8 @@ public class FeatureExtractor {
 ///			outputMeta.write("\n");
 			
 			//prepare meta data file
-			outputMeta.write(metaheader+"\n");
-			outputMeta.write(metaheader+"\n"); 
+			outputMeta.write(metaheader+"\n"); //header
+			outputMeta.write(metasubheader.trim()+"\n"); //subheader 
 			int totalfiles = 0;
 			progressFile.println("Creating image file list...");
 			progressFile.flush();
